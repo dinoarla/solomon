@@ -519,6 +519,17 @@
       } else { clearInterval(iv); }
     }, 1200);
   }
+  function renderMarkdown(text) {
+  return text
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/^### (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.85rem">$1</span>')
+    .replace(/^## (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.9rem;display:block;margin-top:0.8rem">$1</span>')
+    .replace(/^# (.+)$/gm, '<span style="color:#00e5a0;font-weight:800;font-size:1rem;display:block;margin-top:1rem">$1</span>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
+    .replace(/^- (.+)$/gm, '<span style="display:block;padding-left:1rem">• $1</span>')
+    .replace(/^---+$/gm, '<hr style="border-color:#1e222b;margin:0.5rem 0">')
+    .replace(/\n/g, '<br>');
+  }
 
   function showResult(data) {
     const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
@@ -540,8 +551,8 @@
     document.getElementById('jsonOutput').textContent =
       plan ? JSON.stringify(plan, null, 2) : '(Tidak ada task plan)';
 
-    document.getElementById('explanationOutput').textContent =
-      data.explanation || data.full_output || JSON.stringify(data, null, 2);
+    const explanationText = data.explanation || data.full_output || JSON.stringify(data, null, 2);
+    document.getElementById('explanationOutput').innerHTML = renderMarkdown(explanationText);
 
     document.getElementById('resultCard').classList.add('visible');
   }
