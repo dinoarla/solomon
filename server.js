@@ -4,6 +4,7 @@ const path = require('path');
 const { runOrchestrator } = require('./agents/orchestrator');
 const { runTrendAgent } = require('./agents/trendAgent');
 const { runSeoAgent } = require('./agents/seoAgent');
+const { runContentCreator } = require('./agents/contentCreator');
 
 const app = express();
 app.use(express.json());
@@ -114,6 +115,49 @@ app.post('/api/seo', async (req, res) => {
 
   } catch (err) {
     console.error('SEO error:', err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// Content Creator endpoint
+app.post('/api/content', async (req, res) => {
+  const {
+    topic, content_type, target_audience,
+    primary_keyword, secondary_keywords,
+    seo_brief, trend_context, tone, length, cta
+  } = req.body;
+
+  if (!topic?.trim()) {
+    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
+  }
+
+  console.log(`\n[CONTENT] Type: ${content_type} | Topic: "${topic.substring(0, 50)}"`);
+
+  try {
+    const result = await runContentCreator(topic, {
+      contentType: content_type || 'artikel',
+      targetAudience: target_audience || 'Keluarga Indonesia usia 25-40',
+      primaryKeyword: primary_keyword || '',
+      secondaryKeywords: secondary_keywords || '',
+      seoBrief: seo_brief || '',
+      trendContext: trend_context || '',
+      tone: tone || 'kasual-edukatif',
+      length: length || 'sedang',
+      desiredCta: cta || 'Kunjungi link di bawah',
+    });
+
+    return res.json({
+      status: 'success',
+      topic,
+      platform: result.platform,
+      word_count: result.wordCount,
+      content: result.content,
+      full_output: result.raw,
+      timestamp: result.timestamp,
+    });
+
+  } catch (err) {
+    console.error('Content error:', err.message);
     return res.status(500).json({ message: err.message });
   }
 });

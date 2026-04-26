@@ -345,6 +345,8 @@
     #orchestratorPanel.hidden { display: none; }
     #seoPanel { display: none; }
     #seoPanel.visible { display: contents; }
+    #contentPanel { display: none; }
+    #contentPanel.visible { display: contents; }
   </style>
 </head>
 <body>
@@ -356,6 +358,7 @@
     <button class="nav-btn active" id="nav-orchestrator" onclick="switchTab('orchestrator')">🧠 Orchestrator</button>
     <button class="nav-btn" id="nav-trend" onclick="switchTab('trend')">🔥 Trend</button>
     <button class="nav-btn" id="nav-seo" onclick="switchTab('seo')">🔍 SEO</button>
+    <button class="nav-btn" id="nav-content" onclick="switchTab('content')">✍️ Content</button>
   </nav>
   <span id="statusText" style="margin-left:auto">● ONLINE</span>
 </header>
@@ -687,6 +690,132 @@
 
   </div>
   <!-- ── END SEO PANEL ── -->
+
+  <!-- ── CONTENT CREATOR PANEL ── -->
+  <div id="contentPanel">
+
+    <div class="panel panel-left">
+      <div class="panel-label">Content Creator</div>
+
+      <div>
+        <label>Tipe Konten</label>
+        <select id="contentType">
+          <option value="artikel">📝 Artikel Blog Affiliate</option>
+          <option value="script_anak">🧒 Script YouTube — Anak (Clay Animation)</option>
+          <option value="script_edukasi">🎬 Script YouTube — Edukasi Umum</option>
+          <option value="mini_ebook">📖 Mini Ebook (3.000-8.000 kata)</option>
+          <option value="full_ebook">📚 Full Ebook (15.000+ kata)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Topik</label>
+        <textarea id="contentTopic" placeholder="Contoh: MPASI 6 bahan lokal untuk bayi 6-12 bulan..." style="min-height:80px"></textarea>
+      </div>
+
+      <div>
+        <label>Primary Keyword</label>
+        <input type="text" id="contentPrimaryKw" placeholder="Contoh: resep mpasi 6 bulan">
+      </div>
+
+      <div>
+        <label>Secondary Keywords (pisah koma)</label>
+        <input type="text" id="contentSecondaryKw" placeholder="Contoh: mpasi bahan lokal, mpasi mudah, resep bayi bergizi">
+      </div>
+
+      <div>
+        <label>Target Audiens</label>
+        <input type="text" id="contentAudience" placeholder="Contoh: Ibu muda Indonesia, usia 25-35" value="Keluarga Indonesia usia 25-40">
+      </div>
+
+      <div>
+        <label>Tone</label>
+        <select id="contentTone">
+          <option value="kasual-edukatif">😊 Kasual Edukatif (default)</option>
+          <option value="profesional">👔 Profesional</option>
+          <option value="santai">🌴 Santai & Fun</option>
+          <option value="anak-anak">🧒 Anak-anak (untuk script clay)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Panjang Konten</label>
+        <select id="contentLength">
+          <option value="pendek">⚡ Pendek (cepat)</option>
+          <option value="sedang" selected>📄 Sedang (balance)</option>
+          <option value="panjang">📚 Panjang (komprehensif)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>CTA yang Diinginkan</label>
+        <input type="text" id="contentCta" placeholder="Contoh: Download ebook di link deskripsi">
+      </div>
+
+      <div>
+        <label>SEO Brief (dari SEO Agent, opsional)</label>
+        <textarea id="contentSeoBrief" placeholder="Paste output SEO Agent jika ada..." style="min-height:60px"></textarea>
+      </div>
+
+      <button id="contentBtn">
+        <span id="contentBtnIcon">✍️</span>
+        <span id="contentBtnText">Buat Konten</span>
+      </button>
+    </div>
+
+    <div class="panel panel-right">
+      <div class="panel-label">Content Output</div>
+
+      <div class="output-empty" id="contentEmptyState">
+        <div class="big-icon">✍️</div>
+        <p>Pilih tipe konten dan klik Buat Konten</p>
+      </div>
+
+      <div class="loading-state" id="contentLoadingState">
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="contentProgressBar"></div>
+        </div>
+        <div class="loading-steps">
+          <div class="step active" id="cstep1"><div class="step-dot"></div> Memahami topik & audiens...</div>
+          <div class="step" id="cstep2"><div class="step-dot"></div> Menyusun struktur konten...</div>
+          <div class="step" id="cstep3"><div class="step-dot"></div> Menulis konten...</div>
+          <div class="step" id="cstep4"><div class="step-dot"></div> Optimasi keyword & CTA...</div>
+          <div class="step" id="cstep5"><div class="step-dot"></div> Konten siap ✓</div>
+        </div>
+      </div>
+
+      <div class="error-card" id="contentErrorCard"></div>
+
+      <div class="result-card" id="contentResultCard">
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-label">Durasi</div>
+            <div class="stat-value" id="contentDuration">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Platform</div>
+            <div class="stat-value" id="contentPlatformStat">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Word Count</div>
+            <div class="stat-value" id="contentWordCount">—</div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-header">
+            Konten yang Dibuat
+            <button class="copy-btn" onclick="copyText('contentOutput')">copy</button>
+          </div>
+          <div class="result-body" id="contentOutput" style="max-height:600px"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ── END CONTENT CREATOR PANEL ── -->
+
+
 </main>
 
 <script>
@@ -696,10 +825,11 @@
   document.getElementById('runBtn').addEventListener('click', runOrchestrator);
   document.getElementById('trendBtn').addEventListener('click', runTrend);
   document.getElementById('seoBtn').addEventListener('click', runSeo);
+  document.getElementById('contentBtn').addEventListener('click', runContent);
 
   // ── Tab switching ──
   function switchTab(tab) {
-    const tabs = ['orchestrator', 'trend', 'seo'];
+    const tabs = ['orchestrator', 'trend', 'seo', 'content'];
 
     tabs.forEach(t => {
       const panel = document.getElementById(t + 'Panel');
@@ -987,6 +1117,76 @@
       document.getElementById('seoBtn').disabled = false;
       document.getElementById('seoBtnText').textContent = 'Analisis SEO';
       document.getElementById('seoBtnIcon').textContent = '🔍';
+    }
+  }
+
+  // ══════════════════════════════════
+  // CONTENT CREATOR AGENT
+  // ══════════════════════════════════
+  document.getElementById('contentBtn').addEventListener('click', runContent);
+
+  let contentStartTime;
+
+  async function runContent() {
+    const topic = document.getElementById('contentTopic').value.trim();
+    if (!topic) { alert('Isi topik dulu!'); return; }
+
+    contentStartTime = Date.now();
+    const selectedType = document.getElementById('contentType').value;
+
+    document.getElementById('contentEmptyState').style.display = 'none';
+    document.getElementById('contentErrorCard').classList.remove('visible');
+    document.getElementById('contentResultCard').classList.remove('visible');
+    document.getElementById('contentLoadingState').classList.add('visible');
+    document.getElementById('contentBtn').disabled = true;
+    document.getElementById('contentBtnText').textContent = 'Membuat konten...';
+    document.getElementById('contentBtnIcon').textContent = '⏳';
+
+    const iv = animateSteps(
+      ['cstep1','cstep2','cstep3','cstep4','cstep5'],
+      'contentProgressBar', 2500
+    );
+
+    try {
+      const res = await fetch('/api/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          content_type: selectedType,
+          target_audience: document.getElementById('contentAudience').value,
+          primary_keyword: document.getElementById('contentPrimaryKw').value,
+          secondary_keywords: document.getElementById('contentSecondaryKw').value,
+          tone: document.getElementById('contentTone').value,
+          length: document.getElementById('contentLength').value,
+          cta: document.getElementById('contentCta').value,
+          seo_brief: document.getElementById('contentSeoBrief').value,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Server error');
+
+      const dur = ((Date.now() - contentStartTime) / 1000).toFixed(1) + 's';
+      document.getElementById('contentDuration').textContent = dur;
+      document.getElementById('contentPlatformStat').textContent = data.platform || selectedType;
+      document.getElementById('contentWordCount').textContent =
+        (data.word_count || '—') + ' kata';
+
+      document.getElementById('contentOutput').innerHTML =
+        renderMarkdown(data.content || data.full_output || JSON.stringify(data));
+      document.getElementById('contentResultCard').classList.add('visible');
+
+    } catch (err) {
+      const card = document.getElementById('contentErrorCard');
+      card.textContent = '❌ Error: ' + err.message;
+      card.classList.add('visible');
+    } finally {
+      clearInterval(iv);
+      document.getElementById('contentLoadingState').classList.remove('visible');
+      document.getElementById('contentBtn').disabled = false;
+      document.getElementById('contentBtnText').textContent = 'Buat Konten';
+      document.getElementById('contentBtnIcon').textContent = '✍️';
     }
   }
 </script>
