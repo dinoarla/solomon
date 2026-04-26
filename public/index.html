@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Agent System</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg:       #0a0c10;
+      --surface:  #111318;
+      --border:   #1e222b;
+      --accent:   #00e5a0;
+      --accent2:  #0070f3;
+      --text:     #e8eaf0;
+      --muted:    #5a6070;
+      --danger:   #ff4560;
+      --mono:     'JetBrains Mono', monospace;
+      --sans:     'Syne', sans-serif;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── Header ── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 1.25rem 2rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .logo-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%,100% { opacity: 1; transform: scale(1); }
+      50%      { opacity: 0.5; transform: scale(0.8); }
+    }
+    header h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
+    header span { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-left: auto; }
+
+    /* ── Layout ── */
+    main {
+      flex: 1;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0;
+      max-height: calc(100vh - 60px);
+    }
+    @media (max-width: 768px) {
+      main { grid-template-columns: 1fr; max-height: none; }
+    }
+
+    /* ── Panel ── */
+    .panel {
+      padding: 2rem;
+      display: flex;
+      flex-direction: column;
+      gap: 1.25rem;
+      overflow-y: auto;
+    }
+    .panel-left  { border-right: 1px solid var(--border); }
+    .panel-label {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    .panel-label::after {
+      content: '';
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+    }
+
+    /* ── Form ── */
+    label {
+      display: block;
+      font-size: 0.8rem;
+      color: var(--muted);
+      margin-bottom: 0.4rem;
+      font-family: var(--mono);
+    }
+    textarea, select, input {
+      width: 100%;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.85rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    textarea:focus, select:focus, input:focus {
+      border-color: var(--accent);
+    }
+    textarea { min-height: 120px; }
+    select { cursor: pointer; }
+    select option { background: var(--surface); }
+
+    /* ── Button ── */
+    button {
+      width: 100%;
+      padding: 0.9rem;
+      background: var(--accent);
+      color: #000;
+      border: none;
+      border-radius: 6px;
+      font-family: var(--sans);
+      font-size: 0.9rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+    button:hover:not(:disabled) { background: #00ffb3; transform: translateY(-1px); }
+    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    /* ── Agent chips ── */
+    .agents-preview {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+    }
+    .chip {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.25rem 0.6rem;
+      border-radius: 20px;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      transition: all 0.3s;
+    }
+    .chip.active {
+      border-color: var(--accent);
+      color: var(--accent);
+      background: rgba(0,229,160,0.08);
+    }
+
+    /* ── Output panel ── */
+    .output-empty {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 1rem;
+      color: var(--muted);
+    }
+    .output-empty .big-icon {
+      font-size: 3rem;
+      opacity: 0.3;
+    }
+    .output-empty p { font-size: 0.85rem; font-family: var(--mono); }
+
+    /* ── Loading state ── */
+    .loading-state {
+      display: none;
+      flex-direction: column;
+      gap: 1rem;
+      padding: 1rem 0;
+    }
+    .loading-state.visible { display: flex; }
+    .loading-bar {
+      height: 2px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .loading-bar-fill {
+      height: 100%;
+      width: 0%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width 0.3s;
+      box-shadow: 0 0 8px var(--accent);
+    }
+    .loading-steps { display: flex; flex-direction: column; gap: 0.4rem; }
+    .step {
+      font-family: var(--mono);
+      font-size: 0.72rem;
+      color: var(--muted);
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.3s;
+    }
+    .step.done   { color: var(--accent); }
+    .step.active { color: var(--text); }
+    .step-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: currentColor;
+      flex-shrink: 0;
+    }
+
+    /* ── Result card ── */
+    .result-card {
+      display: none;
+      flex-direction: column;
+      gap: 1.25rem;
+    }
+    .result-card.visible { display: flex; }
+    .result-section {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    .result-section-header {
+      padding: 0.6rem 1rem;
+      background: rgba(255,255,255,0.03);
+      border-bottom: 1px solid var(--border);
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .copy-btn {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      font-size: 0.6rem;
+      padding: 0.2rem 0.5rem;
+      border-radius: 3px;
+      cursor: pointer;
+      width: auto;
+      font-family: var(--mono);
+      transition: all 0.2s;
+      letter-spacing: 0;
+    }
+    .copy-btn:hover { border-color: var(--accent); color: var(--accent); transform: none; }
+    .result-body {
+      padding: 1rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      line-height: 1.7;
+      color: var(--text);
+      white-space: pre-wrap;
+      word-break: break-word;
+      max-height: 350px;
+      overflow-y: auto;
+    }
+
+    /* ── Agent flow visualization ── */
+    .agent-flow {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.4rem;
+      align-items: center;
+    }
+    .agent-node {
+      font-family: var(--mono);
+      font-size: 0.65rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 4px;
+      background: rgba(0,229,160,0.1);
+      border: 1px solid var(--accent);
+      color: var(--accent);
+    }
+    .agent-arrow { color: var(--muted); font-size: 0.7rem; }
+
+    /* ── Error ── */
+    .error-card {
+      display: none;
+      background: rgba(255,69,96,0.08);
+      border: 1px solid rgba(255,69,96,0.3);
+      border-radius: 8px;
+      padding: 1rem;
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      color: var(--danger);
+    }
+    .error-card.visible { display: block; }
+
+    /* ── Stats bar ── */
+    .stats-bar {
+      display: flex;
+      gap: 1.5rem;
+      padding: 0.75rem 1rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+    }
+    .stat { display: flex; flex-direction: column; gap: 0.2rem; }
+    .stat-label { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); text-transform: uppercase; }
+    .stat-value { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); font-weight: 700; }
+
+    /* Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+  </style>
+</head>
+<body>
+
+<header>
+  <div class="logo-dot"></div>
+  <h1>AI Agent System</h1>
+  <span id="statusText">● ONLINE</span>
+</header>
+
+<main>
+  <!-- ── LEFT: Input Panel ── -->
+  <div class="panel panel-left">
+    <div class="panel-label">Input Goal</div>
+
+    <div>
+      <label>Goal / Tujuan Bisnis</label>
+      <textarea id="goalInput" placeholder="Contoh: Buat konten ebook dan video YouTube tentang MPASI untuk market Indonesia..."></textarea>
+    </div>
+
+    <div>
+      <label>Lini Bisnis</label>
+      <select id="businessLine">
+        <option value="semua">🌐 Semua Lini (Ebook + YouTube + Affiliate)</option>
+        <option value="ebook">📚 Ebook (Gumroad / Payhip / KDP)</option>
+        <option value="youtube">🎬 YouTube Channel</option>
+        <option value="affiliate">🛒 Affiliate (Amazon / Shopee)</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Konteks Tambahan (opsional)</label>
+      <input type="text" id="contextInput" placeholder="Contoh: Mau launch bulan depan, budget promosi terbatas">
+    </div>
+
+    <div>
+      <label>Urgensi</label>
+      <select id="timeBudget">
+        <option value="normal (1 minggu)">⏱ Normal — 1 minggu</option>
+        <option value="segera (<48 jam)">🚨 Segera — dalam 48 jam</option>
+        <option value="rendah (fleksibel)">🌿 Rendah — fleksibel</option>
+      </select>
+    </div>
+
+    <div>
+      <label>Agen Aktif</label>
+      <div class="agents-preview">
+        <div class="chip active" id="chip-orchestrator">🧠 Orchestrator</div>
+        <div class="chip" id="chip-trend">🔥 Trend</div>
+        <div class="chip" id="chip-analyst">📊 Analyst</div>
+        <div class="chip" id="chip-seo">🔍 SEO</div>
+        <div class="chip" id="chip-content">✍️ Content</div>
+        <div class="chip" id="chip-monetize">💰 Finance</div>
+        <div class="chip" id="chip-dist">📡 Distribution</div>
+      </div>
+    </div>
+
+    <button id="runBtn" onclick="runOrchestrator()">
+      <span id="btnIcon">▶</span>
+      <span id="btnText">Jalankan Orchestrator</span>
+    </button>
+  </div>
+
+  <!-- ── RIGHT: Output Panel ── -->
+  <div class="panel panel-right">
+    <div class="panel-label">Output</div>
+
+    <!-- Empty state -->
+    <div class="output-empty" id="emptyState">
+      <div class="big-icon">🤖</div>
+      <p>Masukkan goal dan klik Jalankan</p>
+    </div>
+
+    <!-- Loading state -->
+    <div class="loading-state" id="loadingState">
+      <div class="loading-bar">
+        <div class="loading-bar-fill" id="progressBar"></div>
+      </div>
+      <div class="loading-steps" id="loadingSteps">
+        <div class="step active" id="step1"><div class="step-dot"></div> Parsing goal...</div>
+        <div class="step" id="step2"><div class="step-dot"></div> Membuat task plan...</div>
+        <div class="step" id="step3"><div class="step-dot"></div> Mengidentifikasi agen...</div>
+        <div class="step" id="step4"><div class="step-dot"></div> Menyusun brief owner...</div>
+        <div class="step" id="step5"><div class="step-dot"></div> Selesai ✓</div>
+      </div>
+    </div>
+
+    <!-- Error -->
+    <div class="error-card" id="errorCard"></div>
+
+    <!-- Result -->
+    <div class="result-card" id="resultCard">
+
+      <div class="stats-bar" id="statsBar">
+        <div class="stat">
+          <div class="stat-label">Durasi</div>
+          <div class="stat-value" id="statDuration">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Agen Direncanakan</div>
+          <div class="stat-value" id="statAgents">—</div>
+        </div>
+        <div class="stat">
+          <div class="stat-label">Lini Bisnis</div>
+          <div class="stat-value" id="statLines">—</div>
+        </div>
+      </div>
+
+      <!-- Agent flow -->
+      <div class="result-section" id="agentFlowSection" style="display:none">
+        <div class="result-section-header">Urutan Agen</div>
+        <div class="result-body">
+          <div class="agent-flow" id="agentFlow"></div>
+        </div>
+      </div>
+
+      <!-- Explanation -->
+      <div class="result-section">
+        <div class="result-section-header">
+          Penjelasan untuk Owner
+          <button class="copy-btn" onclick="copyText('explanationOutput')">copy</button>
+        </div>
+        <div class="result-body" id="explanationOutput"></div>
+      </div>
+
+      <!-- JSON plan -->
+      <div class="result-section">
+        <div class="result-section-header">
+          Task Plan (JSON)
+          <button class="copy-btn" onclick="copyText('jsonOutput')">copy</button>
+        </div>
+        <div class="result-body" id="jsonOutput"></div>
+      </div>
+
+    </div>
+  </div>
+</main>
+
+<script>
+  let startTime;
+
+  async function runOrchestrator() {
+    const goal = document.getElementById('goalInput').value.trim();
+    if (!goal) {
+      alert('Isi goal dulu ya!');
+      return;
+    }
+
+    startTime = Date.now();
+    setLoading(true);
+
+    try {
+      const res = await fetch('/api/orchestrate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          goal,
+          business_line: document.getElementById('businessLine').value,
+          context: document.getElementById('contextInput').value,
+          time_budget: document.getElementById('timeBudget').value,
+        }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || 'Server error');
+
+      showResult(data);
+    } catch (err) {
+      showError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  function setLoading(on) {
+    const btn = document.getElementById('runBtn');
+    btn.disabled = on;
+    document.getElementById('btnText').textContent = on ? 'Memproses...' : 'Jalankan Orchestrator';
+    document.getElementById('btnIcon').textContent = on ? '⏳' : '▶';
+
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('errorCard').classList.remove('visible');
+    document.getElementById('resultCard').classList.remove('visible');
+
+    const ls = document.getElementById('loadingState');
+    if (on) {
+      ls.classList.add('visible');
+      animateSteps();
+    } else {
+      ls.classList.remove('visible');
+    }
+  }
+
+  function animateSteps() {
+    const steps = ['step1','step2','step3','step4','step5'];
+    const bar = document.getElementById('progressBar');
+    steps.forEach(id => {
+      document.getElementById(id).className = 'step';
+    });
+    let i = 0;
+    const iv = setInterval(() => {
+      if (i > 0) document.getElementById(steps[i-1]).className = 'step done';
+      if (i < steps.length) {
+        document.getElementById(steps[i]).className = 'step active';
+        bar.style.width = ((i+1) / steps.length * 100) + '%';
+        i++;
+      } else {
+        clearInterval(iv);
+      }
+    }, 1200);
+  }
+
+  function showResult(data) {
+    const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+    document.getElementById('statDuration').textContent = dur;
+
+    const plan = data.task_plan;
+
+    if (plan) {
+      document.getElementById('statAgents').textContent =
+        plan.agent_sequence ? plan.agent_sequence.length : '—';
+      document.getElementById('statLines').textContent =
+        plan.business_lines ? plan.business_lines.join(', ') : '—';
+
+      // Agent flow
+      if (plan.agent_sequence && plan.agent_sequence.length) {
+        const flow = document.getElementById('agentFlow');
+        flow.innerHTML = plan.agent_sequence.map((a, idx) =>
+          `<span class="agent-node">${idx+1}. ${a.agent}</span>` +
+          (idx < plan.agent_sequence.length - 1 ? '<span class="agent-arrow">→</span>' : '')
+        ).join('');
+        document.getElementById('agentFlowSection').style.display = 'block';
+      }
+
+      document.getElementById('jsonOutput').textContent =
+        JSON.stringify(plan, null, 2);
+    } else {
+      document.getElementById('statAgents').textContent = '—';
+      document.getElementById('statLines').textContent = '—';
+      document.getElementById('jsonOutput').textContent =
+        '(Lihat full output di bawah)';
+    }
+
+    document.getElementById('explanationOutput').textContent =
+      data.explanation || data.full_output || '';
+
+    document.getElementById('resultCard').classList.add('visible');
+
+    // Aktifkan chip agen
+    if (plan && plan.agent_sequence) {
+      const map = {
+        trendAgent: 'chip-trend', businessAnalyst: 'chip-analyst',
+        seoAgent: 'chip-seo', contentCreator: 'chip-content',
+        monetization: 'chip-monetize', distribution: 'chip-dist',
+      };
+      plan.agent_sequence.forEach(a => {
+        const chip = map[a.agent];
+        if (chip) document.getElementById(chip)?.classList.add('active');
+      });
+    }
+  }
+
+  function showError(msg) {
+    const card = document.getElementById('errorCard');
+    card.textContent = '❌ Error: ' + msg + '\n\nCek: API key di .env sudah benar? Server berjalan?';
+    card.classList.add('visible');
+  }
+
+  function copyText(id) {
+    const text = document.getElementById(id).textContent;
+    navigator.clipboard.writeText(text).then(() => {
+      const btn = event.target;
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
+  }
+
+  // Cek status server saat load
+  fetch('/api/health')
+    .then(r => r.json())
+    .then(d => {
+      document.getElementById('statusText').textContent = '● ONLINE';
+    })
+    .catch(() => {
+      document.getElementById('statusText').textContent = '● OFFLINE';
+      document.getElementById('statusText').style.color = '#ff4560';
+    });
+</script>
+</body>
+</html>
