@@ -460,22 +460,31 @@
 <script>
   let startTime;
 
+  document.getElementById('runBtn').addEventListener('click', runOrchestrator);
+
   async function runOrchestrator() {
     const goal = document.getElementById('goalInput').value.trim();
-    if (!goal) {
-      alert('Isi goal dulu ya!');
-      return;
-    }
+    if (!goal) { alert('Isi goal dulu!'); return; }
 
     startTime = Date.now();
-    setLoading(true);
+
+    // Reset UI
+    document.getElementById('emptyState').style.display = 'none';
+    document.getElementById('errorCard').classList.remove('visible');
+    document.getElementById('resultCard').classList.remove('visible');
+    document.getElementById('loadingState').classList.add('visible');
+    document.getElementById('runBtn').disabled = true;
+    document.getElementById('btnText').textContent = 'Memproses...';
+    document.getElementById('btnIcon').textContent = '⏳';
+
+    animateSteps();
 
     try {
       const res = await fetch('/api/orchestrate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          goal,
+          goal: goal,
           business_line: document.getElementById('businessLine').value,
           context: document.getElementById('contextInput').value,
           time_budget: document.getElementById('timeBudget').value,
@@ -483,42 +492,23 @@
       });
 
       const data = await res.json();
-
-      if (!res.ok) throw new Error(data.message || 'Server error');
-
+      if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
       showResult(data);
+
     } catch (err) {
       showError(err.message);
     } finally {
-      setLoading(false);
-    }
-  }
-
-  function setLoading(on) {
-    const btn = document.getElementById('runBtn');
-    btn.disabled = on;
-    document.getElementById('btnText').textContent = on ? 'Memproses...' : 'Jalankan Orchestrator';
-    document.getElementById('btnIcon').textContent = on ? '⏳' : '▶';
-
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('errorCard').classList.remove('visible');
-    document.getElementById('resultCard').classList.remove('visible');
-
-    const ls = document.getElementById('loadingState');
-    if (on) {
-      ls.classList.add('visible');
-      animateSteps();
-    } else {
-      ls.classList.remove('visible');
+      document.getElementById('loadingState').classList.remove('visible');
+      document.getElementById('runBtn').disabled = false;
+      document.getElementById('btnText').textContent = 'Jalankan Orchestrator';
+      document.getElementById('btnIcon').textContent = '▶';
     }
   }
 
   function animateSteps() {
     const steps = ['step1','step2','step3','step4','step5'];
     const bar = document.getElementById('progressBar');
-    steps.forEach(id => {
-      document.getElementById(id).className = 'step';
-    });
+    steps.forEach(id => document.getElementById(id).className = 'step');
     let i = 0;
     const iv = setInterval(() => {
       if (i > 0) document.getElementById(steps[i-1]).className = 'step done';
@@ -526,70 +516,50 @@
         document.getElementById(steps[i]).className = 'step active';
         bar.style.width = ((i+1) / steps.length * 100) + '%';
         i++;
-      } else {
-        clearInterval(iv);
-      }
+      } else { clearInterval(iv); }
     }, 1200);
   }
 
   function showResult(data) {
-  const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
-  document.getElementById('statDuration').textContent = dur;
+    const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+    document.getElementById('statDuration').textContent = dur;
 
-  const plan = data.task_plan;
+    const plan = data.task_plan;
+    document.getElementById('statAgents').textContent = plan?.agent_sequence?.length ?? '—';
+    document.getElementById('statLines').textContent = plan?.business_lines?.join(', ') ?? '—';
 
-  document.getElementById('statAgents').textContent =
-    plan?.agent_sequence?.length ?? '—';
-  document.getElementById('statLines').textContent =
-    plan?.business_lines?.join(', ') ?? '—';
+    if (plan?.agent_sequence?.length) {
+      const flow = document.getElementById('agentFlow');
+      flow.innerHTML = plan.agent_sequence.map((a, i) =>
+        `<span class="agent-node">${i+1}. ${a.agent}</span>` +
+        (i < plan.agent_sequence.length-1 ? '<span class="agent-arrow">→</span>' : '')
+      ).join('');
+      document.getElementById('agentFlowSection').style.display = 'block';
+    }
 
-  // Agent flow
-  if (plan?.agent_sequence?.length) {
-    const flow = document.getElementById('agentFlow');
-    flow.innerHTML = plan.agent_sequence.map((a, idx) =>
-      `<span class="agent-node">${idx+1}. ${a.agent}</span>` +
-      (idx < plan.agent_sequence.length - 1 ? '<span class="agent-arrow">→</span>' : '')
-    ).join('');
-    document.getElementById('agentFlowSection').style.display = 'block';
+    document.getElementById('jsonOutput').textContent =
+      plan ? JSON.stringify(plan, null, 2) : '(Tidak ada task plan)';
+
+    document.getElementById('explanationOutput').textContent =
+      data.explanation || data.full_output || JSON.stringify(data, null, 2);
+
+    document.getElementById('resultCard').classList.add('visible');
   }
-
-  // Tampilkan JSON
-  document.getElementById('jsonOutput').textContent =
-    plan ? JSON.stringify(plan, null, 2) : '(Tidak ada task plan terstruktur)';
-
-  // Tampilkan penjelasan — coba semua kemungkinan field
-  const explanationText =
-    data.explanation ||
-    data.full_output ||
-    data.raw ||
-    JSON.stringify(data, null, 2);
-
-  document.getElementById('explanationOutput').textContent = explanationText;
-
-  document.getElementById('resultCard').classList.add('visible');
-}
 
   function showError(msg) {
     const card = document.getElementById('errorCard');
-    card.textContent = '❌ Error: ' + msg + '\n\nCek: API key di .env sudah benar? Server berjalan?';
+    card.textContent = '❌ Error: ' + msg;
     card.classList.add('visible');
   }
 
   function copyText(id) {
-    const text = document.getElementById(id).textContent;
-    navigator.clipboard.writeText(text).then(() => {
-      const btn = event.target;
-      btn.textContent = 'copied!';
-      setTimeout(() => btn.textContent = 'copy', 1500);
-    });
+    navigator.clipboard.writeText(document.getElementById(id).textContent)
+      .then(() => { event.target.textContent = 'copied!'; setTimeout(() => event.target.textContent = 'copy', 1500); });
   }
 
-  // Cek status server saat load
   fetch('/api/health')
     .then(r => r.json())
-    .then(d => {
-      document.getElementById('statusText').textContent = '● ONLINE';
-    })
+    .then(() => { document.getElementById('statusText').textContent = '● ONLINE'; })
     .catch(() => {
       document.getElementById('statusText').textContent = '● OFFLINE';
       document.getElementById('statusText').style.color = '#ff4560';
