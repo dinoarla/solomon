@@ -6,6 +6,7 @@ const { runTrendAgent } = require('./agents/trendAgent');
 const { runSeoAgent } = require('./agents/seoAgent');
 const { runContentCreator } = require('./agents/contentCreator');
 const { runBusinessAnalyst } = require('./agents/businessAnalyst');
+const { runMonetization } = require('./agents/monetization');
 
 const app = express();
 app.use(express.json());
@@ -243,6 +244,45 @@ app.post('/api/analyst', async (req, res) => {
 
   } catch (err) {
     console.error('Analyst error:', err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// Monetization endpoint
+app.post('/api/monetization', async (req, res) => {
+  const {
+    product, mode, business_line,
+    revenue_data, revenue_target,
+    competitor_pricing, specific_questions
+  } = req.body;
+
+  if (!product?.trim()) {
+    return res.status(400).json({ message: 'Product tidak boleh kosong.' });
+  }
+
+  console.log(`\n[MONETIZATION] Mode: ${mode} | Product: "${product.substring(0, 50)}"`);
+
+  try {
+    const result = await runMonetization(product, {
+      mode: mode || 'pricing',
+      businessLine: business_line || 'semua',
+      revenueData: revenue_data || '',
+      revenueTarget: revenue_target || '',
+      competitorPricing: competitor_pricing || '',
+      specificQuestions: specific_questions || '',
+    });
+
+    return res.json({
+      status: 'success',
+      product,
+      report: result.report,
+      projection_table: result.projectionTable,
+      full_output: result.raw,
+      timestamp: result.timestamp,
+    });
+
+  } catch (err) {
+    console.error('Monetization error:', err.message);
     return res.status(500).json({ message: err.message });
   }
 });

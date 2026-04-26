@@ -349,6 +349,8 @@
     #contentPanel.visible { display: contents; }
     #analystPanel { display: none; }
     #analystPanel.visible { display: contents; }
+    #monetizationPanel { display: none; }
+    #monetizationPanel.visible { display: contents; }
   </style>
 </head>
 <body>
@@ -362,6 +364,7 @@
     <button class="nav-btn" id="nav-seo" onclick="switchTab('seo')">🔍 SEO</button>
     <button class="nav-btn" id="nav-content" onclick="switchTab('content')">✍️ Content</button>
     <button class="nav-btn" id="nav-analyst" onclick="switchTab('analyst')">📊 Analyst</button>
+    <button class="nav-btn" id="nav-monetization" onclick="switchTab('monetization')">💰 Finance</button>
   </nav>
   <span id="statusText" style="margin-left:auto">● ONLINE</span>
 </header>
@@ -817,6 +820,7 @@
 
   </div>
   <!-- ── END CONTENT CREATOR PANEL ── -->
+
   <!-- ── BUSINESS ANALYST PANEL ── -->
   <div id="analystPanel">
 
@@ -931,6 +935,123 @@
   </div>
   <!-- ── END BUSINESS ANALYST PANEL ── -->
 
+  <!-- ── MONETIZATION PANEL ── -->
+  <div id="monetizationPanel">
+
+    <div class="panel panel-left">
+      <div class="panel-label">Monetization & Finance</div>
+
+      <div>
+        <label>Mode</label>
+        <select id="monetizationMode">
+          <option value="pricing">💲 Pricing Strategy</option>
+          <option value="funnel">🔄 Funnel Blueprint</option>
+          <option value="proyeksi">📈 Revenue Projection</option>
+          <option value="optimasi">⚡ Revenue Optimization</option>
+          <option value="laporan">📋 Monthly Financial Report</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Produk / Konten</label>
+        <textarea id="monetizationProduct"
+          placeholder="Contoh: Ebook MPASI 6 bahan lokal, Channel YouTube edukasi anak..."
+          style="min-height:80px"></textarea>
+      </div>
+
+      <div>
+        <label>Lini Bisnis</label>
+        <select id="monetizationBusinessLine">
+          <option value="semua">🌐 Semua Lini</option>
+          <option value="ebook">📚 Ebook</option>
+          <option value="youtube">🎬 YouTube</option>
+          <option value="affiliate">🛒 Affiliate</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Target Revenue</label>
+        <input type="text" id="monetizationTarget"
+          placeholder="Contoh: Rp10.000.000/bulan dalam 6 bulan">
+      </div>
+
+      <div>
+        <label>Data Revenue Existing (opsional)</label>
+        <textarea id="monetizationData"
+          placeholder="Contoh: Ebook terjual 20/bulan @Rp79K, YouTube RPM $1.2..."
+          style="min-height:60px"></textarea>
+      </div>
+
+      <div>
+        <label>Harga Kompetitor (opsional)</label>
+        <input type="text" id="monetizationCompetitor"
+          placeholder="Contoh: Kompetitor A Rp99K, Kompetitor B $4.99">
+      </div>
+
+      <div>
+        <label>Pertanyaan Spesifik (opsional)</label>
+        <input type="text" id="monetizationQuestions"
+          placeholder="Contoh: Berapa harga optimal? Kapan break-even?">
+      </div>
+
+      <button id="monetizationBtn">
+        <span id="monetizationBtnIcon">💰</span>
+        <span id="monetizationBtnText">Analisis Monetisasi</span>
+      </button>
+    </div>
+
+    <div class="panel panel-right">
+      <div class="panel-label">Monetization Report</div>
+
+      <div class="output-empty" id="monetizationEmptyState">
+        <div class="big-icon">💰</div>
+        <p>Pilih mode dan klik Analisis Monetisasi</p>
+      </div>
+
+      <div class="loading-state" id="monetizationLoadingState">
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="monetizationProgressBar"></div>
+        </div>
+        <div class="loading-steps">
+          <div class="step active" id="mstep1"><div class="step-dot"></div> Analisis harga kompetitor...</div>
+          <div class="step" id="mstep2"><div class="step-dot"></div> Merancang funnel...</div>
+          <div class="step" id="mstep3"><div class="step-dot"></div> Kalkulasi proyeksi...</div>
+          <div class="step" id="mstep4"><div class="step-dot"></div> Optimasi revenue...</div>
+          <div class="step" id="mstep5"><div class="step-dot"></div> Report siap ✓</div>
+        </div>
+      </div>
+
+      <div class="error-card" id="monetizationErrorCard"></div>
+
+      <div class="result-card" id="monetizationResultCard">
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-label">Durasi</div>
+            <div class="stat-value" id="monetizationDuration">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Mode</div>
+            <div class="stat-value" id="monetizationModeStat">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Lini Bisnis</div>
+            <div class="stat-value" id="monetizationLineStat">—</div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-header">
+            Monetization Report
+            <button class="copy-btn" onclick="copyText('monetizationOutput')">copy</button>
+          </div>
+          <div class="result-body" id="monetizationOutput"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ── END MONETIZATION PANEL ── -->
+
 </main>
 
 <script>
@@ -942,10 +1063,11 @@
   document.getElementById('seoBtn').addEventListener('click', runSeo);
   document.getElementById('contentBtn').addEventListener('click', runContent);
   document.getElementById('analystBtn').addEventListener('click', runAnalyst);
+  document.getElementById('monetizationBtn').addEventListener('click', runMonetization);
 
   // ── Tab switching ──
   function switchTab(tab) {
-    const tabs = ['orchestrator', 'trend', 'seo', 'content', 'analyst'];
+    const tabs = ['orchestrator', 'trend', 'seo', 'content', 'analyst', 'monetization'];
 
     tabs.forEach(t => {
       const panel = document.getElementById(t + 'Panel');
@@ -1416,6 +1538,72 @@
       document.getElementById('analystBtn').disabled = false;
       document.getElementById('analystBtnText').textContent = 'Analisis Bisnis';
       document.getElementById('analystBtnIcon').textContent = '📊';
+    }
+  }
+
+  // ══════════════════════════════════
+  // MONETIZATION AGENT
+  // ══════════════════════════════════
+  let monetizationStartTime;
+
+  async function runMonetization() {
+    const product = document.getElementById('monetizationProduct').value.trim();
+    if (!product) { alert('Isi produk dulu!'); return; }
+
+    monetizationStartTime = Date.now();
+    const selectedMode = document.getElementById('monetizationMode').value;
+    const selectedLine = document.getElementById('monetizationBusinessLine').value;
+
+    document.getElementById('monetizationEmptyState').style.display = 'none';
+    document.getElementById('monetizationErrorCard').classList.remove('visible');
+    document.getElementById('monetizationResultCard').classList.remove('visible');
+    document.getElementById('monetizationLoadingState').classList.add('visible');
+    document.getElementById('monetizationBtn').disabled = true;
+    document.getElementById('monetizationBtnText').textContent = 'Menganalisis...';
+    document.getElementById('monetizationBtnIcon').textContent = '⏳';
+
+    const iv = animateSteps(
+      ['mstep1','mstep2','mstep3','mstep4','mstep5'],
+      'monetizationProgressBar', 1800
+    );
+
+    try {
+      const res = await fetch('/api/monetization', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          product,
+          mode: selectedMode,
+          business_line: selectedLine,
+          revenue_target: document.getElementById('monetizationTarget').value,
+          revenue_data: document.getElementById('monetizationData').value,
+          competitor_pricing: document.getElementById('monetizationCompetitor').value,
+          specific_questions: document.getElementById('monetizationQuestions').value,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Server error');
+
+      const dur = ((Date.now() - monetizationStartTime) / 1000).toFixed(1) + 's';
+      document.getElementById('monetizationDuration').textContent = dur;
+      document.getElementById('monetizationModeStat').textContent = selectedMode;
+      document.getElementById('monetizationLineStat').textContent = selectedLine;
+
+      document.getElementById('monetizationOutput').innerHTML =
+        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
+      document.getElementById('monetizationResultCard').classList.add('visible');
+
+    } catch (err) {
+      const card = document.getElementById('monetizationErrorCard');
+      card.textContent = '❌ Error: ' + err.message;
+      card.classList.add('visible');
+    } finally {
+      clearInterval(iv);
+      document.getElementById('monetizationLoadingState').classList.remove('visible');
+      document.getElementById('monetizationBtn').disabled = false;
+      document.getElementById('monetizationBtnText').textContent = 'Analisis Monetisasi';
+      document.getElementById('monetizationBtnIcon').textContent = '💰';
     }
   }
 </script>
