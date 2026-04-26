@@ -27,8 +27,6 @@ app.post('/api/orchestrate', async (req, res) => {
     return res.status(400).json({ message: 'Goal tidak boleh kosong.' });
   }
 
-  console.log(`\n[${new Date().toLocaleTimeString('id-ID')}] Goal: "${goal.substring(0, 80)}..."`);
-
   try {
     const result = await runOrchestrator(goal, {
       businessLine: business_line || 'semua',
@@ -36,18 +34,19 @@ app.post('/api/orchestrate', async (req, res) => {
       timeBudget: time_budget || 'normal (1 minggu)',
     });
 
-    res.json({
+    // Pastikan selalu return field 'explanation'
+    return res.json({
       status: 'success',
       goal,
-      task_plan: result.taskPlan,
-      explanation: result.explanation,
-      full_output: result.raw,
+      task_plan: result.taskPlan || null,
+      explanation: result.explanation || result.raw || 'Tidak ada output',
+      full_output: result.raw || '',
       timestamp: result.timestamp,
     });
 
   } catch (err) {
-    console.error('Error:', err.message);
-    res.status(500).json({ message: err.message });
+    console.error('Orchestrate error:', err.message);
+    return res.status(500).json({ message: err.message });
   }
 });
 

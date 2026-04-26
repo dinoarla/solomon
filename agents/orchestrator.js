@@ -26,11 +26,11 @@ async function runOrchestrator(ownerGoal, options = {}) {
   }
 
   return {
-    raw: rawOutput,
-    taskPlan,
-    explanation: explainMatch ? explainMatch[1].trim() : rawOutput,
-    timestamp: new Date().toISOString(),
-  };
+  raw: rawOutput,
+  taskPlan: taskPlan,
+  explanation: explainMatch ? explainMatch[1].trim() : rawOutput, // ← fallback ke rawOutput
+  timestamp: new Date().toISOString(),
+};
 }
 
 module.exports = { runOrchestrator };
