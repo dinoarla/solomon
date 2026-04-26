@@ -533,54 +533,41 @@
   }
 
   function showResult(data) {
-    const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
-    document.getElementById('statDuration').textContent = dur;
+  const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
+  document.getElementById('statDuration').textContent = dur;
 
-    const plan = data.task_plan;
+  const plan = data.task_plan;
 
-    if (plan) {
-      document.getElementById('statAgents').textContent =
-        plan.agent_sequence ? plan.agent_sequence.length : '—';
-      document.getElementById('statLines').textContent =
-        plan.business_lines ? plan.business_lines.join(', ') : '—';
+  document.getElementById('statAgents').textContent =
+    plan?.agent_sequence?.length ?? '—';
+  document.getElementById('statLines').textContent =
+    plan?.business_lines?.join(', ') ?? '—';
 
-      // Agent flow
-      if (plan.agent_sequence && plan.agent_sequence.length) {
-        const flow = document.getElementById('agentFlow');
-        flow.innerHTML = plan.agent_sequence.map((a, idx) =>
-          `<span class="agent-node">${idx+1}. ${a.agent}</span>` +
-          (idx < plan.agent_sequence.length - 1 ? '<span class="agent-arrow">→</span>' : '')
-        ).join('');
-        document.getElementById('agentFlowSection').style.display = 'block';
-      }
-
-      document.getElementById('jsonOutput').textContent =
-        JSON.stringify(plan, null, 2);
-    } else {
-      document.getElementById('statAgents').textContent = '—';
-      document.getElementById('statLines').textContent = '—';
-      document.getElementById('jsonOutput').textContent =
-        '(Lihat full output di bawah)';
-    }
-
-    document.getElementById('explanationOutput').textContent =
-      data.explanation || data.full_output || '';
-
-    document.getElementById('resultCard').classList.add('visible');
-
-    // Aktifkan chip agen
-    if (plan && plan.agent_sequence) {
-      const map = {
-        trendAgent: 'chip-trend', businessAnalyst: 'chip-analyst',
-        seoAgent: 'chip-seo', contentCreator: 'chip-content',
-        monetization: 'chip-monetize', distribution: 'chip-dist',
-      };
-      plan.agent_sequence.forEach(a => {
-        const chip = map[a.agent];
-        if (chip) document.getElementById(chip)?.classList.add('active');
-      });
-    }
+  // Agent flow
+  if (plan?.agent_sequence?.length) {
+    const flow = document.getElementById('agentFlow');
+    flow.innerHTML = plan.agent_sequence.map((a, idx) =>
+      `<span class="agent-node">${idx+1}. ${a.agent}</span>` +
+      (idx < plan.agent_sequence.length - 1 ? '<span class="agent-arrow">→</span>' : '')
+    ).join('');
+    document.getElementById('agentFlowSection').style.display = 'block';
   }
+
+  // Tampilkan JSON
+  document.getElementById('jsonOutput').textContent =
+    plan ? JSON.stringify(plan, null, 2) : '(Tidak ada task plan terstruktur)';
+
+  // Tampilkan penjelasan — coba semua kemungkinan field
+  const explanationText =
+    data.explanation ||
+    data.full_output ||
+    data.raw ||
+    JSON.stringify(data, null, 2);
+
+  document.getElementById('explanationOutput').textContent = explanationText;
+
+  document.getElementById('resultCard').classList.add('visible');
+}
 
   function showError(msg) {
     const card = document.getElementById('errorCard');
