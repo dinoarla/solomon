@@ -2,6 +2,7 @@ require('dotenv').config();
 const express = require('express');
 const path = require('path');
 const { runOrchestrator } = require('./agents/orchestrator');
+const { runTrendAgent } = require('./agents/trendAgent');
 
 const app = express();
 app.use(express.json());
@@ -46,6 +47,39 @@ app.post('/api/orchestrate', async (req, res) => {
 
   } catch (err) {
     console.error('Orchestrate error:', err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// Trend Agent endpoint
+app.post('/api/trend', async (req, res) => {
+  const { topic, business_line, time_horizon, market_context, context } = req.body;
+
+  if (!topic?.trim()) {
+    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
+  }
+
+  console.log(`\n[TREND] Topic: "${topic.substring(0, 60)}"`);
+
+  try {
+    const result = await runTrendAgent(topic, {
+      businessLine: business_line || 'semua',
+      timeHorizon: time_horizon || '1-3 bulan',
+      marketContext: market_context || 'indonesia dan global',
+      additionalContext: context || '',
+    });
+
+    return res.json({
+      status: 'success',
+      topic,
+      report: result.report,
+      high_priority_count: result.highPriorityCount,
+      full_output: result.raw,
+      timestamp: result.timestamp,
+    });
+
+  } catch (err) {
+    console.error('Trend error:', err.message);
     return res.status(500).json({ message: err.message });
   }
 });
