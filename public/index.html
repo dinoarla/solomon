@@ -351,6 +351,8 @@
     #analystPanel.visible { display: contents; }
     #monetizationPanel { display: none; }
     #monetizationPanel.visible { display: contents; }
+    #distributionPanel { display: none; }
+    #distributionPanel.visible { display: contents; }
   </style>
 </head>
 <body>
@@ -365,6 +367,7 @@
     <button class="nav-btn" id="nav-content" onclick="switchTab('content')">✍️ Content</button>
     <button class="nav-btn" id="nav-analyst" onclick="switchTab('analyst')">📊 Analyst</button>
     <button class="nav-btn" id="nav-monetization" onclick="switchTab('monetization')">💰 Finance</button>
+    <button class="nav-btn" id="nav-distribution" onclick="switchTab('distribution')">📡 Distribution</button>
   </nav>
   <span id="statusText" style="margin-left:auto">● ONLINE</span>
 </header>
@@ -1052,6 +1055,118 @@
   </div>
   <!-- ── END MONETIZATION PANEL ── -->
 
+  <!-- ── DISTRIBUTION PANEL ── -->
+  <div id="distributionPanel">
+
+    <div class="panel panel-left">
+      <div class="panel-label">Distribution & Automation</div>
+
+      <div>
+        <label>Mode</label>
+        <select id="distributionMode">
+          <option value="distribution_plan">📡 Distribution Plan</option>
+          <option value="launch_sequence">🚀 Launch Sequence (14 hari)</option>
+          <option value="content_adaptation">🔄 Content Adaptation</option>
+          <option value="automation_checklist">🔧 Automation Checklist</option>
+          <option value="performance_review">📊 Performance Review</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Konten / Produk yang Akan Didistribusikan</label>
+        <textarea id="distributionContent"
+          placeholder="Contoh: Ebook MPASI 6 bahan lokal, harga Rp79.000, target ibu muda Indonesia..."
+          style="min-height:100px"></textarea>
+      </div>
+
+      <div>
+        <label>Platform Target</label>
+        <select id="distributionPlatforms">
+          <option value="semua">🌐 Semua Platform</option>
+          <option value="youtube,instagram,tiktok">📱 Social Media</option>
+          <option value="youtube,blog,email">💻 YouTube + Blog + Email</option>
+          <option value="gumroad,kdp,payhip">📚 Ebook Platforms</option>
+          <option value="instagram,tiktok">📸 Instagram + TikTok</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Tanggal Launch (opsional)</label>
+        <input type="text" id="distributionLaunchDate"
+          placeholder="Contoh: 1 Februari 2025, atau 2 minggu dari sekarang">
+      </div>
+
+      <div>
+        <label>Audiens Existing (opsional)</label>
+        <input type="text" id="distributionAudience"
+          placeholder="Contoh: 500 subscriber YouTube, 1200 follower Instagram">
+      </div>
+
+      <div>
+        <label>Konteks Tambahan (opsional)</label>
+        <textarea id="distributionContext"
+          placeholder="Contoh: Budget iklan nol, fokus organic growth..."
+          style="min-height:60px"></textarea>
+      </div>
+
+      <button id="distributionBtn">
+        <span id="distributionBtnIcon">📡</span>
+        <span id="distributionBtnText">Buat Distribution Plan</span>
+      </button>
+    </div>
+
+    <div class="panel panel-right">
+      <div class="panel-label">Distribution Report</div>
+
+      <div class="output-empty" id="distributionEmptyState">
+        <div class="big-icon">📡</div>
+        <p>Masukkan konten dan klik Buat Distribution Plan</p>
+      </div>
+
+      <div class="loading-state" id="distributionLoadingState">
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="distributionProgressBar"></div>
+        </div>
+        <div class="loading-steps">
+          <div class="step active" id="dstep1"><div class="step-dot"></div> Analisis platform terbaik...</div>
+          <div class="step" id="dstep2"><div class="step-dot"></div> Buat timeline distribusi...</div>
+          <div class="step" id="dstep3"><div class="step-dot"></div> Adaptasi konten per platform...</div>
+          <div class="step" id="dstep4"><div class="step-dot"></div> Setup automation checklist...</div>
+          <div class="step" id="dstep5"><div class="step-dot"></div> Plan siap ✓</div>
+        </div>
+      </div>
+
+      <div class="error-card" id="distributionErrorCard"></div>
+
+      <div class="result-card" id="distributionResultCard">
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-label">Durasi</div>
+            <div class="stat-value" id="distributionDuration">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Platform</div>
+            <div class="stat-value" id="distributionPlatformCount">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Mode</div>
+            <div class="stat-value" id="distributionModeStat">—</div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-header">
+            Distribution Plan
+            <button class="copy-btn" onclick="copyText('distributionOutput')">copy</button>
+          </div>
+          <div class="result-body" id="distributionOutput"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ── END DISTRIBUTION PANEL ── -->
+
 </main>
 
 <script>
@@ -1064,10 +1179,12 @@
   document.getElementById('contentBtn').addEventListener('click', runContent);
   document.getElementById('analystBtn').addEventListener('click', runAnalyst);
   document.getElementById('monetizationBtn').addEventListener('click', runMonetization);
+  document.getElementById('distributionBtn').addEventListener('click', runDistributionAgent);
+
 
   // ── Tab switching ──
   function switchTab(tab) {
-    const tabs = ['orchestrator', 'trend', 'seo', 'content', 'analyst', 'monetization'];
+   const tabs = ['orchestrator','trend','seo','content','analyst','monetization','distribution'];
 
     tabs.forEach(t => {
       const panel = document.getElementById(t + 'Panel');
@@ -1604,6 +1721,72 @@
       document.getElementById('monetizationBtn').disabled = false;
       document.getElementById('monetizationBtnText').textContent = 'Analisis Monetisasi';
       document.getElementById('monetizationBtnIcon').textContent = '💰';
+    }
+  }
+
+  // ══════════════════════════════════
+  // DISTRIBUTION AGENT
+  // ══════════════════════════════════
+  let distributionStartTime;
+
+  async function runDistributionAgent() {
+    const content = document.getElementById('distributionContent').value.trim();
+    if (!content) { alert('Isi konten dulu!'); return; }
+
+    distributionStartTime = Date.now();
+    const selectedMode = document.getElementById('distributionMode').value;
+    const selectedPlatform = document.getElementById('distributionPlatforms').value;
+
+    document.getElementById('distributionEmptyState').style.display = 'none';
+    document.getElementById('distributionErrorCard').classList.remove('visible');
+    document.getElementById('distributionResultCard').classList.remove('visible');
+    document.getElementById('distributionLoadingState').classList.add('visible');
+    document.getElementById('distributionBtn').disabled = true;
+    document.getElementById('distributionBtnText').textContent = 'Membuat plan...';
+    document.getElementById('distributionBtnIcon').textContent = '⏳';
+
+    const iv = animateSteps(
+      ['dstep1','dstep2','dstep3','dstep4','dstep5'],
+      'distributionProgressBar', 1800
+    );
+
+    try {
+      const res = await fetch('/api/distribution', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          content,
+          mode: selectedMode,
+          platforms: selectedPlatform,
+          launch_date: document.getElementById('distributionLaunchDate').value,
+          existing_audience: document.getElementById('distributionAudience').value,
+          context: document.getElementById('distributionContext').value,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Server error');
+
+      const dur = ((Date.now() - distributionStartTime) / 1000).toFixed(1) + 's';
+      document.getElementById('distributionDuration').textContent = dur;
+      document.getElementById('distributionPlatformCount').textContent =
+        (data.platform_count || '—') + ' platform';
+      document.getElementById('distributionModeStat').textContent = selectedMode;
+
+      document.getElementById('distributionOutput').innerHTML =
+        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
+      document.getElementById('distributionResultCard').classList.add('visible');
+
+    } catch (err) {
+      const card = document.getElementById('distributionErrorCard');
+      card.textContent = '❌ Error: ' + err.message;
+      card.classList.add('visible');
+    } finally {
+      clearInterval(iv);
+      document.getElementById('distributionLoadingState').classList.remove('visible');
+      document.getElementById('distributionBtn').disabled = false;
+      document.getElementById('distributionBtnText').textContent = 'Buat Distribution Plan';
+      document.getElementById('distributionBtnIcon').textContent = '📡';
     }
   }
 </script>

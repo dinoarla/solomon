@@ -7,6 +7,7 @@ const { runSeoAgent } = require('./agents/seoAgent');
 const { runContentCreator } = require('./agents/contentCreator');
 const { runBusinessAnalyst } = require('./agents/businessAnalyst');
 const { runMonetization } = require('./agents/monetization');
+const { runDistribution } = require('./agents/distribution');
 
 const app = express();
 app.use(express.json());
@@ -285,6 +286,59 @@ app.post('/api/monetization', async (req, res) => {
     console.error('Monetization error:', err.message);
     return res.status(500).json({ message: err.message });
   }
+});
+
+// Distribution endpoint
+app.post('/api/distribution', async (req, res) => {
+  const {
+    content, mode, platforms,
+    launch_date, existing_audience, context
+  } = req.body;
+
+  if (!content?.trim()) {
+    return res.status(400).json({ message: 'Konten tidak boleh kosong.' });
+  }
+
+  console.log(`\n[DISTRIBUTION] Mode: ${mode} | Content: "${content.substring(0, 50)}"`);
+
+  try {
+    const result = await runDistribution(content, {
+      mode: mode || 'distribution_plan',
+      platforms: platforms || 'semua',
+      launchDate: launch_date || '',
+      existingAudience: existing_audience || '',
+      additionalContext: context || '',
+    });
+
+    return res.json({
+      status: 'success',
+      content,
+      platform_count: result.platformCount,
+      report: result.report,
+      checklist: result.checklist,
+      full_output: result.raw,
+      timestamp: result.timestamp,
+    });
+
+  } catch (err) {
+    console.error('Distribution error:', err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// Update health check — semua agen ready
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    agents_ready: [
+      'orchestrator', 'trendAgent', 'seoAgent',
+      'contentCreator', 'businessAnalyst',
+      'monetization', 'distribution'
+    ],
+    total_agents: 7,
+    uptime: process.uptime().toFixed(0) + 's',
+    timestamp: new Date().toISOString(),
+  });
 });
 
 // Semua route lain → web UI
