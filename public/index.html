@@ -343,6 +343,8 @@
     #trendPanel.visible { display: contents; }
     #orchestratorPanel { display: contents; }
     #orchestratorPanel.hidden { display: none; }
+    #seoPanel { display: none; }
+    #seoPanel.visible { display: contents; }
   </style>
 </head>
 <body>
@@ -353,6 +355,7 @@
   <nav style="display:flex;gap:0.5rem;margin-left:1.5rem">
     <button class="nav-btn active" id="nav-orchestrator" onclick="switchTab('orchestrator')">🧠 Orchestrator</button>
     <button class="nav-btn" id="nav-trend" onclick="switchTab('trend')">🔥 Trend</button>
+    <button class="nav-btn" id="nav-seo" onclick="switchTab('seo')">🔍 SEO</button>
   </nav>
   <span id="statusText" style="margin-left:auto">● ONLINE</span>
 </header>
@@ -585,27 +588,134 @@
   </div>
   <!-- ── END TREND PANEL ── -->
 
+  <!-- ── SEO AGENT PANEL ── -->
+  <div id="seoPanel">
+
+    <div class="panel panel-left">
+      <div class="panel-label">SEO Research</div>
+
+      <div>
+        <label>Topik / Produk</label>
+        <textarea id="seoTopic" placeholder="Contoh: MPASI 6 bahan lokal, air fryer murah, produktivitas ibu rumah tangga..."></textarea>
+      </div>
+
+      <div>
+        <label>Platform Target</label>
+        <select id="seoPlatforms">
+          <option value="youtube,google,kdp,shopee">🌐 Semua Platform</option>
+          <option value="youtube,google">📺 YouTube + Google</option>
+          <option value="kdp,google">📚 KDP + Google (Ebook)</option>
+          <option value="shopee,google">🛒 Shopee + Google (Affiliate)</option>
+          <option value="youtube">🎬 YouTube saja</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Tipe Konten</label>
+        <select id="seoContentType">
+          <option value="mixed">📦 Mixed (semua format)</option>
+          <option value="video">🎬 Video YouTube</option>
+          <option value="ebook">📚 Ebook / KDP</option>
+          <option value="artikel">📝 Artikel Blog Affiliate</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Target Audiens</label>
+        <input type="text" id="seoAudience" placeholder="Contoh: Ibu rumah tangga Indonesia, usia 25-35" value="Keluarga Indonesia usia 25-40">
+      </div>
+
+      <div>
+        <label>Konteks Tren (opsional)</label>
+        <input type="text" id="seoTrendContext" placeholder="Paste insight dari Trend Agent jika ada">
+      </div>
+
+      <button id="seoBtn">
+        <span id="seoBtnIcon">🔍</span>
+        <span id="seoBtnText">Analisis SEO</span>
+      </button>
+    </div>
+
+    <div class="panel panel-right">
+      <div class="panel-label">SEO Blueprint</div>
+
+      <div class="output-empty" id="seoEmptyState">
+        <div class="big-icon">🔍</div>
+        <p>Masukkan topik dan klik Analisis SEO</p>
+      </div>
+
+      <div class="loading-state" id="seoLoadingState">
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="seoProgressBar"></div>
+        </div>
+        <div class="loading-steps">
+          <div class="step active" id="sstep1"><div class="step-dot"></div> Riset keyword per platform...</div>
+          <div class="step" id="sstep2"><div class="step-dot"></div> Analisis kompetitor...</div>
+          <div class="step" id="sstep3"><div class="step-dot"></div> Buat metadata siap pakai...</div>
+          <div class="step" id="sstep4"><div class="step-dot"></div> Competitive gap analysis...</div>
+          <div class="step" id="sstep5"><div class="step-dot"></div> Blueprint siap ✓</div>
+        </div>
+      </div>
+
+      <div class="error-card" id="seoErrorCard"></div>
+
+      <div class="result-card" id="seoResultCard">
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-label">Durasi</div>
+            <div class="stat-value" id="seoDuration">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Platform</div>
+            <div class="stat-value" id="seoPlatformStat">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Tipe Konten</div>
+            <div class="stat-value" id="seoTypeStat">—</div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-header">
+            SEO Blueprint
+            <button class="copy-btn" onclick="copyText('seoOutput')">copy</button>
+          </div>
+          <div class="result-body" id="seoOutput"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ── END SEO PANEL ── -->
 </main>
 
 <script>
   let startTime;
 
+  // ── Event listeners ──
   document.getElementById('runBtn').addEventListener('click', runOrchestrator);
   document.getElementById('trendBtn').addEventListener('click', runTrend);
+  document.getElementById('seoBtn').addEventListener('click', runSeo);
 
   // ── Tab switching ──
   function switchTab(tab) {
-    const orchPanel = document.getElementById('orchestratorPanel');
-    const trendPanel = document.getElementById('trendPanel');
-    document.getElementById('nav-orchestrator').classList.toggle('active', tab === 'orchestrator');
-    document.getElementById('nav-trend').classList.toggle('active', tab === 'trend');
-    if (tab === 'orchestrator') {
-      orchPanel.classList.remove('hidden');
-      trendPanel.classList.remove('visible');
-    } else {
-      orchPanel.classList.add('hidden');
-      trendPanel.classList.add('visible');
-    }
+    const tabs = ['orchestrator', 'trend', 'seo'];
+
+    tabs.forEach(t => {
+      const panel = document.getElementById(t + 'Panel');
+      const btn = document.getElementById('nav-' + t);
+      if (!panel || !btn) return;
+
+      if (t === tab) {
+        panel.classList.add('visible');
+        panel.classList.remove('hidden');
+        btn.classList.add('active');
+      } else {
+        panel.classList.remove('visible');
+        panel.classList.add('hidden');
+        btn.classList.remove('active');
+      }
+    });
   }
 
   // ── Markdown renderer ──
@@ -617,6 +727,12 @@
       .replace(/^# (.+)$/gm, '<span style="color:#00e5a0;font-weight:800;font-size:1rem;display:block;margin-top:1rem">$1</span>')
       .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
       .replace(/^- (.+)$/gm, '<span style="display:block;padding-left:1rem">• $1</span>')
+      .replace(/^\|(.+)\|$/gm, (match) => {
+        const cells = match.split('|').filter(c => c.trim());
+        return '<div style="display:flex;gap:0.5rem;font-size:0.72rem;border-bottom:1px solid #1e222b;padding:0.2rem 0">' +
+          cells.map(c => `<span style="flex:1;min-width:80px">${c.trim()}</span>`).join('') +
+          '</div>';
+      })
       .replace(/^---+$/gm, '<hr style="border-color:#1e222b;margin:0.5rem 0">')
       .replace(/\n/g, '<br>');
   }
@@ -624,13 +740,21 @@
   // ── Animate loading steps ──
   function animateSteps(stepIds, barId, interval = 1200) {
     const bar = document.getElementById(barId);
-    stepIds.forEach(id => document.getElementById(id).className = 'step');
+    if (bar) bar.style.width = '0%';
+    stepIds.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.className = 'step';
+    });
     let i = 0;
     return setInterval(() => {
-      if (i > 0) document.getElementById(stepIds[i-1]).className = 'step done';
+      if (i > 0) {
+        const prev = document.getElementById(stepIds[i - 1]);
+        if (prev) prev.className = 'step done';
+      }
       if (i < stepIds.length) {
-        document.getElementById(stepIds[i]).className = 'step active';
-        bar.style.width = ((i+1) / stepIds.length * 100) + '%';
+        const cur = document.getElementById(stepIds[i]);
+        if (cur) cur.className = 'step active';
+        if (bar) bar.style.width = ((i + 1) / stepIds.length * 100) + '%';
         i++;
       }
     }, interval);
@@ -638,17 +762,21 @@
 
   // ── Copy text ──
   function copyText(id) {
-    navigator.clipboard.writeText(document.getElementById(id).textContent)
-      .then(() => {
-        event.target.textContent = 'copied!';
-        setTimeout(() => event.target.textContent = 'copy', 1500);
-      });
+    const el = document.getElementById(id);
+    if (!el) return;
+    navigator.clipboard.writeText(el.textContent).then(() => {
+      const btn = event.target;
+      btn.textContent = 'copied!';
+      setTimeout(() => btn.textContent = 'copy', 1500);
+    });
   }
 
   // ── Health check ──
   fetch('/api/health')
     .then(r => r.json())
-    .then(() => { document.getElementById('statusText').textContent = '● ONLINE'; })
+    .then(() => {
+      document.getElementById('statusText').textContent = '● ONLINE';
+    })
     .catch(() => {
       document.getElementById('statusText').textContent = '● OFFLINE';
       document.getElementById('statusText').style.color = '#ff4560';
@@ -671,7 +799,10 @@
     document.getElementById('btnText').textContent = 'Memproses...';
     document.getElementById('btnIcon').textContent = '⏳';
 
-    const iv = animateSteps(['step1','step2','step3','step4','step5'], 'progressBar', 1200);
+    const iv = animateSteps(
+      ['step1', 'step2', 'step3', 'step4', 'step5'],
+      'progressBar', 1200
+    );
 
     try {
       const res = await fetch('/api/orchestrate', {
@@ -713,8 +844,8 @@
     if (plan?.agent_sequence?.length) {
       const flow = document.getElementById('agentFlow');
       flow.innerHTML = plan.agent_sequence.map((a, i) =>
-        `<span class="agent-node">${i+1}. ${a.agent}</span>` +
-        (i < plan.agent_sequence.length-1 ? '<span class="agent-arrow">→</span>' : '')
+        `<span class="agent-node">${i + 1}. ${a.agent}</span>` +
+        (i < plan.agent_sequence.length - 1 ? '<span class="agent-arrow">→</span>' : '')
       ).join('');
       document.getElementById('agentFlowSection').style.display = 'block';
     }
@@ -737,8 +868,6 @@
     if (!topic) { alert('Isi topik dulu!'); return; }
 
     trendStartTime = Date.now();
-
-    // Ambil nilai pilihan SEBELUM request
     const selectedBusinessLine = document.getElementById('trendBusinessLine').value;
     const selectedMarket = document.getElementById('trendMarket').value;
     const selectedHorizon = document.getElementById('trendHorizon').value;
@@ -751,7 +880,10 @@
     document.getElementById('trendBtnText').textContent = 'Menganalisis...';
     document.getElementById('trendBtnIcon').textContent = '⏳';
 
-    const iv = animateSteps(['tstep1','tstep2','tstep3','tstep4','tstep5'], 'trendProgressBar', 1500);
+    const iv = animateSteps(
+      ['tstep1', 'tstep2', 'tstep3', 'tstep4', 'tstep5'],
+      'trendProgressBar', 1500
+    );
 
     try {
       const res = await fetch('/api/trend', {
@@ -769,18 +901,15 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Server error');
 
-      // Stats
       const dur = ((Date.now() - trendStartTime) / 1000).toFixed(1) + 's';
       document.getElementById('trendDuration').textContent = dur;
       document.getElementById('trendHighCount').textContent = data.high_priority_count ?? '—';
       document.getElementById('trendMarketStat').textContent = selectedMarket;
 
-      // Label lini bisnis di header
       const lineLabel = selectedBusinessLine === 'semua' ? 'Semua Lini' : selectedBusinessLine;
-      document.querySelector('#trendResultCard .result-section-header').textContent =
-        `Trend Report — ${lineLabel} | ${selectedHorizon}`;
+      const trendHeader = document.querySelector('#trendResultCard .result-section-header');
+      if (trendHeader) trendHeader.textContent = `Trend Report — ${lineLabel} | ${selectedHorizon}`;
 
-      // Render output
       document.getElementById('trendOutput').innerHTML =
         renderMarkdown(data.report || data.full_output || JSON.stringify(data));
       document.getElementById('trendResultCard').classList.add('visible');
@@ -795,6 +924,69 @@
       document.getElementById('trendBtn').disabled = false;
       document.getElementById('trendBtnText').textContent = 'Analisis Tren';
       document.getElementById('trendBtnIcon').textContent = '🔥';
+    }
+  }
+
+  // ══════════════════════════════════
+  // SEO AGENT
+  // ══════════════════════════════════
+  let seoStartTime;
+
+  async function runSeo() {
+    const topic = document.getElementById('seoTopic').value.trim();
+    if (!topic) { alert('Isi topik dulu!'); return; }
+
+    seoStartTime = Date.now();
+    const selectedPlatform = document.getElementById('seoPlatforms').value;
+    const selectedType = document.getElementById('seoContentType').value;
+
+    document.getElementById('seoEmptyState').style.display = 'none';
+    document.getElementById('seoErrorCard').classList.remove('visible');
+    document.getElementById('seoResultCard').classList.remove('visible');
+    document.getElementById('seoLoadingState').classList.add('visible');
+    document.getElementById('seoBtn').disabled = true;
+    document.getElementById('seoBtnText').textContent = 'Menganalisis...';
+    document.getElementById('seoBtnIcon').textContent = '⏳';
+
+    const iv = animateSteps(
+      ['sstep1', 'sstep2', 'sstep3', 'sstep4', 'sstep5'],
+      'seoProgressBar', 1800
+    );
+
+    try {
+      const res = await fetch('/api/seo', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          platforms: selectedPlatform,
+          content_type: selectedType,
+          target_audience: document.getElementById('seoAudience').value,
+          trend_context: document.getElementById('seoTrendContext').value,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Server error');
+
+      const dur = ((Date.now() - seoStartTime) / 1000).toFixed(1) + 's';
+      document.getElementById('seoDuration').textContent = dur;
+      document.getElementById('seoPlatformStat').textContent = selectedPlatform;
+      document.getElementById('seoTypeStat').textContent = selectedType;
+      document.getElementById('seoOutput').innerHTML =
+        renderMarkdown(data.blueprint || data.full_output || JSON.stringify(data));
+      document.getElementById('seoResultCard').classList.add('visible');
+
+    } catch (err) {
+      const card = document.getElementById('seoErrorCard');
+      card.textContent = '❌ Error: ' + err.message;
+      card.classList.add('visible');
+    } finally {
+      clearInterval(iv);
+      document.getElementById('seoLoadingState').classList.remove('visible');
+      document.getElementById('seoBtn').disabled = false;
+      document.getElementById('seoBtnText').textContent = 'Analisis SEO';
+      document.getElementById('seoBtnIcon').textContent = '🔍';
     }
   }
 </script>

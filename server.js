@@ -3,6 +3,7 @@ const express = require('express');
 const path = require('path');
 const { runOrchestrator } = require('./agents/orchestrator');
 const { runTrendAgent } = require('./agents/trendAgent');
+const { runSeoAgent } = require('./agents/seoAgent');
 
 const app = express();
 app.use(express.json());
@@ -80,6 +81,39 @@ app.post('/api/trend', async (req, res) => {
 
   } catch (err) {
     console.error('Trend error:', err.message);
+    return res.status(500).json({ message: err.message });
+  }
+});
+
+// SEO Agent endpoint
+app.post('/api/seo', async (req, res) => {
+  const { topic, platforms, content_type, target_audience, trend_context } = req.body;
+
+  if (!topic?.trim()) {
+    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
+  }
+
+  console.log(`\n[SEO] Topic: "${topic.substring(0, 60)}"`);
+
+  try {
+    const result = await runSeoAgent(topic, {
+      platforms: platforms || 'youtube,google,kdp',
+      contentType: content_type || 'mixed',
+      targetAudience: target_audience || 'Keluarga Indonesia usia 25-40',
+      trendContext: trend_context || '',
+    });
+
+    return res.json({
+      status: 'success',
+      topic,
+      blueprint: result.blueprint,
+      keyword_table: result.keywordTable,
+      full_output: result.raw,
+      timestamp: result.timestamp,
+    });
+
+  } catch (err) {
+    console.error('SEO error:', err.message);
     return res.status(500).json({ message: err.message });
   }
 });
