@@ -5,334 +5,445 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solomon Agent — Login</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,700;0,9..144,900;1,9..144,400;1,9..144,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+    :root{
+      --ink:#111118;--orange:#FF4D00;--yellow:#FFD600;
+      --cream:#FFFBF0;--navy:#0D1117;
+      --border:2px solid #111118;--shadow:4px 4px 0 #111118;
+    }
+    html,body{height:100%;overflow:hidden}
+    body{font-family:'DM Sans',sans-serif;display:flex;background:var(--navy)}
 
-    :root {
-      --cream: #FFFBF2;
-      --cream-dark: #F0E9D8;
-      --ink: #111111;
-      --ink-mid: #555555;
-      --orange: #FF4D00;
-      --yellow: #FFD600;
-      --border: 2px solid #111111;
-      --shadow: 4px 4px 0px #111111;
+    /* ── LEFT HERO ── */
+    .hero{
+      flex:1;position:relative;
+      background:var(--navy);
+      overflow:hidden;
+      display:flex;flex-direction:column;
+      padding:2.5rem 3rem;
+      min-height:100vh;
     }
 
-    body {
-      background: var(--cream);
-      font-family: 'DM Sans', sans-serif;
-      min-height: 100vh;
-      display: grid;
-      grid-template-columns: 1fr 1fr;
+    /* Animated grid background */
+    .hero-grid{
+      position:absolute;inset:0;
+      background-image:
+        linear-gradient(rgba(255,214,0,.04) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,214,0,.04) 1px,transparent 1px);
+      background-size:48px 48px;
+      animation:grid-drift 20s linear infinite;
+    }
+    @keyframes grid-drift{0%{background-position:0 0}100%{background-position:48px 48px}}
+
+    /* Glowing orbs */
+    .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
+    .orb1{width:400px;height:400px;background:rgba(255,77,0,.12);top:-100px;right:-100px;animation:orb-float 8s ease-in-out infinite}
+    .orb2{width:300px;height:300px;background:rgba(255,214,0,.07);bottom:-80px;left:-60px;animation:orb-float 10s ease-in-out infinite reverse}
+    .orb3{width:200px;height:200px;background:rgba(255,77,0,.06);top:40%;right:15%;animation:orb-float 6s ease-in-out infinite 2s}
+    @keyframes orb-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+
+    .hero-brand{
+      position:relative;z-index:2;
+      font-family:'Fraunces',serif;font-size:1rem;font-weight:900;
+      color:var(--yellow);letter-spacing:.1em;text-transform:uppercase;
     }
 
-    /* Left — branding */
-    .brand-side {
-      background: var(--ink);
-      padding: 3rem;
-      display: flex;
-      flex-direction: column;
-      justify-content: space-between;
-      position: relative;
-      overflow: hidden;
+    .hero-headline{
+      position:relative;z-index:2;
+      margin-top:2.5rem;
+      font-family:'Fraunces',serif;font-size:clamp(2.4rem,4vw,3.4rem);
+      font-weight:900;color:#fff;line-height:1.05;
+    }
+    .hero-headline em{color:var(--yellow);font-style:italic}
+    .hero-desc{
+      position:relative;z-index:2;
+      margin-top:1.25rem;font-size:.9rem;
+      color:rgba(255,255,255,.45);line-height:1.75;max-width:340px;
     }
 
-    .brand-side::before {
-      content: '';
-      position: absolute;
-      top: -100px; right: -100px;
-      width: 400px; height: 400px;
-      background: var(--yellow);
-      border-radius: 50%;
-      opacity: 0.08;
+    /* ── WORKFLOW DIAGRAM ── */
+    .workflow{
+      position:relative;z-index:2;
+      margin-top:auto;padding-top:2rem;
+      display:flex;flex-direction:column;gap:0;
     }
 
-    .brand-side::after {
-      content: '';
-      position: absolute;
-      bottom: -60px; left: -60px;
-      width: 300px; height: 300px;
-      background: var(--orange);
-      border-radius: 50%;
-      opacity: 0.1;
+    .wf-row{
+      display:flex;align-items:center;gap:.5rem;
+      animation:wf-in .5s ease both;
+    }
+    @keyframes wf-in{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
+
+    .wf-card{
+      display:flex;align-items:center;gap:.6rem;
+      padding:.52rem .9rem;
+      border-radius:10px;
+      border:1px solid rgba(255,255,255,.08);
+      background:rgba(255,255,255,.04);
+      backdrop-filter:blur(8px);
+      cursor:pointer;
+      transition:all .2s;
+      position:relative;
+      transform-style:preserve-3d;
+      perspective:600px;
+      flex:1;max-width:260px;
+    }
+    .wf-card:hover{
+      background:rgba(255,255,255,.1);
+      border-color:rgba(255,255,255,.2);
+      transform:translateY(-2px) scale(1.02);
+      box-shadow:0 8px 32px rgba(0,0,0,.4);
+    }
+    .wf-card.active-card{
+      background:rgba(255,214,0,.12);
+      border-color:rgba(255,214,0,.35);
     }
 
-    .brand-logo {
-      font-family: 'Fraunces', serif;
-      font-size: 1.1rem;
-      font-weight: 700;
-      color: var(--yellow);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
+    /* Colored left accent per agent */
+    .wf-card::before{
+      content:'';position:absolute;left:0;top:20%;bottom:20%;
+      width:2.5px;border-radius:0 2px 2px 0;
+      background:var(--agent-color,rgba(255,255,255,.2));
+      transition:all .2s;
+    }
+    .wf-card:hover::before{top:10%;bottom:10%;background:var(--agent-color)}
+
+    .wf-icon{font-size:1rem;flex-shrink:0;filter:drop-shadow(0 0 6px var(--agent-color,transparent))}
+    .wf-label{font-family:'DM Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.7);letter-spacing:.02em}
+    .wf-step{
+      font-family:'DM Mono',monospace;font-size:.55rem;
+      color:rgba(255,255,255,.25);margin-left:auto;
+      padding:.1rem .35rem;border-radius:3px;
+      background:rgba(255,255,255,.06);
+    }
+    .wf-card.active-card .wf-label{color:var(--yellow)}
+    .wf-card.active-card .wf-step{color:rgba(255,214,0,.5);background:rgba(255,214,0,.08)}
+
+    /* Arrow connector */
+    .wf-arrow{
+      display:flex;flex-direction:column;align-items:flex-start;
+      padding-left:1.1rem;margin:1px 0;
+      gap:0;
+    }
+    .wf-arrow-line{
+      width:1.5px;height:12px;
+      background:linear-gradient(to bottom,rgba(255,255,255,.15),rgba(255,255,255,.06));
+    }
+    .wf-arrow-head{
+      font-size:.5rem;color:rgba(255,255,255,.15);
+      margin-left:-.15rem;line-height:1;
     }
 
-    .brand-hero {
-      position: relative;
-      z-index: 1;
+    /* Auto-cycle highlight */
+    .wf-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--agent-color,rgba(255,255,255,.2));
+      animation:dot-pulse 2s ease-in-out infinite;
+      flex-shrink:0;
     }
+    @keyframes dot-pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
 
-    .brand-tagline {
-      font-family: 'Fraunces', serif;
-      font-size: 3.5rem;
-      font-weight: 900;
-      color: #ffffff;
-      line-height: 1.1;
-      margin-bottom: 1.5rem;
+    /* ── RIGHT: LOGIN ── */
+    .login-side{
+      width:480px;min-width:380px;
+      background:var(--cream);
+      display:flex;align-items:center;justify-content:center;
+      padding:3rem 3.5rem;
     }
+    .login-box{width:100%;max-width:380px}
 
-    .brand-tagline em {
-      color: var(--yellow);
-      font-style: italic;
+    /* Dynamic greeting */
+    .greeting-wrap{margin-bottom:1.75rem}
+    .greeting-tag{
+      display:inline-flex;align-items:center;gap:.4rem;
+      background:#fff;border:var(--border);border-radius:20px;
+      padding:.3rem .75rem;
+      font-family:'DM Mono',monospace;font-size:.65rem;
+      color:var(--ink);margin-bottom:.9rem;
+      box-shadow:var(--shadow);
+      animation:tag-bounce .4s ease;
     }
-
-    .brand-desc {
-      font-size: 1rem;
-      color: rgba(255,255,255,0.6);
-      line-height: 1.7;
-      max-width: 380px;
+    @keyframes tag-bounce{0%{transform:translateY(4px);opacity:0}100%{transform:translateY(0);opacity:1}}
+    .greeting-dot{
+      width:6px;height:6px;border-radius:50%;
+      background:var(--orange);animation:dot-pulse 1.5s ease-in-out infinite;
     }
+    .greeting-time{color:var(--ink)}
 
-    .brand-agents {
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
+    .login-title{
+      font-family:'Fraunces',serif;font-size:2.1rem;
+      font-weight:900;color:var(--ink);line-height:1.1;
+      min-height:5rem;
     }
-
-    .agent-pill {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-      background: rgba(255,255,255,0.06);
-      border: 1px solid rgba(255,255,255,0.12);
-      border-radius: 6px;
-      padding: 0.5rem 0.75rem;
-      font-family: 'DM Mono', monospace;
-      font-size: 0.72rem;
-      color: rgba(255,255,255,0.7);
-      width: fit-content;
+    .login-title .greeting-text{
+      display:inline-block;
+      animation:greet-in .4s cubic-bezier(.34,1.56,.64,1) both;
     }
+    @keyframes greet-in{from{opacity:0;transform:translateY(8px) scale(.97)}to{opacity:1;transform:translateY(0) scale(1)}}
+    .login-title em{font-style:italic;color:var(--orange)}
+    .login-sub{font-size:.85rem;color:#666;margin-top:.4rem;margin-bottom:2rem}
 
-    .agent-pill .dot {
-      width: 6px; height: 6px;
-      border-radius: 50%;
-      background: var(--yellow);
-      animation: blink 2s ease-in-out infinite;
+    .field-lbl{display:block;font-size:.7rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;color:#555;margin-bottom:.45rem}
+    .field-inp{
+      width:100%;padding:.82rem 1rem;
+      border:var(--border);border-radius:10px;
+      background:#fff;font-family:'DM Sans',sans-serif;font-size:.95rem;
+      color:var(--ink);outline:none;transition:box-shadow .15s;
+      margin-bottom:1.1rem;
     }
+    .field-inp:focus{box-shadow:var(--shadow)}
 
-    @keyframes blink {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.3; }
+    .login-btn{
+      width:100%;padding:.92rem;
+      background:var(--orange);color:#fff;
+      border:var(--border);border-radius:10px;
+      font-family:'DM Sans',sans-serif;font-size:1rem;font-weight:600;
+      cursor:pointer;box-shadow:var(--shadow);
+      transition:all .15s;display:flex;align-items:center;justify-content:center;gap:.5rem;
     }
+    .login-btn:hover:not(:disabled){transform:translate(-2px,-2px);box-shadow:6px 6px 0 #111118}
+    .login-btn:active:not(:disabled){transform:translate(2px,2px);box-shadow:2px 2px 0 #111118}
+    .login-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
 
-    /* Right — login form */
-    .login-side {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      padding: 3rem;
-    }
+    .err{display:none;background:#FFF0EB;border:2px solid var(--orange);border-radius:8px;padding:.7rem 1rem;font-size:.82rem;color:#C0300A;margin-top:.9rem}
+    .err.show{display:block}
 
-    .login-box {
-      width: 100%;
-      max-width: 400px;
-    }
+    .login-footer{margin-top:2.25rem;padding-top:1.5rem;border-top:1px solid #E5E0D5;font-size:.7rem;color:#999;text-align:center;font-family:'DM Mono',monospace}
 
-    .login-title {
-      font-family: 'Fraunces', serif;
-      font-size: 2rem;
-      font-weight: 700;
-      color: var(--ink);
-      margin-bottom: 0.5rem;
-    }
-
-    .login-subtitle {
-      font-size: 0.9rem;
-      color: var(--ink-mid);
-      margin-bottom: 2.5rem;
-    }
-
-    .form-group {
-      margin-bottom: 1.25rem;
-    }
-
-    .form-label {
-      display: block;
-      font-size: 0.78rem;
-      font-weight: 600;
-      color: var(--ink);
-      letter-spacing: 0.05em;
-      text-transform: uppercase;
-      margin-bottom: 0.5rem;
-    }
-
-    .form-input {
-      width: 100%;
-      padding: 0.85rem 1rem;
-      border: var(--border);
-      border-radius: 8px;
-      background: white;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.95rem;
-      color: var(--ink);
-      outline: none;
-      transition: box-shadow 0.15s;
-    }
-
-    .form-input:focus {
-      box-shadow: var(--shadow);
-    }
-
-    .login-btn {
-      width: 100%;
-      padding: 0.95rem;
-      background: var(--orange);
-      color: white;
-      border: var(--border);
-      border-radius: 8px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 1rem;
-      font-weight: 600;
-      cursor: pointer;
-      transition: all 0.15s;
-      margin-top: 0.5rem;
-      box-shadow: var(--shadow);
-    }
-
-    .login-btn:hover {
-      transform: translate(-2px, -2px);
-      box-shadow: 6px 6px 0px #111111;
-    }
-
-    .login-btn:active {
-      transform: translate(2px, 2px);
-      box-shadow: 2px 2px 0px #111111;
-    }
-
-    .login-btn:disabled {
-      opacity: 0.6;
-      cursor: not-allowed;
-      transform: none;
-      box-shadow: var(--shadow);
-    }
-
-    .error-msg {
-      display: none;
-      background: #FFF0ED;
-      border: 2px solid var(--orange);
-      border-radius: 8px;
-      padding: 0.75rem 1rem;
-      font-size: 0.85rem;
-      color: var(--orange);
-      margin-top: 1rem;
-    }
-
-    .error-msg.show { display: block; }
-
-    .login-footer {
-      margin-top: 2rem;
-      padding-top: 1.5rem;
-      border-top: 1px solid var(--cream-dark);
-      font-size: 0.78rem;
-      color: var(--ink-mid);
-      text-align: center;
-    }
-
-    @media (max-width: 768px) {
-      body { grid-template-columns: 1fr; }
-      .brand-side { display: none; }
+    @media(max-width:900px){
+      .hero{display:none}
+      .login-side{width:100%;min-width:unset}
     }
   </style>
 </head>
 <body>
 
-  <!-- Left: Branding -->
-  <div class="brand-side">
-    <div class="brand-logo">Solomon Agent</div>
+<!-- ── LEFT HERO ── -->
+<div class="hero">
+  <div class="hero-grid"></div>
+  <div class="orb orb1"></div>
+  <div class="orb orb2"></div>
+  <div class="orb orb3"></div>
 
-    <div class="brand-hero">
-      <h1 class="brand-tagline">Your <em>Agentic</em> Business Intelligence</h1>
-      <p class="brand-desc">7 AI agents bekerja bersama untuk mengotomasi riset, konten, SEO, dan distribusi bisnis digital kamu.</p>
-    </div>
+  <div class="hero-brand">Solomon Agent</div>
 
-    <div class="brand-agents">
-      <div class="agent-pill"><span class="dot"></span> 🔥 Trend Research Agent</div>
-      <div class="agent-pill"><span class="dot"></span> 📊 Market Analyst Agent</div>
-      <div class="agent-pill"><span class="dot"></span> 🔍 SEO Intelligence Agent</div>
-      <div class="agent-pill"><span class="dot"></span> ✍️ Content Studio Agent</div>
-      <div class="agent-pill"><span class="dot"></span> 💰 Monetization Agent</div>
-      <div class="agent-pill"><span class="dot"></span> 📡 Distribution Agent</div>
-      <div class="agent-pill"><span class="dot"></span> 🧠 Orchestrator Agent</div>
-    </div>
-  </div>
+  <h1 class="hero-headline">
+    Your <em>Agentic</em> Business<br>Intelligence
+  </h1>
+  <p class="hero-desc">
+    7 AI agents bekerja bersama untuk mengotomasi riset, konten, SEO, dan distribusi bisnis digital kamu.
+  </p>
 
-  <!-- Right: Login Form -->
-  <div class="login-side">
-    <div class="login-box">
-      <h2 class="login-title">Welcome back, Dino.</h2>
-      <p class="login-subtitle">Masuk untuk mengakses Solomon Agent</p>
+  <!-- Workflow diagram interactive -->
+  <div class="workflow" id="workflow"></div>
+</div>
 
-      <form id="loginForm" onsubmit="handleLogin(event)">
-        <div class="form-group">
-          <label class="form-label">Username</label>
-          <input type="text" id="username" class="form-input"
-            placeholder="username" autocomplete="username" required>
-        </div>
+<!-- ── RIGHT LOGIN ── -->
+<div class="login-side">
+  <div class="login-box">
 
-        <div class="form-group">
-          <label class="form-label">Password</label>
-          <input type="password" id="password" class="form-input"
-            placeholder="••••••••" autocomplete="current-password" required>
-        </div>
-
-        <button type="submit" class="login-btn" id="loginBtn">
-          Masuk ke Solomon Agent →
-        </button>
-      </form>
-
-      <div class="error-msg" id="errorMsg"></div>
-
-      <div class="login-footer">
-        Solomon Agent · Private Access · Dino Arla
+    <div class="greeting-wrap">
+      <div class="greeting-tag">
+        <div class="greeting-dot"></div>
+        <span class="greeting-time" id="greetingTime">Selamat Pagi</span>
       </div>
+      <h1 class="login-title" id="loginTitle">
+        <span class="greeting-text">Loading...</span>
+      </h1>
+      <p class="login-sub">Masuk untuk mengakses Solomon Agent</p>
+    </div>
+
+    <form id="loginForm" onsubmit="handleLogin(event)">
+      <label class="field-lbl">Username</label>
+      <input type="text" id="username" class="field-inp" placeholder="username" autocomplete="username" required>
+
+      <label class="field-lbl">Password</label>
+      <input type="password" id="password" class="field-inp" placeholder="••••••••" autocomplete="current-password" required>
+
+      <button type="submit" class="login-btn" id="loginBtn">
+        <span id="loginBtnText">Masuk ke Solomon Agent →</span>
+      </button>
+    </form>
+
+    <div class="err" id="errMsg"></div>
+
+    <div class="login-footer">
+      Solomon Agent · Private Access · Dino Arla
     </div>
   </div>
+</div>
 
-  <script>
-    async function handleLogin(e) {
-      e.preventDefault();
-      const btn = document.getElementById('loginBtn');
-      const err = document.getElementById('errorMsg');
+<script>
+// ══════════════════════════
+// DYNAMIC GREETING
+// ══════════════════════════
+const GREETINGS = {
+  dawn:    ['Masih begadang nih,', 'Jam segini masih kerja,', 'Early bird nih,', 'Subuh-subuh udah semangat,'],
+  morning: ['Selamat pagi,', 'Morning, bos!', 'Pagi yang produktif,', 'Semangat pagi,', 'Good morning,'],
+  noon:    ['Selamat siang,', 'Lagi makan siang ya,', 'Tengah hari nih,', 'Semangat terus,'],
+  afternoon:['Selamat sore,', 'Gimana harinya,', 'Sore nih bos,', 'Hampir maghrib nih,'],
+  evening: ['Selamat malam,', 'Malam-malam masih semangat,', 'Udah malam nih bos,', 'Good evening,'],
+  night:   ['Masih up nih,', 'Begadang ya bos,', 'Malam yang produktif,', 'Late night grind,'],
+};
 
-      btn.disabled = true;
-      btn.textContent = 'Memverifikasi...';
-      err.classList.remove('show');
+const NAME_CALLS = [
+  'Dino! 👋', 'Boss Dino!', 'Bos! 🚀', 'Dino Arla!',
+  'Kak Dino!', 'Chief!', 'Pak Dino!', 'Dino 💪',
+];
 
-      try {
-        const res = await fetch('/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            username: document.getElementById('username').value,
-            password: document.getElementById('password').value,
-          }),
-        });
+const SUFFIXES = [
+  'Apa kabar?', 'Siap produktif?', 'Mau ngapain hari ini?',
+  'Let\'s get things done!', 'Ada yang bisa dibantu?',
+  'Sistem siap, bos!', '7 agen siap tempur!', 'Semangat ya!',
+];
 
-        const data = await res.json();
-        if (data.success) {
-          btn.textContent = '✓ Berhasil! Mengalihkan...';
-          window.location.href = '/';
-        } else {
-          throw new Error(data.message);
-        }
-      } catch (error) {
-        err.textContent = '❌ ' + (error.message || 'Login gagal. Coba lagi.');
-        err.classList.add('show');
-        btn.disabled = false;
-        btn.textContent = 'Masuk ke Solomon Agent →';
-      }
+function getTimeSlot() {
+  const h = new Date().getHours();
+  if (h >= 4  && h < 6)  return 'dawn';
+  if (h >= 6  && h < 12) return 'morning';
+  if (h >= 12 && h < 14) return 'noon';
+  if (h >= 14 && h < 18) return 'afternoon';
+  if (h >= 18 && h < 21) return 'evening';
+  return 'night';
+}
+
+function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
+
+function buildGreeting() {
+  const slot = getTimeSlot();
+  const greet = pick(GREETINGS[slot]);
+  const name  = pick(NAME_CALLS);
+  const suffix = pick(SUFFIXES);
+
+  // Time label for badge
+  const labels = {
+    dawn:'Dini Hari',morning:'Pagi',noon:'Siang',
+    afternoon:'Sore',evening:'Malam',night:'Tengah Malam'
+  };
+  document.getElementById('greetingTime').textContent = labels[slot];
+
+  // Build HTML title
+  const titleEl = document.getElementById('loginTitle');
+  titleEl.innerHTML = `
+    <span class="greeting-text">${greet}</span><br>
+    <span class="greeting-text" style="animation-delay:.1s;color:var(--orange);font-style:italic">${name}</span><br>
+    <span class="greeting-text" style="animation-delay:.2s;font-size:1.15rem;font-weight:400;font-family:'DM Sans',sans-serif;color:#555;margin-top:.2rem;display:block">${suffix}</span>
+  `;
+}
+
+// Rotate greeting every 8 seconds
+buildGreeting();
+setInterval(buildGreeting, 8000);
+
+// ══════════════════════════
+// WORKFLOW DIAGRAM
+// ══════════════════════════
+const AGENTS = [
+  { icon:'🔥', label:'Trend Research',   step:'Step 1', color:'#FF6B35' },
+  { icon:'📊', label:'Market Analysis',  step:'Step 2', color:'#4CAF50' },
+  { icon:'🔍', label:'SEO Intelligence', step:'Step 3', color:'#9C27B0' },
+  { icon:'✍️', label:'Content Studio',   step:'Step 4', color:'#FF7043' },
+  { icon:'💰', label:'Monetization',     step:'Step 5', color:'#FFA726' },
+  { icon:'📡', label:'Distribution',     step:'Step 6', color:'#E53935' },
+  { icon:'🧠', label:'Orchestrator',     step:'Auto',   color:'#78909C' },
+];
+
+const wf = document.getElementById('workflow');
+let activeIdx = 0;
+
+function renderWorkflow() {
+  wf.innerHTML = '';
+  AGENTS.forEach((ag, i) => {
+    // Arrow between cards (except before first)
+    if (i > 0 && i < AGENTS.length - 1) {
+      const arrow = document.createElement('div');
+      arrow.className = 'wf-arrow';
+      arrow.innerHTML = `<div class="wf-arrow-line"></div><div class="wf-arrow-head">▼</div>`;
+      wf.appendChild(arrow);
     }
-  </script>
+    // Separator line before Orchestrator
+    if (i === AGENTS.length - 1) {
+      const sep = document.createElement('div');
+      sep.style.cssText = 'height:1px;background:rgba(255,255,255,.08);margin:8px 0 6px;';
+      wf.appendChild(sep);
+    }
+
+    const row = document.createElement('div');
+    row.className = 'wf-row';
+    row.style.animationDelay = (i * 0.08) + 's';
+
+    const card = document.createElement('div');
+    card.className = 'wf-card' + (i === activeIdx ? ' active-card' : '');
+    card.style.setProperty('--agent-color', ag.color);
+    card.style.animationDelay = (i * 0.08) + 's';
+    card.dataset.idx = i;
+
+    card.innerHTML = `
+      <div class="wf-dot" style="animation-delay:${i * 0.3}s"></div>
+      <span class="wf-icon">${ag.icon}</span>
+      <span class="wf-label">${ag.label}</span>
+      <span class="wf-step">${ag.step}</span>
+    `;
+
+    card.addEventListener('mouseenter', () => {
+      activeIdx = i;
+      renderWorkflow();
+    });
+
+    row.appendChild(card);
+    wf.appendChild(row);
+  });
+}
+
+renderWorkflow();
+
+// Auto-cycle active highlight
+setInterval(() => {
+  activeIdx = (activeIdx + 1) % AGENTS.length;
+  // Only re-render cards, not full DOM rebuild (smooth)
+  document.querySelectorAll('.wf-card').forEach((c, i) => {
+    c.classList.toggle('active-card', i === activeIdx);
+  });
+}, 1800);
+
+// ══════════════════════════
+// LOGIN
+// ══════════════════════════
+async function handleLogin(e) {
+  e.preventDefault();
+  const btn = document.getElementById('loginBtn');
+  const txt = document.getElementById('loginBtnText');
+  const err = document.getElementById('errMsg');
+
+  btn.disabled = true;
+  txt.textContent = 'Memverifikasi...';
+  err.classList.remove('show');
+
+  try {
+    const res = await fetch('/auth/login', {
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        username: document.getElementById('username').value,
+        password: document.getElementById('password').value,
+      }),
+    });
+    const data = await res.json();
+    if (data.success) {
+      txt.textContent = '✓ Berhasil! Mengalihkan...';
+      window.location.href = '/';
+    } else {
+      throw new Error(data.message);
+    }
+  } catch(error) {
+    err.textContent = '❌ ' + (error.message || 'Login gagal. Coba lagi.');
+    err.classList.add('show');
+    btn.disabled = false;
+    txt.textContent = 'Masuk ke Solomon Agent →';
+  }
+}
+</script>
 </body>
 </html>
