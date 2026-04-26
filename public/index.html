@@ -591,6 +591,7 @@
   let startTime;
 
   document.getElementById('runBtn').addEventListener('click', runOrchestrator);
+  document.getElementById('trendBtn').addEventListener('click', runTrend);
 
   async function runOrchestrator() {
     const goal = document.getElementById('goalInput').value.trim();
