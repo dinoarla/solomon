@@ -3,1792 +3,1784 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AI Agent System</title>
+  <title>Solomon Agent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@400;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
     :root {
-      --bg:       #0a0c10;
-      --surface:  #111318;
-      --border:   #1e222b;
-      --accent:   #00e5a0;
-      --accent2:  #0070f3;
-      --text:     #e8eaf0;
-      --muted:    #5a6070;
-      --danger:   #ff4560;
-      --mono:     'JetBrains Mono', monospace;
-      --sans:     'Syne', sans-serif;
+      --cream:       #FFFBF2;
+      --cream-dark:  #F0E9D8;
+      --cream-mid:   #F7F0E3;
+      --ink:         #111111;
+      --ink-mid:     #555555;
+      --ink-light:   #999999;
+      --orange:      #FF4D00;
+      --orange-soft: #FFF0EB;
+      --yellow:      #FFD600;
+      --yellow-soft: #FFFBE6;
+      --blue:        #0052CC;
+      --blue-soft:   #EBF2FF;
+      --green:       #00875A;
+      --green-soft:  #E3FCF3;
+      --red:         #DE350B;
+      --sidebar-bg:  #111111;
+      --sidebar-w:   240px;
+      --border:      2px solid #111111;
+      --border-thin: 1px solid #E0D9CC;
+      --radius:      10px;
+      --shadow:      4px 4px 0px #111111;
+      --shadow-sm:   2px 2px 0px #111111;
+      --font-display:'Fraunces', serif;
+      --font-ui:     'DM Sans', sans-serif;
+      --font-mono:   'DM Mono', monospace;
     }
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
 
     body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      min-height: 100vh;
+      background: var(--cream);
+      font-family: var(--font-ui);
+      color: var(--ink);
       display: flex;
-      flex-direction: column;
+      overflow: hidden;
     }
 
-    /* ── Header ── */
-    header {
-      border-bottom: 1px solid var(--border);
-      padding: 1.25rem 2rem;
+    /* ══════════════════════════════════
+       SIDEBAR
+    ══════════════════════════════════ */
+    .sidebar {
+      width: var(--sidebar-w);
+      min-width: var(--sidebar-w);
+      background: var(--sidebar-bg);
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      position: fixed;
+      left: 0; top: 0;
+      z-index: 100;
+      border-right: var(--border);
+    }
+
+    .sidebar-brand {
+      padding: 1.5rem 1.25rem 1.25rem;
+      border-bottom: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .brand-mark {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-weight: 900;
+      color: var(--yellow);
+      letter-spacing: -0.01em;
+      line-height: 1.1;
+    }
+
+    .brand-sub {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.35);
+      margin-top: 0.2rem;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      font-family: var(--font-mono);
+    }
+
+    .sidebar-section {
+      padding: 1rem 0.75rem 0.5rem;
+    }
+
+    .sidebar-section-label {
+      font-size: 0.6rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: rgba(255,255,255,0.25);
+      padding: 0 0.5rem;
+      margin-bottom: 0.4rem;
+      font-family: var(--font-mono);
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      padding: 0.55rem 0.75rem;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: rgba(255,255,255,0.55);
+      font-size: 0.82rem;
+      font-weight: 500;
+      border: 1px solid transparent;
+      margin-bottom: 0.15rem;
+      text-decoration: none;
+      user-select: none;
+    }
+
+    .nav-item:hover {
+      background: rgba(255,255,255,0.06);
+      color: rgba(255,255,255,0.9);
+    }
+
+    .nav-item.active {
+      background: var(--yellow);
+      color: var(--ink);
+      border-color: transparent;
+      font-weight: 600;
+    }
+
+    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
+
+    .nav-badge {
+      margin-left: auto;
+      background: rgba(255,255,255,0.12);
+      color: rgba(255,255,255,0.5);
+      font-size: 0.55rem;
+      font-family: var(--font-mono);
+      padding: 0.1rem 0.4rem;
+      border-radius: 4px;
+      letter-spacing: 0.05em;
+    }
+    .nav-item.active .nav-badge {
+      background: rgba(0,0,0,0.15);
+      color: var(--ink);
+    }
+
+    .sidebar-divider {
+      height: 1px;
+      background: rgba(255,255,255,0.08);
+      margin: 0.5rem 1rem;
+    }
+
+    .sidebar-footer {
+      margin-top: auto;
+      padding: 1rem 1.25rem;
+      border-top: 1px solid rgba(255,255,255,0.08);
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      margin-bottom: 0.75rem;
+    }
+
+    .user-avatar {
+      width: 32px; height: 32px;
+      background: var(--yellow);
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-family: var(--font-display);
+      font-weight: 900;
+      font-size: 0.85rem;
+      color: var(--ink);
+      flex-shrink: 0;
+    }
+
+    .user-name {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: rgba(255,255,255,0.85);
+    }
+
+    .user-role {
+      font-size: 0.62rem;
+      color: rgba(255,255,255,0.35);
+      font-family: var(--font-mono);
+    }
+
+    .logout-btn {
+      width: 100%;
+      padding: 0.5rem;
+      background: rgba(255,255,255,0.05);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 6px;
+      color: rgba(255,255,255,0.4);
+      font-family: var(--font-ui);
+      font-size: 0.75rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      text-align: center;
+    }
+
+    .logout-btn:hover {
+      background: rgba(255,77,0,0.15);
+      border-color: rgba(255,77,0,0.3);
+      color: #FF7755;
+    }
+
+    .status-dot {
+      width: 7px; height: 7px;
+      background: var(--green);
+      border-radius: 50%;
+      display: inline-block;
+      margin-right: 0.4rem;
+      animation: pulse-green 2s ease-in-out infinite;
+    }
+
+    @keyframes pulse-green {
+      0%, 100% { opacity: 1; box-shadow: 0 0 0 0 rgba(0,135,90,0.4); }
+      50% { opacity: 0.8; box-shadow: 0 0 0 4px rgba(0,135,90,0); }
+    }
+
+    /* ══════════════════════════════════
+       MAIN CONTENT AREA
+    ══════════════════════════════════ */
+    .main {
+      margin-left: var(--sidebar-w);
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* Top bar */
+    .topbar {
+      padding: 0.9rem 2rem;
+      border-bottom: var(--border-thin);
+      background: var(--cream);
       display: flex;
       align-items: center;
       gap: 1rem;
+      flex-shrink: 0;
     }
-    .logo-dot {
-      width: 10px; height: 10px;
-      border-radius: 50%;
-      background: var(--accent);
-      box-shadow: 0 0 12px var(--accent);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%,100% { opacity: 1; transform: scale(1); }
-      50%      { opacity: 0.5; transform: scale(0.8); }
-    }
-    header h1 { font-size: 1rem; font-weight: 700; letter-spacing: 0.1em; text-transform: uppercase; color: var(--text); }
-    header span { font-family: var(--mono); font-size: 0.7rem; color: var(--muted); margin-left: auto; }
 
-    /* ── Layout ── */
-    main {
+    .topbar-title {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    .topbar-title em {
+      font-style: italic;
+      color: var(--orange);
+    }
+
+    .topbar-status {
+      margin-left: auto;
+      display: flex;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 0.7rem;
+      color: var(--ink-mid);
+    }
+
+    /* Content grid */
+    .content-grid {
       flex: 1;
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 0;
-      max-height: calc(100vh - 60px);
-    }
-    @media (max-width: 768px) {
-      main { grid-template-columns: 1fr; max-height: none; }
+      grid-template-columns: 420px 1fr;
+      overflow: hidden;
     }
 
-    /* ── Panel ── */
-    .panel {
-      padding: 2rem;
+    /* Input panel */
+    .input-panel {
+      border-right: var(--border-thin);
+      overflow-y: auto;
+      padding: 1.75rem;
+      background: var(--cream);
       display: flex;
       flex-direction: column;
       gap: 1.25rem;
-      overflow-y: auto;
     }
-    .panel-left  { border-right: 1px solid var(--border); }
-    .panel-label {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      letter-spacing: 0.15em;
+
+    /* Output panel */
+    .output-panel {
+      overflow-y: auto;
+      padding: 1.75rem;
+      background: var(--cream-mid);
+    }
+
+    /* ══════════════════════════════════
+       FORM ELEMENTS
+    ══════════════════════════════════ */
+    .field-group { display: flex; flex-direction: column; gap: 0.4rem; }
+
+    .field-label {
+      font-size: 0.72rem;
+      font-weight: 600;
+      letter-spacing: 0.06em;
       text-transform: uppercase;
-      color: var(--muted);
+      color: var(--ink-mid);
+    }
+
+    .field-input, .field-select, .field-textarea {
+      width: 100%;
+      padding: 0.7rem 0.9rem;
+      border: var(--border);
+      border-radius: var(--radius);
+      background: white;
+      font-family: var(--font-ui);
+      font-size: 0.88rem;
+      color: var(--ink);
+      outline: none;
+      transition: box-shadow 0.15s;
+      appearance: none;
+    }
+
+    .field-input:focus, .field-select:focus, .field-textarea:focus {
+      box-shadow: var(--shadow-sm);
+    }
+
+    .field-textarea { resize: vertical; min-height: 90px; }
+
+    .field-select {
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%23111' stroke-width='1.5' fill='none'/%3E%3C/svg%3E");
+      background-repeat: no-repeat;
+      background-position: right 0.9rem center;
+      padding-right: 2.5rem;
+      cursor: pointer;
+    }
+
+    /* Run button */
+    .run-btn {
+      width: 100%;
+      padding: 0.9rem 1.5rem;
+      background: var(--orange);
+      color: white;
+      border: var(--border);
+      border-radius: var(--radius);
+      font-family: var(--font-ui);
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.15s;
+      box-shadow: var(--shadow);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5rem;
+    }
+
+    .run-btn:hover:not(:disabled) {
+      transform: translate(-2px, -2px);
+      box-shadow: 6px 6px 0px #111111;
+    }
+
+    .run-btn:active:not(:disabled) {
+      transform: translate(2px, 2px);
+      box-shadow: 2px 2px 0px #111111;
+    }
+
+    .run-btn:disabled {
+      background: var(--ink-light);
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: var(--shadow);
+    }
+
+    /* Section divider */
+    .section-label {
+      font-size: 0.65rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      color: var(--ink-light);
       display: flex;
       align-items: center;
       gap: 0.5rem;
     }
-    .panel-label::after {
+    .section-label::after {
       content: '';
       flex: 1;
       height: 1px;
-      background: var(--border);
+      background: var(--cream-dark);
     }
 
-    /* ── Form ── */
-    label {
-      display: block;
-      font-size: 0.8rem;
-      color: var(--muted);
-      margin-bottom: 0.4rem;
-      font-family: var(--mono);
-    }
-    textarea, select, input {
-      width: 100%;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      color: var(--text);
-      font-family: var(--mono);
-      font-size: 0.85rem;
-      padding: 0.75rem 1rem;
-      outline: none;
-      transition: border-color 0.2s;
-      resize: vertical;
-    }
-    textarea:focus, select:focus, input:focus {
-      border-color: var(--accent);
-    }
-    textarea { min-height: 120px; }
-    select { cursor: pointer; }
-    select option { background: var(--surface); }
-
-    /* ── Button ── */
-    button {
-      width: 100%;
-      padding: 0.9rem;
-      background: var(--accent);
-      color: #000;
-      border: none;
-      border-radius: 6px;
-      font-family: var(--sans);
-      font-size: 0.9rem;
-      font-weight: 700;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 0.5rem;
-    }
-    button:hover:not(:disabled) { background: #00ffb3; transform: translateY(-1px); }
-    button:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
-    /* ── Agent chips ── */
-    .agents-preview {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.4rem;
-    }
-    .chip {
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      padding: 0.25rem 0.6rem;
-      border-radius: 20px;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      transition: all 0.3s;
-    }
-    .chip.active {
-      border-color: var(--accent);
-      color: var(--accent);
-      background: rgba(0,229,160,0.08);
-    }
-
-    /* ── Output panel ── */
-    .output-empty {
-      flex: 1;
+    /* ══════════════════════════════════
+       OUTPUT COMPONENTS
+    ══════════════════════════════════ */
+    .empty-state {
+      height: 100%;
       display: flex;
       flex-direction: column;
       align-items: center;
       justify-content: center;
       gap: 1rem;
-      color: var(--muted);
+      color: var(--ink-light);
+      text-align: center;
     }
-    .output-empty .big-icon {
-      font-size: 3rem;
+
+    .empty-icon {
+      font-size: 3.5rem;
       opacity: 0.3;
     }
-    .output-empty p { font-size: 0.85rem; font-family: var(--mono); }
 
-    /* ── Loading state ── */
-    .loading-state {
+    .empty-text {
+      font-family: var(--font-display);
+      font-size: 1.1rem;
+      font-style: italic;
+      color: var(--ink-mid);
+    }
+
+    .empty-hint {
+      font-size: 0.78rem;
+      color: var(--ink-light);
+      font-family: var(--font-mono);
+    }
+
+    /* Loading */
+    .loading-card {
       display: none;
-      flex-direction: column;
-      gap: 1rem;
-      padding: 1rem 0;
+      background: white;
+      border: var(--border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow);
     }
-    .loading-state.visible { display: flex; }
-    .loading-bar {
-      height: 2px;
-      background: var(--border);
-      border-radius: 2px;
+    .loading-card.show { display: block; }
+
+    .loading-title {
+      font-family: var(--font-display);
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 1rem;
+      color: var(--ink);
+    }
+
+    .progress-bar {
+      height: 3px;
+      background: var(--cream-dark);
+      border-radius: 3px;
       overflow: hidden;
+      margin-bottom: 1.25rem;
     }
-    .loading-bar-fill {
+    .progress-fill {
       height: 100%;
       width: 0%;
-      background: var(--accent);
-      border-radius: 2px;
-      transition: width 0.3s;
-      box-shadow: 0 0 8px var(--accent);
+      background: var(--orange);
+      border-radius: 3px;
+      transition: width 0.4s ease;
     }
-    .loading-steps { display: flex; flex-direction: column; gap: 0.4rem; }
-    .step {
-      font-family: var(--mono);
-      font-size: 0.72rem;
-      color: var(--muted);
+
+    .step-list { display: flex; flex-direction: column; gap: 0.6rem; }
+
+    .step-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
-      transition: color 0.3s;
+      gap: 0.65rem;
+      font-size: 0.8rem;
+      color: var(--ink-light);
+      font-family: var(--font-mono);
+      transition: color 0.2s;
     }
-    .step.done   { color: var(--accent); }
-    .step.active { color: var(--text); }
+    .step-item.active { color: var(--ink); }
+    .step-item.done { color: var(--green); }
+
     .step-dot {
-      width: 6px; height: 6px;
+      width: 8px; height: 8px;
       border-radius: 50%;
       background: currentColor;
       flex-shrink: 0;
     }
 
-    /* ── Result card ── */
-    .result-card {
+    /* Result cards */
+    .result-wrap {
       display: none;
       flex-direction: column;
-      gap: 1.25rem;
+      gap: 1rem;
     }
-    .result-card.visible { display: flex; }
-    .result-section {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 8px;
-      overflow: hidden;
+    .result-wrap.show { display: flex; }
+
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 0.75rem;
     }
-    .result-section-header {
-      padding: 0.6rem 1rem;
-      background: rgba(255,255,255,0.03);
-      border-bottom: 1px solid var(--border);
-      font-family: var(--mono);
-      font-size: 0.65rem;
-      color: var(--muted);
-      letter-spacing: 0.1em;
+
+    .stat-card {
+      background: white;
+      border: var(--border);
+      border-radius: var(--radius);
+      padding: 0.9rem 1rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .stat-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
+      color: var(--ink-light);
+      font-family: var(--font-mono);
+      margin-bottom: 0.3rem;
+    }
+
+    .stat-value {
+      font-family: var(--font-display);
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--ink);
+    }
+
+    /* Output card */
+    .output-card {
+      background: white;
+      border: var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      box-shadow: var(--shadow);
+    }
+
+    .output-card-header {
+      padding: 0.75rem 1.25rem;
+      border-bottom: var(--border-thin);
       display: flex;
       align-items: center;
       justify-content: space-between;
+      background: var(--cream-dark);
     }
+
+    .output-card-title {
+      font-family: var(--font-mono);
+      font-size: 0.68rem;
+      font-weight: 500;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--ink-mid);
+    }
+
     .copy-btn {
-      background: none;
-      border: 1px solid var(--border);
-      color: var(--muted);
-      font-size: 0.6rem;
-      padding: 0.2rem 0.5rem;
-      border-radius: 3px;
+      font-family: var(--font-mono);
+      font-size: 0.62rem;
+      padding: 0.25rem 0.65rem;
+      background: white;
+      border: var(--border);
+      border-radius: 5px;
       cursor: pointer;
-      width: auto;
-      font-family: var(--mono);
-      transition: all 0.2s;
-      letter-spacing: 0;
+      color: var(--ink-mid);
+      transition: all 0.15s;
     }
-    .copy-btn:hover { border-color: var(--accent); color: var(--accent); transform: none; }
-    .result-body {
-      padding: 1rem;
-      font-family: var(--mono);
+
+    .copy-btn:hover {
+      background: var(--yellow);
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .output-body {
+      padding: 1.25rem;
+      font-family: var(--font-mono);
       font-size: 0.78rem;
-      line-height: 1.7;
-      color: var(--text);
+      line-height: 1.8;
+      color: var(--ink);
       white-space: pre-wrap;
       word-break: break-word;
-      max-height: 350px;
+      max-height: 480px;
       overflow-y: auto;
     }
 
-    /* ── Agent flow visualization ── */
+    /* Agent flow */
+    .agent-flow-card {
+      background: var(--yellow-soft);
+      border: var(--border);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .agent-flow-label {
+      font-size: 0.62rem;
+      font-weight: 600;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      color: var(--ink-mid);
+      font-family: var(--font-mono);
+      margin-bottom: 0.75rem;
+    }
+
     .agent-flow {
       display: flex;
       flex-wrap: wrap;
       gap: 0.4rem;
       align-items: center;
     }
+
     .agent-node {
-      font-family: var(--mono);
+      font-family: var(--font-mono);
       font-size: 0.65rem;
       padding: 0.3rem 0.7rem;
-      border-radius: 4px;
-      background: rgba(0,229,160,0.1);
-      border: 1px solid var(--accent);
-      color: var(--accent);
+      background: white;
+      border: var(--border);
+      border-radius: 5px;
+      color: var(--ink);
+      box-shadow: var(--shadow-sm);
     }
-    .agent-arrow { color: var(--muted); font-size: 0.7rem; }
 
-    /* ── Error ── */
+    .agent-arrow {
+      color: var(--ink-light);
+      font-size: 0.7rem;
+    }
+
+    /* Error */
     .error-card {
       display: none;
-      background: rgba(255,69,96,0.08);
-      border: 1px solid rgba(255,69,96,0.3);
-      border-radius: 8px;
-      padding: 1rem;
-      font-family: var(--mono);
+      background: #FFF0EB;
+      border: 2px solid var(--orange);
+      border-radius: var(--radius);
+      padding: 1rem 1.25rem;
+      font-family: var(--font-mono);
       font-size: 0.78rem;
-      color: var(--danger);
+      color: var(--red);
     }
-    .error-card.visible { display: block; }
+    .error-card.show { display: block; }
 
-    /* ── Stats bar ── */
-    .stats-bar {
-      display: flex;
-      gap: 1.5rem;
-      padding: 0.75rem 1rem;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-    }
-    .stat { display: flex; flex-direction: column; gap: 0.2rem; }
-    .stat-label { font-family: var(--mono); font-size: 0.6rem; color: var(--muted); text-transform: uppercase; }
-    .stat-value { font-family: var(--mono); font-size: 0.85rem; color: var(--accent); font-weight: 700; }
+    /* Verdict badge */
+    .verdict-go { color: var(--green); }
+    .verdict-nogo { color: var(--red); }
+    .verdict-cond { color: var(--orange); }
 
     /* Scrollbar */
-    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: var(--cream-dark); border-radius: 2px; }
 
-        /* ── Nav tabs ── */
-    .nav-btn {
-      width: auto;
-      padding: 0.35rem 0.8rem;
-      background: transparent;
-      color: var(--muted);
-      border: 1px solid var(--border);
-      border-radius: 20px;
-      font-size: 0.7rem;
-      font-family: var(--mono);
-      font-weight: 400;
-      letter-spacing: 0.05em;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    .nav-btn:hover:not(:disabled) { color: var(--text); border-color: var(--muted); transform: none; background: transparent; }
-    .nav-btn.active { color: var(--accent); border-color: var(--accent); background: rgba(0,229,160,0.08); }
-
-    /* ── Trend panel ── */
-    #trendPanel { display: none; }
-    #trendPanel.visible { display: contents; }
-    #orchestratorPanel { display: contents; }
-    #orchestratorPanel.hidden { display: none; }
-    #seoPanel { display: none; }
-    #seoPanel.visible { display: contents; }
-    #contentPanel { display: none; }
-    #contentPanel.visible { display: contents; }
-    #analystPanel { display: none; }
-    #analystPanel.visible { display: contents; }
-    #monetizationPanel { display: none; }
-    #monetizationPanel.visible { display: contents; }
-    #distributionPanel { display: none; }
-    #distributionPanel.visible { display: contents; }
+    /* Panel visibility */
+    .agent-panel { display: none; }
+    .agent-panel.active { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
   </style>
 </head>
 <body>
 
-<header>
-  <div class="logo-dot"></div>
-  <h1>AI Agent System</h1>
-  <nav style="display:flex;gap:0.5rem;margin-left:1.5rem">
-    <button class="nav-btn active" id="nav-orchestrator" onclick="switchTab('orchestrator')">🧠 Orchestrator</button>
-    <button class="nav-btn" id="nav-trend" onclick="switchTab('trend')">🔥 Trend</button>
-    <button class="nav-btn" id="nav-seo" onclick="switchTab('seo')">🔍 SEO</button>
-    <button class="nav-btn" id="nav-content" onclick="switchTab('content')">✍️ Content</button>
-    <button class="nav-btn" id="nav-analyst" onclick="switchTab('analyst')">📊 Analyst</button>
-    <button class="nav-btn" id="nav-monetization" onclick="switchTab('monetization')">💰 Finance</button>
-    <button class="nav-btn" id="nav-distribution" onclick="switchTab('distribution')">📡 Distribution</button>
-  </nav>
-  <span id="statusText" style="margin-left:auto">● ONLINE</span>
-</header>
-
-<main>
-  <!-- ── ORCHESTRATOR PANEL ── -->
-  <div id="orchestratorPanel">
-
-    <!-- LEFT: Input -->
-    <div class="panel panel-left">
-      <div class="panel-label">Input Goal</div>
-
-      <div>
-        <label>Goal / Tujuan Bisnis</label>
-        <textarea id="goalInput" placeholder="Contoh: Buat konten ebook dan video YouTube tentang MPASI untuk market Indonesia..."></textarea>
-      </div>
-
-      <div>
-        <label>Lini Bisnis</label>
-        <select id="businessLine">
-          <option value="semua">🌐 Semua Lini (Ebook + YouTube + Affiliate)</option>
-          <option value="ebook">📚 Ebook (Gumroad / Payhip / KDP)</option>
-          <option value="youtube">🎬 YouTube Channel</option>
-          <option value="affiliate">🛒 Affiliate (Amazon / Shopee)</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Konteks Tambahan (opsional)</label>
-        <input type="text" id="contextInput" placeholder="Contoh: Mau launch bulan depan, budget promosi terbatas">
-      </div>
-
-      <div>
-        <label>Urgensi</label>
-        <select id="timeBudget">
-          <option value="normal (1 minggu)">⏱ Normal — 1 minggu</option>
-          <option value="segera (<48 jam)">🚨 Segera — dalam 48 jam</option>
-          <option value="rendah (fleksibel)">🌿 Rendah — fleksibel</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Agen Aktif</label>
-        <div class="agents-preview">
-          <div class="chip active" id="chip-orchestrator">🧠 Orchestrator</div>
-          <div class="chip" id="chip-trend">🔥 Trend</div>
-          <div class="chip" id="chip-analyst">📊 Analyst</div>
-          <div class="chip" id="chip-seo">🔍 SEO</div>
-          <div class="chip" id="chip-content">✍️ Content</div>
-          <div class="chip" id="chip-monetize">💰 Finance</div>
-          <div class="chip" id="chip-dist">📡 Distribution</div>
-        </div>
-      </div>
-
-      <button id="runBtn">
-        <span id="btnIcon">▶</span>
-        <span id="btnText">Jalankan Orchestrator</span>
-      </button>
-    </div>
-
-    <!-- RIGHT: Output -->
-    <div class="panel panel-right">
-      <div class="panel-label">Output</div>
-
-      <div class="output-empty" id="emptyState">
-        <div class="big-icon">🤖</div>
-        <p>Masukkan goal dan klik Jalankan</p>
-      </div>
-
-      <div class="loading-state" id="loadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="progressBar"></div>
-        </div>
-        <div class="loading-steps">
-          <div class="step active" id="step1"><div class="step-dot"></div> Parsing goal...</div>
-          <div class="step" id="step2"><div class="step-dot"></div> Membuat task plan...</div>
-          <div class="step" id="step3"><div class="step-dot"></div> Mengidentifikasi agen...</div>
-          <div class="step" id="step4"><div class="step-dot"></div> Menyusun brief owner...</div>
-          <div class="step" id="step5"><div class="step-dot"></div> Selesai ✓</div>
-        </div>
-      </div>
-
-      <div class="error-card" id="errorCard"></div>
-
-      <div class="result-card" id="resultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="statDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Agen Direncanakan</div>
-            <div class="stat-value" id="statAgents">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Lini Bisnis</div>
-            <div class="stat-value" id="statLines">—</div>
-          </div>
-        </div>
-
-        <div class="result-section" id="agentFlowSection" style="display:none">
-          <div class="result-section-header">Urutan Agen</div>
-          <div class="result-body">
-            <div class="agent-flow" id="agentFlow"></div>
-          </div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Penjelasan untuk Owner
-            <button class="copy-btn" onclick="copyText('explanationOutput')">copy</button>
-          </div>
-          <div class="result-body" id="explanationOutput"></div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Task Plan (JSON)
-            <button class="copy-btn" onclick="copyText('jsonOutput')">copy</button>
-          </div>
-          <div class="result-body" id="jsonOutput"></div>
-        </div>
-      </div>
-    </div>
-
+<!-- ══════════════════════════════════
+     SIDEBAR
+══════════════════════════════════ -->
+<aside class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-mark">Solomon Agent</div>
+    <div class="brand-sub">by Dino Arla · Agentic AI</div>
   </div>
-  <!-- ── END ORCHESTRATOR PANEL ── -->
 
-  <!-- ── TREND AGENT PANEL ── -->
-  <div id="trendPanel">
+  <!-- Workflow nav -->
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Workflow</div>
 
-    <!-- LEFT: Trend Input -->
-    <div class="panel panel-left">
-      <div class="panel-label">Trend Research</div>
-
-      <div>
-        <label>Topik / Niche</label>
-        <textarea id="trendTopic" placeholder="Contoh: MPASI, produktivitas ibu rumah tangga, air fryer..."></textarea>
-      </div>
-
-      <div>
-        <label>Lini Bisnis Fokus</label>
-        <select id="trendBusinessLine">
-          <option value="semua">🌐 Semua Lini</option>
-          <option value="ebook">📚 Ebook</option>
-          <option value="youtube">🎬 YouTube</option>
-          <option value="affiliate">🛒 Affiliate</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Periode Tren</label>
-        <select id="trendHorizon">
-          <option value="1-3 bulan">📅 1-3 Bulan ke depan</option>
-          <option value="minggu ini">⚡ Minggu ini (cepat)</option>
-          <option value="6-12 bulan">🔭 6-12 Bulan (jangka panjang)</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Fokus Pasar</label>
-        <select id="trendMarket">
-          <option value="indonesia dan global">🌏 Indonesia + Global</option>
-          <option value="indonesia">🇮🇩 Indonesia saja</option>
-          <option value="global">🌍 Global saja</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Konteks Tambahan (opsional)</label>
-        <input type="text" id="trendContext" placeholder="Contoh: Fokus produk di bawah Rp500.000">
-      </div>
-
-      <button id="trendBtn">
-        <span id="trendBtnIcon">🔥</span>
-        <span id="trendBtnText">Analisis Tren</span>
-      </button>
+    <div class="nav-item active" id="nav-trend" onclick="switchAgent('trend')">
+      <span class="nav-icon">🔥</span>
+      <span>Trend Research</span>
+      <span class="nav-badge">Step 1</span>
     </div>
 
-    <!-- RIGHT: Trend Output -->
-    <div class="panel panel-right">
-      <div class="panel-label">Trend Report</div>
-
-      <div class="output-empty" id="trendEmptyState">
-        <div class="big-icon">🔥</div>
-        <p>Masukkan topik dan klik Analisis Tren</p>
-      </div>
-
-      <div class="loading-state" id="trendLoadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="trendProgressBar"></div>
-        </div>
-        <div class="loading-steps">
-          <div class="step active" id="tstep1"><div class="step-dot"></div> Scanning global trends...</div>
-          <div class="step" id="tstep2"><div class="step-dot"></div> Analisis pasar Indonesia...</div>
-          <div class="step" id="tstep3"><div class="step-dot"></div> Scoring peluang...</div>
-          <div class="step" id="tstep4"><div class="step-dot"></div> Menyusun angle konten...</div>
-          <div class="step" id="tstep5"><div class="step-dot"></div> Report siap ✓</div>
-        </div>
-      </div>
-
-      <div class="error-card" id="trendErrorCard"></div>
-
-      <div class="result-card" id="trendResultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="trendDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Tren Prioritas Tinggi</div>
-            <div class="stat-value" id="trendHighCount">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Pasar</div>
-            <div class="stat-value" id="trendMarketStat">—</div>
-          </div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Trend Report
-            <button class="copy-btn" onclick="copyText('trendOutput')">copy</button>
-          </div>
-          <div class="result-body" id="trendOutput"></div>
-        </div>
-      </div>
+    <div class="nav-item" id="nav-analyst" onclick="switchAgent('analyst')">
+      <span class="nav-icon">📊</span>
+      <span>Market Analysis</span>
+      <span class="nav-badge">Step 2</span>
     </div>
 
+    <div class="nav-item" id="nav-seo" onclick="switchAgent('seo')">
+      <span class="nav-icon">🔍</span>
+      <span>SEO Intelligence</span>
+      <span class="nav-badge">Step 3</span>
+    </div>
+
+    <div class="nav-item" id="nav-content" onclick="switchAgent('content')">
+      <span class="nav-icon">✍️</span>
+      <span>Content Studio</span>
+      <span class="nav-badge">Step 4</span>
+    </div>
+
+    <div class="nav-item" id="nav-monetization" onclick="switchAgent('monetization')">
+      <span class="nav-icon">💰</span>
+      <span>Monetization</span>
+      <span class="nav-badge">Step 5</span>
+    </div>
+
+    <div class="nav-item" id="nav-distribution" onclick="switchAgent('distribution')">
+      <span class="nav-icon">📡</span>
+      <span>Distribution</span>
+      <span class="nav-badge">Step 6</span>
+    </div>
   </div>
-  <!-- ── END TREND PANEL ── -->
 
-  <!-- ── SEO AGENT PANEL ── -->
-  <div id="seoPanel">
+  <div class="sidebar-divider"></div>
 
-    <div class="panel panel-left">
-      <div class="panel-label">SEO Research</div>
-
-      <div>
-        <label>Topik / Produk</label>
-        <textarea id="seoTopic" placeholder="Contoh: MPASI 6 bahan lokal, air fryer murah, produktivitas ibu rumah tangga..."></textarea>
-      </div>
-
-      <div>
-        <label>Platform Target</label>
-        <select id="seoPlatforms">
-          <option value="youtube,google,kdp,shopee">🌐 Semua Platform</option>
-          <option value="youtube,google">📺 YouTube + Google</option>
-          <option value="kdp,google">📚 KDP + Google (Ebook)</option>
-          <option value="shopee,google">🛒 Shopee + Google (Affiliate)</option>
-          <option value="youtube">🎬 YouTube saja</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Tipe Konten</label>
-        <select id="seoContentType">
-          <option value="mixed">📦 Mixed (semua format)</option>
-          <option value="video">🎬 Video YouTube</option>
-          <option value="ebook">📚 Ebook / KDP</option>
-          <option value="artikel">📝 Artikel Blog Affiliate</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Target Audiens</label>
-        <input type="text" id="seoAudience" placeholder="Contoh: Ibu rumah tangga Indonesia, usia 25-35" value="Keluarga Indonesia usia 25-40">
-      </div>
-
-      <div>
-        <label>Konteks Tren (opsional)</label>
-        <input type="text" id="seoTrendContext" placeholder="Paste insight dari Trend Agent jika ada">
-      </div>
-
-      <button id="seoBtn">
-        <span id="seoBtnIcon">🔍</span>
-        <span id="seoBtnText">Analisis SEO</span>
-      </button>
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Automation</div>
+    <div class="nav-item" id="nav-orchestrator" onclick="switchAgent('orchestrator')">
+      <span class="nav-icon">🧠</span>
+      <span>Orchestrator</span>
+      <span class="nav-badge">Auto</span>
     </div>
-
-    <div class="panel panel-right">
-      <div class="panel-label">SEO Blueprint</div>
-
-      <div class="output-empty" id="seoEmptyState">
-        <div class="big-icon">🔍</div>
-        <p>Masukkan topik dan klik Analisis SEO</p>
-      </div>
-
-      <div class="loading-state" id="seoLoadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="seoProgressBar"></div>
-        </div>
-        <div class="loading-steps">
-          <div class="step active" id="sstep1"><div class="step-dot"></div> Riset keyword per platform...</div>
-          <div class="step" id="sstep2"><div class="step-dot"></div> Analisis kompetitor...</div>
-          <div class="step" id="sstep3"><div class="step-dot"></div> Buat metadata siap pakai...</div>
-          <div class="step" id="sstep4"><div class="step-dot"></div> Competitive gap analysis...</div>
-          <div class="step" id="sstep5"><div class="step-dot"></div> Blueprint siap ✓</div>
-        </div>
-      </div>
-
-      <div class="error-card" id="seoErrorCard"></div>
-
-      <div class="result-card" id="seoResultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="seoDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Platform</div>
-            <div class="stat-value" id="seoPlatformStat">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Tipe Konten</div>
-            <div class="stat-value" id="seoTypeStat">—</div>
-          </div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            SEO Blueprint
-            <button class="copy-btn" onclick="copyText('seoOutput')">copy</button>
-          </div>
-          <div class="result-body" id="seoOutput"></div>
-        </div>
-      </div>
-    </div>
-
   </div>
-  <!-- ── END SEO PANEL ── -->
 
-  <!-- ── CONTENT CREATOR PANEL ── -->
-  <div id="contentPanel">
-
-    <div class="panel panel-left">
-      <div class="panel-label">Content Creator</div>
-
+  <div class="sidebar-footer">
+    <div class="user-info">
+      <div class="user-avatar">D</div>
       <div>
-        <label>Tipe Konten</label>
-        <select id="contentType">
-          <option value="artikel">📝 Artikel Blog Affiliate</option>
-          <option value="script_anak">🧒 Script YouTube — Anak (Clay Animation)</option>
-          <option value="script_edukasi">🎬 Script YouTube — Edukasi Umum</option>
-          <option value="mini_ebook">📖 Mini Ebook (3.000-8.000 kata)</option>
-          <option value="full_ebook">📚 Full Ebook (15.000+ kata)</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Topik</label>
-        <textarea id="contentTopic" placeholder="Contoh: MPASI 6 bahan lokal untuk bayi 6-12 bulan..." style="min-height:80px"></textarea>
-      </div>
-
-      <div>
-        <label>Primary Keyword</label>
-        <input type="text" id="contentPrimaryKw" placeholder="Contoh: resep mpasi 6 bulan">
-      </div>
-
-      <div>
-        <label>Secondary Keywords (pisah koma)</label>
-        <input type="text" id="contentSecondaryKw" placeholder="Contoh: mpasi bahan lokal, mpasi mudah, resep bayi bergizi">
-      </div>
-
-      <div>
-        <label>Target Audiens</label>
-        <input type="text" id="contentAudience" placeholder="Contoh: Ibu muda Indonesia, usia 25-35" value="Keluarga Indonesia usia 25-40">
-      </div>
-
-      <div>
-        <label>Tone</label>
-        <select id="contentTone">
-          <option value="kasual-edukatif">😊 Kasual Edukatif (default)</option>
-          <option value="profesional">👔 Profesional</option>
-          <option value="santai">🌴 Santai & Fun</option>
-          <option value="anak-anak">🧒 Anak-anak (untuk script clay)</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Panjang Konten</label>
-        <select id="contentLength">
-          <option value="pendek">⚡ Pendek (cepat)</option>
-          <option value="sedang" selected>📄 Sedang (balance)</option>
-          <option value="panjang">📚 Panjang (komprehensif)</option>
-        </select>
-      </div>
-
-      <div>
-        <label>CTA yang Diinginkan</label>
-        <input type="text" id="contentCta" placeholder="Contoh: Download ebook di link deskripsi">
-      </div>
-
-      <div>
-        <label>SEO Brief (dari SEO Agent, opsional)</label>
-        <textarea id="contentSeoBrief" placeholder="Paste output SEO Agent jika ada..." style="min-height:60px"></textarea>
-      </div>
-
-      <button id="contentBtn">
-        <span id="contentBtnIcon">✍️</span>
-        <span id="contentBtnText">Buat Konten</span>
-      </button>
-    </div>
-
-    <div class="panel panel-right">
-      <div class="panel-label">Content Output</div>
-
-      <div class="output-empty" id="contentEmptyState">
-        <div class="big-icon">✍️</div>
-        <p>Pilih tipe konten dan klik Buat Konten</p>
-      </div>
-
-      <div class="loading-state" id="contentLoadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="contentProgressBar"></div>
-        </div>
-        <div class="loading-steps">
-          <div class="step active" id="cstep1"><div class="step-dot"></div> Memahami topik & audiens...</div>
-          <div class="step" id="cstep2"><div class="step-dot"></div> Menyusun struktur konten...</div>
-          <div class="step" id="cstep3"><div class="step-dot"></div> Menulis konten...</div>
-          <div class="step" id="cstep4"><div class="step-dot"></div> Optimasi keyword & CTA...</div>
-          <div class="step" id="cstep5"><div class="step-dot"></div> Konten siap ✓</div>
-        </div>
-      </div>
-
-      <div class="error-card" id="contentErrorCard"></div>
-
-      <div class="result-card" id="contentResultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="contentDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Platform</div>
-            <div class="stat-value" id="contentPlatformStat">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Word Count</div>
-            <div class="stat-value" id="contentWordCount">—</div>
-          </div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Konten yang Dibuat
-            <button class="copy-btn" onclick="copyText('contentOutput')">copy</button>
-          </div>
-          <div class="result-body" id="contentOutput" style="max-height:600px"></div>
-        </div>
+        <div class="user-name">Dino Arla</div>
+        <div class="user-role">Owner · Admin</div>
       </div>
     </div>
-
+    <button class="logout-btn" onclick="handleLogout()">
+      Sign out →
+    </button>
   </div>
-  <!-- ── END CONTENT CREATOR PANEL ── -->
+</aside>
 
-  <!-- ── BUSINESS ANALYST PANEL ── -->
-  <div id="analystPanel">
+<!-- ══════════════════════════════════
+     MAIN
+══════════════════════════════════ -->
+<div class="main">
 
-    <div class="panel panel-left">
-      <div class="panel-label">Business Analyst</div>
-
-      <div>
-        <label>Mode Analisis</label>
-        <select id="analystMode">
-          <option value="validasi_pasar">🔎 Validasi Pasar (produk baru)</option>
-          <option value="analisis_produk">📦 Analisis Produk Existing</option>
-          <option value="proyeksi_finansial">📈 Proyeksi Finansial</option>
-          <option value="laporan_bulanan">📋 Laporan Performa Bulanan</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Topik / Produk</label>
-        <textarea id="analystTopic" placeholder="Contoh: Ebook MPASI 6 bahan lokal, Channel YouTube edukasi anak..."></textarea>
-      </div>
-
-      <div>
-        <label>Lini Bisnis</label>
-        <select id="analystBusinessLine">
-          <option value="semua">🌐 Semua Lini</option>
-          <option value="ebook">📚 Ebook</option>
-          <option value="youtube">🎬 YouTube</option>
-          <option value="affiliate">🛒 Affiliate</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Target Revenue (opsional)</label>
-        <input type="text" id="analystRevTarget"
-          placeholder="Contoh: Rp5.000.000/bulan dalam 3 bulan">
-      </div>
-
-      <div>
-        <label>Data yang Tersedia (opsional)</label>
-        <textarea id="analystData"
-          placeholder="Contoh: Views YouTube 500/hari, penjualan ebook 10 unit/bulan..."
-          style="min-height:60px"></textarea>
-      </div>
-
-      <div>
-        <label>Pertanyaan Spesifik (opsional)</label>
-        <input type="text" id="analystQuestions"
-          placeholder="Contoh: Apakah worth it expand ke KDP? Kapan break-even?">
-      </div>
-
-      <div>
-        <label>Konteks Tren (dari Trend Agent, opsional)</label>
-        <input type="text" id="analystTrendContext"
-          placeholder="Paste insight dari Trend Agent jika ada">
-      </div>
-
-      <button id="analystBtn">
-        <span id="analystBtnIcon">📊</span>
-        <span id="analystBtnText">Analisis Bisnis</span>
-      </button>
+  <!-- Top bar -->
+  <div class="topbar">
+    <div class="topbar-title" id="topbarTitle">
+      🔥 <em>Trend</em> Research
     </div>
-
-    <div class="panel panel-right">
-      <div class="panel-label">Business Report</div>
-
-      <div class="output-empty" id="analystEmptyState">
-        <div class="big-icon">📊</div>
-        <p>Pilih mode analisis dan klik Analisis Bisnis</p>
-      </div>
-
-      <div class="loading-state" id="analystLoadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="analystProgressBar"></div>
-        </div>
-        <div class="loading-steps">
-          <div class="step active" id="astep1"><div class="step-dot"></div> Analisis market size...</div>
-          <div class="step" id="astep2"><div class="step-dot"></div> Competitive landscape...</div>
-          <div class="step" id="astep3"><div class="step-dot"></div> Financial modeling...</div>
-          <div class="step" id="astep4"><div class="step-dot"></div> Risk assessment...</div>
-          <div class="step" id="astep5"><div class="step-dot"></div> Report siap ✓</div>
-        </div>
-      </div>
-
-      <div class="error-card" id="analystErrorCard"></div>
-
-      <div class="result-card" id="analystResultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="analystDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Verdict</div>
-            <div class="stat-value" id="analystVerdict">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Mode</div>
-            <div class="stat-value" id="analystModeStat">—</div>
-          </div>
-        </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Business Analysis Report
-            <button class="copy-btn" onclick="copyText('analystOutput')">copy</button>
-          </div>
-          <div class="result-body" id="analystOutput"></div>
-        </div>
-      </div>
+    <div class="topbar-status">
+      <span class="status-dot"></span>
+      <span id="statusText">Online</span>
     </div>
-
   </div>
-  <!-- ── END BUSINESS ANALYST PANEL ── -->
+
+  <!-- ── TREND PANEL ── -->
+  <div class="agent-panel active" id="panel-trend">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+
+        <div class="field-group">
+          <label class="field-label">Topik / Niche</label>
+          <textarea class="field-textarea" id="trendTopic"
+            placeholder="Contoh: MPASI, produktivitas ibu rumah tangga, air fryer..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Lini Bisnis</label>
+          <select class="field-select" id="trendBusinessLine">
+            <option value="semua">🌐 Semua Lini</option>
+            <option value="ebook">📚 Ebook</option>
+            <option value="youtube">🎬 YouTube</option>
+            <option value="affiliate">🛒 Affiliate</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Periode Tren</label>
+          <select class="field-select" id="trendHorizon">
+            <option value="1-3 bulan">📅 1-3 Bulan ke depan</option>
+            <option value="minggu ini">⚡ Minggu ini</option>
+            <option value="6-12 bulan">🔭 6-12 Bulan</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Fokus Pasar</label>
+          <select class="field-select" id="trendMarket">
+            <option value="indonesia dan global">🌏 Indonesia + Global</option>
+            <option value="indonesia">🇮🇩 Indonesia</option>
+            <option value="global">🌍 Global</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Konteks Tambahan</label>
+          <input class="field-input" id="trendContext" type="text"
+            placeholder="Opsional — info tambahan">
+        </div>
+
+        <button class="run-btn" id="trendBtn">
+          <span id="trendBtnIcon">🔥</span>
+          <span id="trendBtnText">Analisis Tren</span>
+        </button>
+      </div>
+
+      <div class="output-panel" id="trendOutputPanel">
+        <div class="empty-state" id="trendEmpty">
+          <div class="empty-icon">🔥</div>
+          <div class="empty-text">Temukan tren sebelum kompetitor</div>
+          <div class="empty-hint">Isi topik → klik Analisis Tren</div>
+        </div>
+        <div class="loading-card" id="trendLoading">
+          <div class="loading-title">Scanning tren global & Indonesia...</div>
+          <div class="progress-bar"><div class="progress-fill" id="trendBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="ts1"><div class="step-dot"></div>Scanning global trends</div>
+            <div class="step-item" id="ts2"><div class="step-dot"></div>Analisis pasar Indonesia</div>
+            <div class="step-item" id="ts3"><div class="step-dot"></div>Scoring peluang</div>
+            <div class="step-item" id="ts4"><div class="step-dot"></div>Menyusun angle konten</div>
+            <div class="step-item" id="ts5"><div class="step-dot"></div>Report siap ✓</div>
+          </div>
+        </div>
+        <div class="error-card" id="trendError"></div>
+        <div class="result-wrap" id="trendResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="trendDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Tren Tinggi</div><div class="stat-value" id="trendHigh">—</div></div>
+            <div class="stat-card"><div class="stat-label">Pasar</div><div class="stat-value" id="trendMkt">—</div></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Trend Report</span>
+              <button class="copy-btn" onclick="copyEl('trendOut')">Copy</button>
+            </div>
+            <div class="output-body" id="trendOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── ANALYST PANEL ── -->
+  <div class="agent-panel" id="panel-analyst">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+        <div class="field-group">
+          <label class="field-label">Mode Analisis</label>
+          <select class="field-select" id="analystMode">
+            <option value="validasi_pasar">🔎 Validasi Pasar</option>
+            <option value="analisis_produk">📦 Analisis Produk Existing</option>
+            <option value="proyeksi_finansial">📈 Proyeksi Finansial</option>
+            <option value="laporan_bulanan">📋 Laporan Bulanan</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Topik / Produk</label>
+          <textarea class="field-textarea" id="analystTopic"
+            placeholder="Contoh: Ebook MPASI 6 bahan lokal..."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Lini Bisnis</label>
+          <select class="field-select" id="analystBizLine">
+            <option value="semua">🌐 Semua Lini</option>
+            <option value="ebook">📚 Ebook</option>
+            <option value="youtube">🎬 YouTube</option>
+            <option value="affiliate">🛒 Affiliate</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Target Revenue</label>
+          <input class="field-input" id="analystRevTarget" type="text"
+            placeholder="Contoh: Rp5.000.000/bulan dalam 3 bulan">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Data Existing</label>
+          <textarea class="field-textarea" id="analystData"
+            placeholder="Opsional — data performa yang ada" style="min-height:60px"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Pertanyaan Spesifik</label>
+          <input class="field-input" id="analystQs" type="text"
+            placeholder="Contoh: Apakah worth it? Kapan break-even?">
+        </div>
+        <button class="run-btn" id="analystBtn">
+          <span id="analystBtnIcon">📊</span>
+          <span id="analystBtnText">Analisis Bisnis</span>
+        </button>
+      </div>
+      <div class="output-panel">
+        <div class="empty-state" id="analystEmpty">
+          <div class="empty-icon">📊</div>
+          <div class="empty-text">Validasi sebelum eksekusi</div>
+          <div class="empty-hint">Isi topik → klik Analisis Bisnis</div>
+        </div>
+        <div class="loading-card" id="analystLoading">
+          <div class="loading-title">Menjalankan analisis bisnis...</div>
+          <div class="progress-bar"><div class="progress-fill" id="analystBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="as1"><div class="step-dot"></div>Market sizing</div>
+            <div class="step-item" id="as2"><div class="step-dot"></div>Competitive landscape</div>
+            <div class="step-item" id="as3"><div class="step-dot"></div>Financial modeling</div>
+            <div class="step-item" id="as4"><div class="step-dot"></div>Risk assessment</div>
+            <div class="step-item" id="as5"><div class="step-dot"></div>Report siap ✓</div>
+          </div>
+        </div>
+        <div class="error-card" id="analystError"></div>
+        <div class="result-wrap" id="analystResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="analystDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Verdict</div><div class="stat-value" id="analystVerdict">—</div></div>
+            <div class="stat-card"><div class="stat-label">Mode</div><div class="stat-value" id="analystModeStat">—</div></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Business Analysis Report</span>
+              <button class="copy-btn" onclick="copyEl('analystOut')">Copy</button>
+            </div>
+            <div class="output-body" id="analystOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── SEO PANEL ── -->
+  <div class="agent-panel" id="panel-seo">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+        <div class="field-group">
+          <label class="field-label">Topik / Produk</label>
+          <textarea class="field-textarea" id="seoTopic"
+            placeholder="Contoh: MPASI 6 bahan lokal, air fryer murah..."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Platform Target</label>
+          <select class="field-select" id="seoPlatforms">
+            <option value="youtube,google,kdp,shopee">🌐 Semua Platform</option>
+            <option value="youtube,google">📺 YouTube + Google</option>
+            <option value="kdp,google">📚 KDP + Google</option>
+            <option value="shopee,google">🛒 Shopee + Google</option>
+            <option value="youtube">🎬 YouTube saja</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tipe Konten</label>
+          <select class="field-select" id="seoContentType">
+            <option value="mixed">📦 Mixed</option>
+            <option value="video">🎬 Video YouTube</option>
+            <option value="ebook">📚 Ebook / KDP</option>
+            <option value="artikel">📝 Artikel Blog</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Target Audiens</label>
+          <input class="field-input" id="seoAudience" type="text"
+            value="Keluarga Indonesia usia 25-40">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Konteks Tren</label>
+          <input class="field-input" id="seoTrendCtx" type="text"
+            placeholder="Paste insight dari Trend Agent">
+        </div>
+        <button class="run-btn" id="seoBtn">
+          <span id="seoBtnIcon">🔍</span>
+          <span id="seoBtnText">Analisis SEO</span>
+        </button>
+      </div>
+      <div class="output-panel">
+        <div class="empty-state" id="seoEmpty">
+          <div class="empty-icon">🔍</div>
+          <div class="empty-text">Keyword yang tepat = traffic gratis</div>
+          <div class="empty-hint">Isi topik → klik Analisis SEO</div>
+        </div>
+        <div class="loading-card" id="seoLoading">
+          <div class="loading-title">Riset keyword multi-platform...</div>
+          <div class="progress-bar"><div class="progress-fill" id="seoBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="ss1"><div class="step-dot"></div>Riset keyword per platform</div>
+            <div class="step-item" id="ss2"><div class="step-dot"></div>Analisis kompetitor</div>
+            <div class="step-item" id="ss3"><div class="step-dot"></div>Buat metadata</div>
+            <div class="step-item" id="ss4"><div class="step-dot"></div>Gap analysis</div>
+            <div class="step-item" id="ss5"><div class="step-dot"></div>Blueprint siap ✓</div>
+          </div>
+        </div>
+        <div class="error-card" id="seoError"></div>
+        <div class="result-wrap" id="seoResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="seoDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Platform</div><div class="stat-value" id="seoPlatStat">—</div></div>
+            <div class="stat-card"><div class="stat-label">Tipe</div><div class="stat-value" id="seoTypeStat">—</div></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">SEO Blueprint</span>
+              <button class="copy-btn" onclick="copyEl('seoOut')">Copy</button>
+            </div>
+            <div class="output-body" id="seoOut"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CONTENT PANEL ── -->
+  <div class="agent-panel" id="panel-content">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+        <div class="field-group">
+          <label class="field-label">Tipe Konten</label>
+          <select class="field-select" id="contentType">
+            <option value="artikel">📝 Artikel Blog Affiliate</option>
+            <option value="script_anak">🧒 Script YouTube Anak (Clay)</option>
+            <option value="script_edukasi">🎬 Script YouTube Edukasi</option>
+            <option value="mini_ebook">📖 Mini Ebook</option>
+            <option value="full_ebook">📚 Full Ebook</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Topik</label>
+          <textarea class="field-textarea" id="contentTopic"
+            placeholder="Contoh: MPASI 6 bahan lokal untuk bayi 6-12 bulan..."></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Primary Keyword</label>
+          <input class="field-input" id="contentKw" type="text"
+            placeholder="Contoh: resep mpasi 6 bulan">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Secondary Keywords</label>
+          <input class="field-input" id="contentKw2" type="text"
+            placeholder="Pisah koma: mpasi lokal, mpasi mudah">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tone</label>
+          <select class="field-select" id="contentTone">
+            <option value="kasual-edukatif">😊 Kasual Edukatif</option>
+            <option value="profesional">👔 Profesional</option>
+            <option value="santai">🌴 Santai & Fun</option>
+            <option value="anak-anak">🧒 Anak-anak</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Panjang</label>
+          <select class="field-select" id="contentLength">
+            <option value="pendek">⚡ Pendek</option>
+            <option value="sedang" selected>📄 Sedang</option>
+            <option value="panjang">📚 Panjang</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">CTA</label>
+          <input class="field-input" id="contentCta" type="text"
+            placeholder="Contoh: Download ebook di link deskripsi">
+        </div>
+        <div class="field-group">
+          <label class="field-label">SEO Brief (dari SEO Agent)</label>
+          <textarea class="field-textarea" id="contentSeoBrief"
+            placeholder="Paste output SEO Agent..." style="min-height:60px"></textarea>
+        </div>
+        <button class="run-btn" id="contentBtn">
+          <span id="contentBtnIcon">✍️</span>
+          <span id="contentBtnText">Buat Konten</span>
+        </button>
+      </div>
+      <div class="output-panel">
+        <div class="empty-state" id="contentEmpty">
+          <div class="empty-icon">✍️</div>
+          <div class="empty-text">Konten berkualitas, otomatis</div>
+          <div class="empty-hint">Isi topik → klik Buat Konten</div>
+        </div>
+        <div class="loading-card" id="contentLoading">
+          <div class="loading-title">Memproduksi konten...</div>
+          <div class="progress-bar"><div class="progress-fill" id="contentBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="cs1"><div class="step-dot"></div>Memahami topik</div>
+            <div class="step-item" id="cs2"><div class="step-dot"></div>Menyusun struktur</div>
+            <div class="step-item" id="cs3"><div class="step-dot"></div>Menulis konten...</div>
+            <div class="step-item" id="cs4"><div class="step-dot"></div>Optimasi keyword</div>
+            <div class="step-item" id="cs5"><div class="step-dot"></div>Konten siap ✓</div>
+          </div>
+        </div>
+        <div class="error-card" id="contentError"></div>
+        <div class="result-wrap" id="contentResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="contentDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Platform</div><div class="stat-value" id="contentPlatStat">—</div></div>
+            <div class="stat-card"><div class="stat-label">Words</div><div class="stat-value" id="contentWords">—</div></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Content Output</span>
+              <button class="copy-btn" onclick="copyEl('contentOut')">Copy</button>
+            </div>
+            <div class="output-body" id="contentOut" style="max-height:600px"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 
   <!-- ── MONETIZATION PANEL ── -->
-  <div id="monetizationPanel">
-
-    <div class="panel panel-left">
-      <div class="panel-label">Monetization & Finance</div>
-
-      <div>
-        <label>Mode</label>
-        <select id="monetizationMode">
-          <option value="pricing">💲 Pricing Strategy</option>
-          <option value="funnel">🔄 Funnel Blueprint</option>
-          <option value="proyeksi">📈 Revenue Projection</option>
-          <option value="optimasi">⚡ Revenue Optimization</option>
-          <option value="laporan">📋 Monthly Financial Report</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Produk / Konten</label>
-        <textarea id="monetizationProduct"
-          placeholder="Contoh: Ebook MPASI 6 bahan lokal, Channel YouTube edukasi anak..."
-          style="min-height:80px"></textarea>
-      </div>
-
-      <div>
-        <label>Lini Bisnis</label>
-        <select id="monetizationBusinessLine">
-          <option value="semua">🌐 Semua Lini</option>
-          <option value="ebook">📚 Ebook</option>
-          <option value="youtube">🎬 YouTube</option>
-          <option value="affiliate">🛒 Affiliate</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Target Revenue</label>
-        <input type="text" id="monetizationTarget"
-          placeholder="Contoh: Rp10.000.000/bulan dalam 6 bulan">
-      </div>
-
-      <div>
-        <label>Data Revenue Existing (opsional)</label>
-        <textarea id="monetizationData"
-          placeholder="Contoh: Ebook terjual 20/bulan @Rp79K, YouTube RPM $1.2..."
-          style="min-height:60px"></textarea>
-      </div>
-
-      <div>
-        <label>Harga Kompetitor (opsional)</label>
-        <input type="text" id="monetizationCompetitor"
-          placeholder="Contoh: Kompetitor A Rp99K, Kompetitor B $4.99">
-      </div>
-
-      <div>
-        <label>Pertanyaan Spesifik (opsional)</label>
-        <input type="text" id="monetizationQuestions"
-          placeholder="Contoh: Berapa harga optimal? Kapan break-even?">
-      </div>
-
-      <button id="monetizationBtn">
-        <span id="monetizationBtnIcon">💰</span>
-        <span id="monetizationBtnText">Analisis Monetisasi</span>
-      </button>
-    </div>
-
-    <div class="panel panel-right">
-      <div class="panel-label">Monetization Report</div>
-
-      <div class="output-empty" id="monetizationEmptyState">
-        <div class="big-icon">💰</div>
-        <p>Pilih mode dan klik Analisis Monetisasi</p>
-      </div>
-
-      <div class="loading-state" id="monetizationLoadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="monetizationProgressBar"></div>
+  <div class="agent-panel" id="panel-monetization">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+        <div class="field-group">
+          <label class="field-label">Mode</label>
+          <select class="field-select" id="monoMode">
+            <option value="pricing">💲 Pricing Strategy</option>
+            <option value="funnel">🔄 Funnel Blueprint</option>
+            <option value="proyeksi">📈 Revenue Projection</option>
+            <option value="optimasi">⚡ Revenue Optimization</option>
+            <option value="laporan">📋 Monthly Report</option>
+          </select>
         </div>
-        <div class="loading-steps">
-          <div class="step active" id="mstep1"><div class="step-dot"></div> Analisis harga kompetitor...</div>
-          <div class="step" id="mstep2"><div class="step-dot"></div> Merancang funnel...</div>
-          <div class="step" id="mstep3"><div class="step-dot"></div> Kalkulasi proyeksi...</div>
-          <div class="step" id="mstep4"><div class="step-dot"></div> Optimasi revenue...</div>
-          <div class="step" id="mstep5"><div class="step-dot"></div> Report siap ✓</div>
+        <div class="field-group">
+          <label class="field-label">Produk / Konten</label>
+          <textarea class="field-textarea" id="monoProduct"
+            placeholder="Contoh: Ebook MPASI 6 bahan lokal..."></textarea>
         </div>
+        <div class="field-group">
+          <label class="field-label">Lini Bisnis</label>
+          <select class="field-select" id="monoBizLine">
+            <option value="semua">🌐 Semua Lini</option>
+            <option value="ebook">📚 Ebook</option>
+            <option value="youtube">🎬 YouTube</option>
+            <option value="affiliate">🛒 Affiliate</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Target Revenue</label>
+          <input class="field-input" id="monoTarget" type="text"
+            placeholder="Contoh: Rp10.000.000/bulan">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Data Revenue Existing</label>
+          <textarea class="field-textarea" id="monoData"
+            placeholder="Opsional" style="min-height:60px"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Harga Kompetitor</label>
+          <input class="field-input" id="monoComp" type="text"
+            placeholder="Contoh: Kompetitor A Rp99K">
+        </div>
+        <button class="run-btn" id="monoBtn">
+          <span id="monoBtnIcon">💰</span>
+          <span id="monoBtnText">Analisis Monetisasi</span>
+        </button>
       </div>
-
-      <div class="error-card" id="monetizationErrorCard"></div>
-
-      <div class="result-card" id="monetizationResultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="monetizationDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Mode</div>
-            <div class="stat-value" id="monetizationModeStat">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Lini Bisnis</div>
-            <div class="stat-value" id="monetizationLineStat">—</div>
+      <div class="output-panel">
+        <div class="empty-state" id="monoEmpty">
+          <div class="empty-icon">💰</div>
+          <div class="empty-text">Maksimalkan setiap rupiah</div>
+          <div class="empty-hint">Isi produk → klik Analisis Monetisasi</div>
+        </div>
+        <div class="loading-card" id="monoLoading">
+          <div class="loading-title">Merancang strategi monetisasi...</div>
+          <div class="progress-bar"><div class="progress-fill" id="monoBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="ms1"><div class="step-dot"></div>Analisis harga kompetitor</div>
+            <div class="step-item" id="ms2"><div class="step-dot"></div>Merancang funnel</div>
+            <div class="step-item" id="ms3"><div class="step-dot"></div>Kalkulasi proyeksi</div>
+            <div class="step-item" id="ms4"><div class="step-dot"></div>Optimasi revenue</div>
+            <div class="step-item" id="ms5"><div class="step-dot"></div>Report siap ✓</div>
           </div>
         </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Monetization Report
-            <button class="copy-btn" onclick="copyText('monetizationOutput')">copy</button>
+        <div class="error-card" id="monoError"></div>
+        <div class="result-wrap" id="monoResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="monoDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Mode</div><div class="stat-value" id="monoModeStat">—</div></div>
+            <div class="stat-card"><div class="stat-label">Lini</div><div class="stat-value" id="monoLineStat">—</div></div>
           </div>
-          <div class="result-body" id="monetizationOutput"></div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Monetization Report</span>
+              <button class="copy-btn" onclick="copyEl('monoOut')">Copy</button>
+            </div>
+            <div class="output-body" id="monoOut"></div>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
-  <!-- ── END MONETIZATION PANEL ── -->
 
   <!-- ── DISTRIBUTION PANEL ── -->
-  <div id="distributionPanel">
-
-    <div class="panel panel-left">
-      <div class="panel-label">Distribution & Automation</div>
-
-      <div>
-        <label>Mode</label>
-        <select id="distributionMode">
-          <option value="distribution_plan">📡 Distribution Plan</option>
-          <option value="launch_sequence">🚀 Launch Sequence (14 hari)</option>
-          <option value="content_adaptation">🔄 Content Adaptation</option>
-          <option value="automation_checklist">🔧 Automation Checklist</option>
-          <option value="performance_review">📊 Performance Review</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Konten / Produk yang Akan Didistribusikan</label>
-        <textarea id="distributionContent"
-          placeholder="Contoh: Ebook MPASI 6 bahan lokal, harga Rp79.000, target ibu muda Indonesia..."
-          style="min-height:100px"></textarea>
-      </div>
-
-      <div>
-        <label>Platform Target</label>
-        <select id="distributionPlatforms">
-          <option value="semua">🌐 Semua Platform</option>
-          <option value="youtube,instagram,tiktok">📱 Social Media</option>
-          <option value="youtube,blog,email">💻 YouTube + Blog + Email</option>
-          <option value="gumroad,kdp,payhip">📚 Ebook Platforms</option>
-          <option value="instagram,tiktok">📸 Instagram + TikTok</option>
-        </select>
-      </div>
-
-      <div>
-        <label>Tanggal Launch (opsional)</label>
-        <input type="text" id="distributionLaunchDate"
-          placeholder="Contoh: 1 Februari 2025, atau 2 minggu dari sekarang">
-      </div>
-
-      <div>
-        <label>Audiens Existing (opsional)</label>
-        <input type="text" id="distributionAudience"
-          placeholder="Contoh: 500 subscriber YouTube, 1200 follower Instagram">
-      </div>
-
-      <div>
-        <label>Konteks Tambahan (opsional)</label>
-        <textarea id="distributionContext"
-          placeholder="Contoh: Budget iklan nol, fokus organic growth..."
-          style="min-height:60px"></textarea>
-      </div>
-
-      <button id="distributionBtn">
-        <span id="distributionBtnIcon">📡</span>
-        <span id="distributionBtnText">Buat Distribution Plan</span>
-      </button>
-    </div>
-
-    <div class="panel panel-right">
-      <div class="panel-label">Distribution Report</div>
-
-      <div class="output-empty" id="distributionEmptyState">
-        <div class="big-icon">📡</div>
-        <p>Masukkan konten dan klik Buat Distribution Plan</p>
-      </div>
-
-      <div class="loading-state" id="distributionLoadingState">
-        <div class="loading-bar">
-          <div class="loading-bar-fill" id="distributionProgressBar"></div>
+  <div class="agent-panel" id="panel-distribution">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+        <div class="field-group">
+          <label class="field-label">Mode</label>
+          <select class="field-select" id="distMode">
+            <option value="distribution_plan">📡 Distribution Plan</option>
+            <option value="launch_sequence">🚀 Launch Sequence 14 Hari</option>
+            <option value="content_adaptation">🔄 Content Adaptation</option>
+            <option value="automation_checklist">🔧 Automation Checklist</option>
+            <option value="performance_review">📊 Performance Review</option>
+          </select>
         </div>
-        <div class="loading-steps">
-          <div class="step active" id="dstep1"><div class="step-dot"></div> Analisis platform terbaik...</div>
-          <div class="step" id="dstep2"><div class="step-dot"></div> Buat timeline distribusi...</div>
-          <div class="step" id="dstep3"><div class="step-dot"></div> Adaptasi konten per platform...</div>
-          <div class="step" id="dstep4"><div class="step-dot"></div> Setup automation checklist...</div>
-          <div class="step" id="dstep5"><div class="step-dot"></div> Plan siap ✓</div>
+        <div class="field-group">
+          <label class="field-label">Konten / Produk</label>
+          <textarea class="field-textarea" id="distContent"
+            placeholder="Contoh: Ebook MPASI Rp79.000 target ibu muda Indonesia..."></textarea>
         </div>
+        <div class="field-group">
+          <label class="field-label">Platform</label>
+          <select class="field-select" id="distPlatforms">
+            <option value="semua">🌐 Semua Platform</option>
+            <option value="youtube,instagram,tiktok">📱 Social Media</option>
+            <option value="youtube,blog,email">💻 YouTube + Blog + Email</option>
+            <option value="gumroad,kdp,payhip">📚 Ebook Platforms</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Tanggal Launch</label>
+          <input class="field-input" id="distLaunch" type="text"
+            placeholder="Contoh: 2 minggu dari sekarang">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Audiens Existing</label>
+          <input class="field-input" id="distAudience" type="text"
+            placeholder="Contoh: 500 subscriber YouTube">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Konteks Tambahan</label>
+          <textarea class="field-textarea" id="distContext"
+            placeholder="Opsional" style="min-height:60px"></textarea>
+        </div>
+        <button class="run-btn" id="distBtn">
+          <span id="distBtnIcon">📡</span>
+          <span id="distBtnText">Buat Distribution Plan</span>
+        </button>
       </div>
-
-      <div class="error-card" id="distributionErrorCard"></div>
-
-      <div class="result-card" id="distributionResultCard">
-        <div class="stats-bar">
-          <div class="stat">
-            <div class="stat-label">Durasi</div>
-            <div class="stat-value" id="distributionDuration">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Platform</div>
-            <div class="stat-value" id="distributionPlatformCount">—</div>
-          </div>
-          <div class="stat">
-            <div class="stat-label">Mode</div>
-            <div class="stat-value" id="distributionModeStat">—</div>
+      <div class="output-panel">
+        <div class="empty-state" id="distEmpty">
+          <div class="empty-icon">📡</div>
+          <div class="empty-text">Distribusi ke semua platform otomatis</div>
+          <div class="empty-hint">Isi konten → klik Buat Distribution Plan</div>
+        </div>
+        <div class="loading-card" id="distLoading">
+          <div class="loading-title">Menyusun distribution plan...</div>
+          <div class="progress-bar"><div class="progress-fill" id="distBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="ds1"><div class="step-dot"></div>Analisis platform terbaik</div>
+            <div class="step-item" id="ds2"><div class="step-dot"></div>Buat timeline</div>
+            <div class="step-item" id="ds3"><div class="step-dot"></div>Adaptasi per platform</div>
+            <div class="step-item" id="ds4"><div class="step-dot"></div>Setup checklist</div>
+            <div class="step-item" id="ds5"><div class="step-dot"></div>Plan siap ✓</div>
           </div>
         </div>
-
-        <div class="result-section">
-          <div class="result-section-header">
-            Distribution Plan
-            <button class="copy-btn" onclick="copyText('distributionOutput')">copy</button>
+        <div class="error-card" id="distError"></div>
+        <div class="result-wrap" id="distResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="distDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Platform</div><div class="stat-value" id="distPlatCount">—</div></div>
+            <div class="stat-card"><div class="stat-label">Mode</div><div class="stat-value" id="distModeStat">—</div></div>
           </div>
-          <div class="result-body" id="distributionOutput"></div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Distribution Plan</span>
+              <button class="copy-btn" onclick="copyEl('distOut')">Copy</button>
+            </div>
+            <div class="output-body" id="distOut"></div>
+          </div>
         </div>
       </div>
     </div>
-
   </div>
-  <!-- ── END DISTRIBUTION PANEL ── -->
 
-</main>
+  <!-- ── ORCHESTRATOR PANEL ── -->
+  <div class="agent-panel" id="panel-orchestrator">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+        <div style="background:var(--yellow-soft);border:var(--border);border-radius:var(--radius);
+          padding:1rem;font-size:0.8rem;color:var(--ink-mid);line-height:1.6">
+          🧠 Orchestrator membaca goal kamu dan membuat <strong>task plan</strong> lengkap — 
+          siapa agen yang jalan, urutannya, dan apa yang dihasilkan.
+        </div>
+        <div class="field-group">
+          <label class="field-label">Goal / Tujuan Bisnis</label>
+          <textarea class="field-textarea" id="orchGoal"
+            placeholder="Contoh: Buat ebook MPASI dan video YouTube untuk market Indonesia..."
+            style="min-height:120px"></textarea>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Lini Bisnis</label>
+          <select class="field-select" id="orchBizLine">
+            <option value="semua">🌐 Semua Lini</option>
+            <option value="ebook">📚 Ebook</option>
+            <option value="youtube">🎬 YouTube</option>
+            <option value="affiliate">🛒 Affiliate</option>
+          </select>
+        </div>
+        <div class="field-group">
+          <label class="field-label">Konteks Tambahan</label>
+          <input class="field-input" id="orchContext" type="text"
+            placeholder="Contoh: Launch bulan depan, budget terbatas">
+        </div>
+        <div class="field-group">
+          <label class="field-label">Urgensi</label>
+          <select class="field-select" id="orchUrgency">
+            <option value="normal (1 minggu)">⏱ Normal — 1 minggu</option>
+            <option value="segera (<48 jam)">🚨 Segera — 48 jam</option>
+            <option value="rendah (fleksibel)">🌿 Rendah — fleksibel</option>
+          </select>
+        </div>
+        <button class="run-btn" id="orchBtn">
+          <span id="orchBtnIcon">🧠</span>
+          <span id="orchBtnText">Jalankan Orchestrator</span>
+        </button>
+      </div>
+      <div class="output-panel">
+        <div class="empty-state" id="orchEmpty">
+          <div class="empty-icon">🧠</div>
+          <div class="empty-text">Satu goal, rencana lengkap</div>
+          <div class="empty-hint">Isi goal → klik Jalankan Orchestrator</div>
+        </div>
+        <div class="loading-card" id="orchLoading">
+          <div class="loading-title">Orchestrator sedang memproses...</div>
+          <div class="progress-bar"><div class="progress-fill" id="orchBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="os1"><div class="step-dot"></div>Parsing goal</div>
+            <div class="step-item" id="os2"><div class="step-dot"></div>Membuat task plan</div>
+            <div class="step-item" id="os3"><div class="step-dot"></div>Mengidentifikasi agen</div>
+            <div class="step-item" id="os4"><div class="step-dot"></div>Menyusun brief</div>
+            <div class="step-item" id="os5"><div class="step-dot"></div>Selesai ✓</div>
+          </div>
+        </div>
+        <div class="error-card" id="orchError"></div>
+        <div class="result-wrap" id="orchResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="orchDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Agen</div><div class="stat-value" id="orchAgents">—</div></div>
+            <div class="stat-card"><div class="stat-label">Lini</div><div class="stat-value" id="orchLines">—</div></div>
+          </div>
+          <div class="agent-flow-card" id="orchFlowCard" style="display:none">
+            <div class="agent-flow-label">Urutan Eksekusi Agen</div>
+            <div class="agent-flow" id="orchFlow"></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Penjelasan untuk Owner</span>
+              <button class="copy-btn" onclick="copyEl('orchExplain')">Copy</button>
+            </div>
+            <div class="output-body" id="orchExplain"></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Task Plan (JSON)</span>
+              <button class="copy-btn" onclick="copyEl('orchJson')">Copy</button>
+            </div>
+            <div class="output-body" id="orchJson"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- end .main -->
 
 <script>
-  let startTime;
+// ══════════════════════════════════
+// UTILITIES
+// ══════════════════════════════════
 
-  // ── Event listeners ──
-  document.getElementById('runBtn').addEventListener('click', runOrchestrator);
-  document.getElementById('trendBtn').addEventListener('click', runTrend);
-  document.getElementById('seoBtn').addEventListener('click', runSeo);
-  document.getElementById('contentBtn').addEventListener('click', runContent);
-  document.getElementById('analystBtn').addEventListener('click', runAnalyst);
-  document.getElementById('monetizationBtn').addEventListener('click', runMonetization);
-  document.getElementById('distributionBtn').addEventListener('click', runDistributionAgent);
+const AGENT_TITLES = {
+  trend: '🔥 <em>Trend</em> Research',
+  analyst: '📊 <em>Market</em> Analysis',
+  seo: '🔍 <em>SEO</em> Intelligence',
+  content: '✍️ <em>Content</em> Studio',
+  monetization: '💰 <em>Monetization</em>',
+  distribution: '📡 <em>Distribution</em>',
+  orchestrator: '🧠 <em>Orchestrator</em>',
+};
 
+function switchAgent(agent) {
+  // Update panels
+  document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('panel-' + agent).classList.add('active');
 
-  // ── Tab switching ──
-  function switchTab(tab) {
-   const tabs = ['orchestrator','trend','seo','content','analyst','monetization','distribution'];
+  // Update nav
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('nav-' + agent).classList.add('active');
 
-    tabs.forEach(t => {
-      const panel = document.getElementById(t + 'Panel');
-      const btn = document.getElementById('nav-' + t);
-      if (!panel || !btn) return;
+  // Update topbar
+  document.getElementById('topbarTitle').innerHTML = AGENT_TITLES[agent];
+}
 
-      if (t === tab) {
-        panel.classList.add('visible');
-        panel.classList.remove('hidden');
-        btn.classList.add('active');
-      } else {
-        panel.classList.remove('visible');
-        panel.classList.add('hidden');
-        btn.classList.remove('active');
-      }
-    });
-  }
-
-  // ── Markdown renderer ──
-  function renderMarkdown(text) {
-    return text
-      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-      .replace(/^### (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.85rem;display:block;margin-top:0.6rem">$1</span>')
-      .replace(/^## (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.9rem;display:block;margin-top:0.8rem">$1</span>')
-      .replace(/^# (.+)$/gm, '<span style="color:#00e5a0;font-weight:800;font-size:1rem;display:block;margin-top:1rem">$1</span>')
-      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
-      .replace(/^- (.+)$/gm, '<span style="display:block;padding-left:1rem">• $1</span>')
-      .replace(/^\|(.+)\|$/gm, (match) => {
-        const cells = match.split('|').filter(c => c.trim());
-        return '<div style="display:flex;gap:0.5rem;font-size:0.72rem;border-bottom:1px solid #1e222b;padding:0.2rem 0">' +
-          cells.map(c => `<span style="flex:1;min-width:80px">${c.trim()}</span>`).join('') +
-          '</div>';
-      })
-      .replace(/^---+$/gm, '<hr style="border-color:#1e222b;margin:0.5rem 0">')
-      .replace(/\n/g, '<br>');
-  }
-
-  // ── Animate loading steps ──
-  function animateSteps(stepIds, barId, interval = 1200) {
-    const bar = document.getElementById(barId);
-    if (bar) bar.style.width = '0%';
-    stepIds.forEach(id => {
-      const el = document.getElementById(id);
-      if (el) el.className = 'step';
-    });
-    let i = 0;
-    return setInterval(() => {
-      if (i > 0) {
-        const prev = document.getElementById(stepIds[i - 1]);
-        if (prev) prev.className = 'step done';
-      }
-      if (i < stepIds.length) {
-        const cur = document.getElementById(stepIds[i]);
-        if (cur) cur.className = 'step active';
-        if (bar) bar.style.width = ((i + 1) / stepIds.length * 100) + '%';
-        i++;
-      }
-    }, interval);
-  }
-
-  // ── Copy text ──
-  function copyText(id) {
-    const el = document.getElementById(id);
-    if (!el) return;
-    navigator.clipboard.writeText(el.textContent).then(() => {
-      const btn = event.target;
-      btn.textContent = 'copied!';
-      setTimeout(() => btn.textContent = 'copy', 1500);
-    });
-  }
-
-  // ── Health check ──
-  fetch('/api/health')
-    .then(r => r.json())
-    .then(() => {
-      document.getElementById('statusText').textContent = '● ONLINE';
+function renderMd(text) {
+  if (!text) return '';
+  return text
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/^### (.+)$/gm,'<span style="font-weight:700;color:var(--orange);display:block;margin-top:.7rem;font-family:var(--font-ui)">$1</span>')
+    .replace(/^## (.+)$/gm,'<span style="font-weight:700;color:var(--ink);font-size:.85rem;display:block;margin-top:1rem;font-family:var(--font-ui)">$1</span>')
+    .replace(/^# (.+)$/gm,'<span style="font-weight:900;color:var(--ink);font-size:.95rem;display:block;margin-top:1.2rem;font-family:var(--font-display);font-style:italic">$1</span>')
+    .replace(/\*\*(.+?)\*\*/g,'<strong>$1</strong>')
+    .replace(/^- (.+)$/gm,'<span style="display:block;padding-left:1rem;position:relative"><span style="position:absolute;left:.2rem;color:var(--orange)">›</span> $1</span>')
+    .replace(/^\|(.+)\|$/gm,(m)=>{
+      const cells = m.split('|').filter(c=>c.trim()&&!c.match(/^[-: ]+$/));
+      if(!cells.length) return '';
+      return '<div style="display:flex;gap:.5rem;border-bottom:1px solid var(--cream-dark);padding:.3rem 0;font-size:.72rem">'+
+        cells.map(c=>`<span style="flex:1;min-width:60px">${c.trim()}</span>`).join('')+'</div>';
     })
-    .catch(() => {
-      document.getElementById('statusText').textContent = '● OFFLINE';
-      document.getElementById('statusText').style.color = '#ff4560';
-    });
+    .replace(/^---+$/gm,'<hr style="border:none;border-top:1px solid var(--cream-dark);margin:.75rem 0">')
+    .replace(/\n/g,'<br>');
+}
 
-  // ══════════════════════════════════
-  // ORCHESTRATOR AGENT
-  // ══════════════════════════════════
-  async function runOrchestrator() {
-    const goal = document.getElementById('goalInput').value.trim();
-    if (!goal) { alert('Isi goal dulu!'); return; }
-
-    startTime = Date.now();
-
-    document.getElementById('emptyState').style.display = 'none';
-    document.getElementById('errorCard').classList.remove('visible');
-    document.getElementById('resultCard').classList.remove('visible');
-    document.getElementById('loadingState').classList.add('visible');
-    document.getElementById('runBtn').disabled = true;
-    document.getElementById('btnText').textContent = 'Memproses...';
-    document.getElementById('btnIcon').textContent = '⏳';
-
-    const iv = animateSteps(
-      ['step1', 'step2', 'step3', 'step4', 'step5'],
-      'progressBar', 1200
-    );
-
-    try {
-      const res = await fetch('/api/orchestrate', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          goal,
-          business_line: document.getElementById('businessLine').value,
-          context: document.getElementById('contextInput').value,
-          time_budget: document.getElementById('timeBudget').value,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
-      showOrchestratorResult(data);
-
-    } catch (err) {
-      const card = document.getElementById('errorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('loadingState').classList.remove('visible');
-      document.getElementById('runBtn').disabled = false;
-      document.getElementById('btnText').textContent = 'Jalankan Orchestrator';
-      document.getElementById('btnIcon').textContent = '▶';
+function animSteps(ids, barId, ms=1200) {
+  const bar = document.getElementById(barId);
+  if(bar) bar.style.width='0%';
+  ids.forEach(id=>{const e=document.getElementById(id);if(e)e.className='step-item';});
+  let i=0;
+  return setInterval(()=>{
+    if(i>0){const p=document.getElementById(ids[i-1]);if(p)p.className='step-item done';}
+    if(i<ids.length){
+      const c=document.getElementById(ids[i]);if(c)c.className='step-item active';
+      if(bar)bar.style.width=((i+1)/ids.length*100)+'%';
+      i++;
     }
+  },ms);
+}
+
+function copyEl(id) {
+  const el = document.getElementById(id);
+  if(!el) return;
+  navigator.clipboard.writeText(el.textContent).then(()=>{
+    event.target.textContent='Copied!';
+    setTimeout(()=>event.target.textContent='Copy',1500);
+  });
+}
+
+function showErr(id, msg) {
+  const el=document.getElementById(id);
+  if(el){el.textContent='❌ '+msg;el.classList.add('show');}
+}
+
+function hideErr(id){
+  const el=document.getElementById(id);if(el)el.classList.remove('show');
+}
+
+async function handleLogout() {
+  await fetch('/auth/logout',{method:'POST'});
+  window.location.href='/login';
+}
+
+// Health check
+fetch('/api/health')
+  .then(r=>r.ok?r.json():Promise.reject())
+  .then(()=>document.getElementById('statusText').textContent='7 Agents Online')
+  .catch(()=>{
+    document.getElementById('statusText').textContent='Offline';
+  });
+
+// ══════════════════════════════════
+// TREND AGENT
+// ══════════════════════════════════
+let trendT0;
+document.getElementById('trendBtn').addEventListener('click', async ()=>{
+  const topic=document.getElementById('trendTopic').value.trim();
+  if(!topic){alert('Isi topik dulu!');return;}
+  trendT0=Date.now();
+  const selLine=document.getElementById('trendBusinessLine').value;
+  const selMkt=document.getElementById('trendMarket').value;
+  const selHz=document.getElementById('trendHorizon').value;
+
+  document.getElementById('trendEmpty').style.display='none';
+  hideErr('trendError');
+  document.getElementById('trendResult').classList.remove('show');
+  document.getElementById('trendLoading').classList.add('show');
+  document.getElementById('trendBtn').disabled=true;
+  document.getElementById('trendBtnText').textContent='Menganalisis...';
+  document.getElementById('trendBtnIcon').textContent='⏳';
+
+  const iv=animSteps(['ts1','ts2','ts3','ts4','ts5'],'trendBar',1500);
+  try{
+    const res=await fetch('/api/trend',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({topic,business_line:selLine,time_horizon:selHz,market_context:selMkt,context:document.getElementById('trendContext').value})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.message);
+    const dur=((Date.now()-trendT0)/1000).toFixed(1)+'s';
+    document.getElementById('trendDur').textContent=dur;
+    document.getElementById('trendHigh').textContent=data.high_priority_count??'—';
+    document.getElementById('trendMkt').textContent=selMkt;
+    document.getElementById('trendOut').innerHTML=renderMd(data.report||data.full_output||'');
+    document.getElementById('trendResult').classList.add('show');
+  }catch(e){showErr('trendError',e.message);}
+  finally{
+    clearInterval(iv);
+    document.getElementById('trendLoading').classList.remove('show');
+    document.getElementById('trendBtn').disabled=false;
+    document.getElementById('trendBtnText').textContent='Analisis Tren';
+    document.getElementById('trendBtnIcon').textContent='🔥';
   }
+});
 
-  function showOrchestratorResult(data) {
-    const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
-    document.getElementById('statDuration').textContent = dur;
+// ══════════════════════════════════
+// BUSINESS ANALYST
+// ══════════════════════════════════
+let analystT0;
+document.getElementById('analystBtn').addEventListener('click', async ()=>{
+  const topic=document.getElementById('analystTopic').value.trim();
+  if(!topic){alert('Isi topik dulu!');return;}
+  analystT0=Date.now();
+  const selMode=document.getElementById('analystMode').value;
 
-    const plan = data.task_plan;
-    document.getElementById('statAgents').textContent = plan?.agent_sequence?.length ?? '—';
-    document.getElementById('statLines').textContent = plan?.business_lines?.join(', ') ?? '—';
+  document.getElementById('analystEmpty').style.display='none';
+  hideErr('analystError');
+  document.getElementById('analystResult').classList.remove('show');
+  document.getElementById('analystLoading').classList.add('show');
+  document.getElementById('analystBtn').disabled=true;
+  document.getElementById('analystBtnText').textContent='Menganalisis...';
+  document.getElementById('analystBtnIcon').textContent='⏳';
 
-    if (plan?.agent_sequence?.length) {
-      const flow = document.getElementById('agentFlow');
-      flow.innerHTML = plan.agent_sequence.map((a, i) =>
-        `<span class="agent-node">${i + 1}. ${a.agent}</span>` +
-        (i < plan.agent_sequence.length - 1 ? '<span class="agent-arrow">→</span>' : '')
-      ).join('');
-      document.getElementById('agentFlowSection').style.display = 'block';
+  const iv=animSteps(['as1','as2','as3','as4','as5'],'analystBar',2000);
+  try{
+    const res=await fetch('/api/analyst',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({topic,analysis_mode:selMode,business_line:document.getElementById('analystBizLine').value,
+        revenue_target:document.getElementById('analystRevTarget').value,
+        available_data:document.getElementById('analystData').value,
+        specific_questions:document.getElementById('analystQs').value})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.message);
+    const dur=((Date.now()-analystT0)/1000).toFixed(1)+'s';
+    document.getElementById('analystDur').textContent=dur;
+    document.getElementById('analystModeStat').textContent=selMode;
+    const ve=document.getElementById('analystVerdict');
+    if(data.verdict){
+      ve.textContent=data.verdict;
+      ve.className='stat-value '+(data.verdict==='GO'?'verdict-go':data.verdict==='NO-GO'?'verdict-nogo':'verdict-cond');
     }
-
-    document.getElementById('jsonOutput').textContent =
-      plan ? JSON.stringify(plan, null, 2) : '(Tidak ada task plan)';
-
-    const explanationText = data.explanation || data.full_output || JSON.stringify(data, null, 2);
-    document.getElementById('explanationOutput').innerHTML = renderMarkdown(explanationText);
-    document.getElementById('resultCard').classList.add('visible');
+    document.getElementById('analystOut').innerHTML=renderMd(data.report||data.full_output||'');
+    document.getElementById('analystResult').classList.add('show');
+  }catch(e){showErr('analystError',e.message);}
+  finally{
+    clearInterval(iv);
+    document.getElementById('analystLoading').classList.remove('show');
+    document.getElementById('analystBtn').disabled=false;
+    document.getElementById('analystBtnText').textContent='Analisis Bisnis';
+    document.getElementById('analystBtnIcon').textContent='📊';
   }
+});
 
-  // ══════════════════════════════════
-  // TREND AGENT
-  // ══════════════════════════════════
-  let trendStartTime;
+// ══════════════════════════════════
+// SEO AGENT
+// ══════════════════════════════════
+let seoT0;
+document.getElementById('seoBtn').addEventListener('click', async ()=>{
+  const topic=document.getElementById('seoTopic').value.trim();
+  if(!topic){alert('Isi topik dulu!');return;}
+  seoT0=Date.now();
+  const selPlat=document.getElementById('seoPlatforms').value;
+  const selType=document.getElementById('seoContentType').value;
 
-  async function runTrend() {
-    const topic = document.getElementById('trendTopic').value.trim();
-    if (!topic) { alert('Isi topik dulu!'); return; }
+  document.getElementById('seoEmpty').style.display='none';
+  hideErr('seoError');
+  document.getElementById('seoResult').classList.remove('show');
+  document.getElementById('seoLoading').classList.add('show');
+  document.getElementById('seoBtn').disabled=true;
+  document.getElementById('seoBtnText').textContent='Menganalisis...';
+  document.getElementById('seoBtnIcon').textContent='⏳';
 
-    trendStartTime = Date.now();
-    const selectedBusinessLine = document.getElementById('trendBusinessLine').value;
-    const selectedMarket = document.getElementById('trendMarket').value;
-    const selectedHorizon = document.getElementById('trendHorizon').value;
-
-    document.getElementById('trendEmptyState').style.display = 'none';
-    document.getElementById('trendErrorCard').classList.remove('visible');
-    document.getElementById('trendResultCard').classList.remove('visible');
-    document.getElementById('trendLoadingState').classList.add('visible');
-    document.getElementById('trendBtn').disabled = true;
-    document.getElementById('trendBtnText').textContent = 'Menganalisis...';
-    document.getElementById('trendBtnIcon').textContent = '⏳';
-
-    const iv = animateSteps(
-      ['tstep1', 'tstep2', 'tstep3', 'tstep4', 'tstep5'],
-      'trendProgressBar', 1500
-    );
-
-    try {
-      const res = await fetch('/api/trend', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          business_line: selectedBusinessLine,
-          time_horizon: selectedHorizon,
-          market_context: selectedMarket,
-          context: document.getElementById('trendContext').value,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error');
-
-      const dur = ((Date.now() - trendStartTime) / 1000).toFixed(1) + 's';
-      document.getElementById('trendDuration').textContent = dur;
-      document.getElementById('trendHighCount').textContent = data.high_priority_count ?? '—';
-      document.getElementById('trendMarketStat').textContent = selectedMarket;
-
-      const lineLabel = selectedBusinessLine === 'semua' ? 'Semua Lini' : selectedBusinessLine;
-      const trendHeader = document.querySelector('#trendResultCard .result-section-header');
-      if (trendHeader) trendHeader.textContent = `Trend Report — ${lineLabel} | ${selectedHorizon}`;
-
-      document.getElementById('trendOutput').innerHTML =
-        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
-      document.getElementById('trendResultCard').classList.add('visible');
-
-    } catch (err) {
-      const card = document.getElementById('trendErrorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('trendLoadingState').classList.remove('visible');
-      document.getElementById('trendBtn').disabled = false;
-      document.getElementById('trendBtnText').textContent = 'Analisis Tren';
-      document.getElementById('trendBtnIcon').textContent = '🔥';
-    }
+  const iv=animSteps(['ss1','ss2','ss3','ss4','ss5'],'seoBar',1800);
+  try{
+    const res=await fetch('/api/seo',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({topic,platforms:selPlat,content_type:selType,
+        target_audience:document.getElementById('seoAudience').value,
+        trend_context:document.getElementById('seoTrendCtx').value})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.message);
+    const dur=((Date.now()-seoT0)/1000).toFixed(1)+'s';
+    document.getElementById('seoDur').textContent=dur;
+    document.getElementById('seoPlatStat').textContent=selPlat;
+    document.getElementById('seoTypeStat').textContent=selType;
+    document.getElementById('seoOut').innerHTML=renderMd(data.blueprint||data.full_output||'');
+    document.getElementById('seoResult').classList.add('show');
+  }catch(e){showErr('seoError',e.message);}
+  finally{
+    clearInterval(iv);
+    document.getElementById('seoLoading').classList.remove('show');
+    document.getElementById('seoBtn').disabled=false;
+    document.getElementById('seoBtnText').textContent='Analisis SEO';
+    document.getElementById('seoBtnIcon').textContent='🔍';
   }
+});
 
-  // ══════════════════════════════════
-  // SEO AGENT
-  // ══════════════════════════════════
-  let seoStartTime;
+// ══════════════════════════════════
+// CONTENT CREATOR (Streaming)
+// ══════════════════════════════════
+let contentT0;
+document.getElementById('contentBtn').addEventListener('click', async ()=>{
+  const topic=document.getElementById('contentTopic').value.trim();
+  if(!topic){alert('Isi topik dulu!');return;}
+  contentT0=Date.now();
+  const selType=document.getElementById('contentType').value;
 
-  async function runSeo() {
-    const topic = document.getElementById('seoTopic').value.trim();
-    if (!topic) { alert('Isi topik dulu!'); return; }
+  document.getElementById('contentEmpty').style.display='none';
+  hideErr('contentError');
+  document.getElementById('contentResult').classList.add('show');
+  document.getElementById('contentOut').innerHTML='<span style="color:var(--ink-light);font-style:italic">Menulis konten...</span>';
+  document.getElementById('contentLoading').classList.add('show');
+  document.getElementById('contentBtn').disabled=true;
+  document.getElementById('contentBtnText').textContent='Menulis...';
+  document.getElementById('contentBtnIcon').textContent='⏳';
 
-    seoStartTime = Date.now();
-    const selectedPlatform = document.getElementById('seoPlatforms').value;
-    const selectedType = document.getElementById('seoContentType').value;
+  const iv=animSteps(['cs1','cs2','cs3','cs4','cs5'],'contentBar',2500);
+  try{
+    const res=await fetch('/api/content',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({topic,content_type:selType,
+        target_audience:document.getElementById('contentAudience')?document.getElementById('contentAudience').value:'Keluarga Indonesia usia 25-40',
+        primary_keyword:document.getElementById('contentKw').value,
+        secondary_keywords:document.getElementById('contentKw2').value,
+        tone:document.getElementById('contentTone').value,
+        length:document.getElementById('contentLength').value,
+        cta:document.getElementById('contentCta').value,
+        seo_brief:document.getElementById('contentSeoBrief').value})});
 
-    document.getElementById('seoEmptyState').style.display = 'none';
-    document.getElementById('seoErrorCard').classList.remove('visible');
-    document.getElementById('seoResultCard').classList.remove('visible');
-    document.getElementById('seoLoadingState').classList.add('visible');
-    document.getElementById('seoBtn').disabled = true;
-    document.getElementById('seoBtnText').textContent = 'Menganalisis...';
-    document.getElementById('seoBtnIcon').textContent = '⏳';
-
-    const iv = animateSteps(
-      ['sstep1', 'sstep2', 'sstep3', 'sstep4', 'sstep5'],
-      'seoProgressBar', 1800
-    );
-
-    try {
-      const res = await fetch('/api/seo', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          platforms: selectedPlatform,
-          content_type: selectedType,
-          target_audience: document.getElementById('seoAudience').value,
-          trend_context: document.getElementById('seoTrendContext').value,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error');
-
-      const dur = ((Date.now() - seoStartTime) / 1000).toFixed(1) + 's';
-      document.getElementById('seoDuration').textContent = dur;
-      document.getElementById('seoPlatformStat').textContent = selectedPlatform;
-      document.getElementById('seoTypeStat').textContent = selectedType;
-      document.getElementById('seoOutput').innerHTML =
-        renderMarkdown(data.blueprint || data.full_output || JSON.stringify(data));
-      document.getElementById('seoResultCard').classList.add('visible');
-
-    } catch (err) {
-      const card = document.getElementById('seoErrorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('seoLoadingState').classList.remove('visible');
-      document.getElementById('seoBtn').disabled = false;
-      document.getElementById('seoBtnText').textContent = 'Analisis SEO';
-      document.getElementById('seoBtnIcon').textContent = '🔍';
-    }
-  }
-
-  // ══════════════════════════════════
-  // CONTENT CREATOR AGENT
-  // ══════════════════════════════════
-
-  let contentStartTime;
-
-  async function runContent() {
-    const topic = document.getElementById('contentTopic').value.trim();
-    if (!topic) { alert('Isi topik dulu!'); return; }
-
-    contentStartTime = Date.now();
-    const selectedType = document.getElementById('contentType').value;
-
-    document.getElementById('contentEmptyState').style.display = 'none';
-    document.getElementById('contentErrorCard').classList.remove('visible');
-    document.getElementById('contentResultCard').classList.remove('visible');
-    document.getElementById('contentLoadingState').classList.add('visible');
-    document.getElementById('contentBtn').disabled = true;
-    document.getElementById('contentBtnText').textContent = 'Membuat konten...';
-    document.getElementById('contentBtnIcon').textContent = '⏳';
-
-    const iv = animateSteps(
-      ['cstep1','cstep2','cstep3','cstep4','cstep5'],
-      'contentProgressBar', 2500
-    );
-
-    // Tampilkan output area lebih awal untuk streaming
-    document.getElementById('contentResultCard').classList.add('visible');
-    document.getElementById('contentOutput').innerHTML = '<span style="color:var(--muted)">Menulis konten...</span>';
-
-    try {
-      const res = await fetch('/api/content', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          content_type: selectedType,
-          target_audience: document.getElementById('contentAudience').value,
-          primary_keyword: document.getElementById('contentPrimaryKw').value,
-          secondary_keywords: document.getElementById('contentSecondaryKw').value,
-          tone: document.getElementById('contentTone').value,
-          length: document.getElementById('contentLength').value,
-          cta: document.getElementById('contentCta').value,
-          seo_brief: document.getElementById('contentSeoBrief').value,
-        }),
-      });
-
-      const reader = res.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-      let fullContent = '';
-
-      while (true) {
-        const { done, value } = await reader.read();
-        if (done) break;
-
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop();
-
-        for (const line of lines) {
-          if (!line.startsWith('data: ')) continue;
-          try {
-            const event = JSON.parse(line.slice(6));
-
-            if (event.type === 'chunk') {
-              fullContent += event.text;
-              // Update output secara realtime
-              document.getElementById('contentOutput').innerHTML =
-                renderMarkdown(fullContent);
-            }
-
-            if (event.type === 'done') {
-              const dur = ((Date.now() - contentStartTime) / 1000).toFixed(1) + 's';
-              document.getElementById('contentDuration').textContent = dur;
-              document.getElementById('contentPlatformStat').textContent =
-                event.platform || selectedType;
-              document.getElementById('contentWordCount').textContent =
-                (event.word_count || '—') + ' kata';
-              document.getElementById('contentOutput').innerHTML =
-                renderMarkdown(event.content || fullContent);
-            }
-
-            if (event.type === 'error') {
-              throw new Error(event.message);
-            }
-
-          } catch (e) {
-            if (e.message !== 'Unexpected end of JSON input') {
-              console.error('Parse error:', e);
-            }
+    const reader=res.body.getReader();
+    const dec=new TextDecoder();
+    let buf='',full='';
+    while(true){
+      const{done,value}=await reader.read();
+      if(done)break;
+      buf+=dec.decode(value,{stream:true});
+      const lines=buf.split('\n');buf=lines.pop();
+      for(const line of lines){
+        if(!line.startsWith('data: '))continue;
+        try{
+          const ev=JSON.parse(line.slice(6));
+          if(ev.type==='chunk'){full+=ev.text;document.getElementById('contentOut').innerHTML=renderMd(full);}
+          if(ev.type==='done'){
+            const dur=((Date.now()-contentT0)/1000).toFixed(1)+'s';
+            document.getElementById('contentDur').textContent=dur;
+            document.getElementById('contentPlatStat').textContent=ev.platform||selType;
+            document.getElementById('contentWords').textContent=(ev.word_count||'—')+' kata';
+            document.getElementById('contentOut').innerHTML=renderMd(ev.content||full);
           }
-        }
+          if(ev.type==='error')throw new Error(ev.message);
+        }catch(pe){if(pe.message&&!pe.message.includes('JSON'))throw pe;}
       }
-
-    } catch (err) {
-      const card = document.getElementById('contentErrorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-      document.getElementById('contentResultCard').classList.remove('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('contentLoadingState').classList.remove('visible');
-      document.getElementById('contentBtn').disabled = false;
-      document.getElementById('contentBtnText').textContent = 'Buat Konten';
-      document.getElementById('contentBtnIcon').textContent = '✍️';
     }
+  }catch(e){
+    showErr('contentError',e.message);
+    document.getElementById('contentResult').classList.remove('show');
   }
+  finally{
+    clearInterval(iv);
+    document.getElementById('contentLoading').classList.remove('show');
+    document.getElementById('contentBtn').disabled=false;
+    document.getElementById('contentBtnText').textContent='Buat Konten';
+    document.getElementById('contentBtnIcon').textContent='✍️';
+  }
+});
 
-  // ══════════════════════════════════
-  // BUSINESS ANALYST AGENT
-  // ══════════════════════════════════
-  let analystStartTime;
+// ══════════════════════════════════
+// MONETIZATION
+// ══════════════════════════════════
+let monoT0;
+document.getElementById('monoBtn').addEventListener('click', async ()=>{
+  const product=document.getElementById('monoProduct').value.trim();
+  if(!product){alert('Isi produk dulu!');return;}
+  monoT0=Date.now();
+  const selMode=document.getElementById('monoMode').value;
+  const selLine=document.getElementById('monoBizLine').value;
 
-  async function runAnalyst() {
-    const topic = document.getElementById('analystTopic').value.trim();
-    if (!topic) { alert('Isi topik dulu!'); return; }
+  document.getElementById('monoEmpty').style.display='none';
+  hideErr('monoError');
+  document.getElementById('monoResult').classList.remove('show');
+  document.getElementById('monoLoading').classList.add('show');
+  document.getElementById('monoBtn').disabled=true;
+  document.getElementById('monoBtnText').textContent='Menganalisis...';
+  document.getElementById('monoBtnIcon').textContent='⏳';
 
-    analystStartTime = Date.now();
-    const selectedMode = document.getElementById('analystMode').value;
+  const iv=animSteps(['ms1','ms2','ms3','ms4','ms5'],'monoBar',1800);
+  try{
+    const res=await fetch('/api/monetization',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({product,mode:selMode,business_line:selLine,
+        revenue_target:document.getElementById('monoTarget').value,
+        revenue_data:document.getElementById('monoData').value,
+        competitor_pricing:document.getElementById('monoComp').value})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.message);
+    const dur=((Date.now()-monoT0)/1000).toFixed(1)+'s';
+    document.getElementById('monoDur').textContent=dur;
+    document.getElementById('monoModeStat').textContent=selMode;
+    document.getElementById('monoLineStat').textContent=selLine;
+    document.getElementById('monoOut').innerHTML=renderMd(data.report||data.full_output||'');
+    document.getElementById('monoResult').classList.add('show');
+  }catch(e){showErr('monoError',e.message);}
+  finally{
+    clearInterval(iv);
+    document.getElementById('monoLoading').classList.remove('show');
+    document.getElementById('monoBtn').disabled=false;
+    document.getElementById('monoBtnText').textContent='Analisis Monetisasi';
+    document.getElementById('monoBtnIcon').textContent='💰';
+  }
+});
 
-    document.getElementById('analystEmptyState').style.display = 'none';
-    document.getElementById('analystErrorCard').classList.remove('visible');
-    document.getElementById('analystResultCard').classList.remove('visible');
-    document.getElementById('analystLoadingState').classList.add('visible');
-    document.getElementById('analystBtn').disabled = true;
-    document.getElementById('analystBtnText').textContent = 'Menganalisis...';
-    document.getElementById('analystBtnIcon').textContent = '⏳';
+// ══════════════════════════════════
+// DISTRIBUTION
+// ══════════════════════════════════
+let distT0;
+document.getElementById('distBtn').addEventListener('click', async ()=>{
+  const content=document.getElementById('distContent').value.trim();
+  if(!content){alert('Isi konten dulu!');return;}
+  distT0=Date.now();
+  const selMode=document.getElementById('distMode').value;
+  const selPlat=document.getElementById('distPlatforms').value;
 
-    const iv = animateSteps(
-      ['astep1','astep2','astep3','astep4','astep5'],
-      'analystProgressBar', 2000
-    );
+  document.getElementById('distEmpty').style.display='none';
+  hideErr('distError');
+  document.getElementById('distResult').classList.remove('show');
+  document.getElementById('distLoading').classList.add('show');
+  document.getElementById('distBtn').disabled=true;
+  document.getElementById('distBtnText').textContent='Membuat plan...';
+  document.getElementById('distBtnIcon').textContent='⏳';
 
-    try {
-      const res = await fetch('/api/analyst', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          topic,
-          analysis_mode: selectedMode,
-          business_line: document.getElementById('analystBusinessLine').value,
-          revenue_target: document.getElementById('analystRevTarget').value,
-          available_data: document.getElementById('analystData').value,
-          specific_questions: document.getElementById('analystQuestions').value,
-          trend_context: document.getElementById('analystTrendContext').value,
-        }),
-      });
+  const iv=animSteps(['ds1','ds2','ds3','ds4','ds5'],'distBar',1800);
+  try{
+    const res=await fetch('/api/distribution',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({content,mode:selMode,platforms:selPlat,
+        launch_date:document.getElementById('distLaunch').value,
+        existing_audience:document.getElementById('distAudience').value,
+        context:document.getElementById('distContext').value})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.message);
+    const dur=((Date.now()-distT0)/1000).toFixed(1)+'s';
+    document.getElementById('distDur').textContent=dur;
+    document.getElementById('distPlatCount').textContent=(data.platform_count||'—')+' platform';
+    document.getElementById('distModeStat').textContent=selMode;
+    document.getElementById('distOut').innerHTML=renderMd(data.report||data.full_output||'');
+    document.getElementById('distResult').classList.add('show');
+  }catch(e){showErr('distError',e.message);}
+  finally{
+    clearInterval(iv);
+    document.getElementById('distLoading').classList.remove('show');
+    document.getElementById('distBtn').disabled=false;
+    document.getElementById('distBtnText').textContent='Buat Distribution Plan';
+    document.getElementById('distBtnIcon').textContent='📡';
+  }
+});
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error');
+// ══════════════════════════════════
+// ORCHESTRATOR
+// ══════════════════════════════════
+let orchT0;
+document.getElementById('orchBtn').addEventListener('click', async ()=>{
+  const goal=document.getElementById('orchGoal').value.trim();
+  if(!goal){alert('Isi goal dulu!');return;}
+  orchT0=Date.now();
 
-      const dur = ((Date.now() - analystStartTime) / 1000).toFixed(1) + 's';
-      document.getElementById('analystDuration').textContent = dur;
-      document.getElementById('analystModeStat').textContent = selectedMode;
+  document.getElementById('orchEmpty').style.display='none';
+  hideErr('orchError');
+  document.getElementById('orchResult').classList.remove('show');
+  document.getElementById('orchLoading').classList.add('show');
+  document.getElementById('orchBtn').disabled=true;
+  document.getElementById('orchBtnText').textContent='Memproses...';
+  document.getElementById('orchBtnIcon').textContent='⏳';
 
-      // Verdict dengan warna
-      const verdictEl = document.getElementById('analystVerdict');
-      if (data.verdict) {
-        verdictEl.textContent = data.verdict;
-        verdictEl.style.color = data.verdict === 'GO' ? '#00e5a0' :
-          data.verdict === 'NO-GO' ? '#ff4560' : '#f5a623';
-      } else {
-        verdictEl.textContent = '—';
-      }
-
-      document.getElementById('analystOutput').innerHTML =
-        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
-      document.getElementById('analystResultCard').classList.add('visible');
-
-    } catch (err) {
-      const card = document.getElementById('analystErrorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('analystLoadingState').classList.remove('visible');
-      document.getElementById('analystBtn').disabled = false;
-      document.getElementById('analystBtnText').textContent = 'Analisis Bisnis';
-      document.getElementById('analystBtnIcon').textContent = '📊';
+  const iv=animSteps(['os1','os2','os3','os4','os5'],'orchBar',1200);
+  try{
+    const res=await fetch('/api/orchestrate',{method:'POST',headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({goal,business_line:document.getElementById('orchBizLine').value,
+        context:document.getElementById('orchContext').value,
+        time_budget:document.getElementById('orchUrgency').value})});
+    const data=await res.json();
+    if(!res.ok)throw new Error(data.message);
+    const dur=((Date.now()-orchT0)/1000).toFixed(1)+'s';
+    document.getElementById('orchDur').textContent=dur;
+    const plan=data.task_plan;
+    document.getElementById('orchAgents').textContent=plan?.agent_sequence?.length??'—';
+    document.getElementById('orchLines').textContent=plan?.business_lines?.join(', ')??'—';
+    if(plan?.agent_sequence?.length){
+      const flow=document.getElementById('orchFlow');
+      flow.innerHTML=plan.agent_sequence.map((a,i)=>
+        `<span class="agent-node">${i+1}. ${a.agent}</span>`+
+        (i<plan.agent_sequence.length-1?'<span class="agent-arrow">→</span>':'')
+      ).join('');
+      document.getElementById('orchFlowCard').style.display='block';
     }
+    document.getElementById('orchExplain').innerHTML=renderMd(data.explanation||data.full_output||'');
+    document.getElementById('orchJson').textContent=plan?JSON.stringify(plan,null,2):'(tidak ada)';
+    document.getElementById('orchResult').classList.add('show');
+  }catch(e){showErr('orchError',e.message);}
+  finally{
+    clearInterval(iv);
+    document.getElementById('orchLoading').classList.remove('show');
+    document.getElementById('orchBtn').disabled=false;
+    document.getElementById('orchBtnText').textContent='Jalankan Orchestrator';
+    document.getElementById('orchBtnIcon').textContent='🧠';
   }
-
-  // ══════════════════════════════════
-  // MONETIZATION AGENT
-  // ══════════════════════════════════
-  let monetizationStartTime;
-
-  async function runMonetization() {
-    const product = document.getElementById('monetizationProduct').value.trim();
-    if (!product) { alert('Isi produk dulu!'); return; }
-
-    monetizationStartTime = Date.now();
-    const selectedMode = document.getElementById('monetizationMode').value;
-    const selectedLine = document.getElementById('monetizationBusinessLine').value;
-
-    document.getElementById('monetizationEmptyState').style.display = 'none';
-    document.getElementById('monetizationErrorCard').classList.remove('visible');
-    document.getElementById('monetizationResultCard').classList.remove('visible');
-    document.getElementById('monetizationLoadingState').classList.add('visible');
-    document.getElementById('monetizationBtn').disabled = true;
-    document.getElementById('monetizationBtnText').textContent = 'Menganalisis...';
-    document.getElementById('monetizationBtnIcon').textContent = '⏳';
-
-    const iv = animateSteps(
-      ['mstep1','mstep2','mstep3','mstep4','mstep5'],
-      'monetizationProgressBar', 1800
-    );
-
-    try {
-      const res = await fetch('/api/monetization', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          product,
-          mode: selectedMode,
-          business_line: selectedLine,
-          revenue_target: document.getElementById('monetizationTarget').value,
-          revenue_data: document.getElementById('monetizationData').value,
-          competitor_pricing: document.getElementById('monetizationCompetitor').value,
-          specific_questions: document.getElementById('monetizationQuestions').value,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error');
-
-      const dur = ((Date.now() - monetizationStartTime) / 1000).toFixed(1) + 's';
-      document.getElementById('monetizationDuration').textContent = dur;
-      document.getElementById('monetizationModeStat').textContent = selectedMode;
-      document.getElementById('monetizationLineStat').textContent = selectedLine;
-
-      document.getElementById('monetizationOutput').innerHTML =
-        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
-      document.getElementById('monetizationResultCard').classList.add('visible');
-
-    } catch (err) {
-      const card = document.getElementById('monetizationErrorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('monetizationLoadingState').classList.remove('visible');
-      document.getElementById('monetizationBtn').disabled = false;
-      document.getElementById('monetizationBtnText').textContent = 'Analisis Monetisasi';
-      document.getElementById('monetizationBtnIcon').textContent = '💰';
-    }
-  }
-
-  // ══════════════════════════════════
-  // DISTRIBUTION AGENT
-  // ══════════════════════════════════
-  let distributionStartTime;
-
-  async function runDistributionAgent() {
-    const content = document.getElementById('distributionContent').value.trim();
-    if (!content) { alert('Isi konten dulu!'); return; }
-
-    distributionStartTime = Date.now();
-    const selectedMode = document.getElementById('distributionMode').value;
-    const selectedPlatform = document.getElementById('distributionPlatforms').value;
-
-    document.getElementById('distributionEmptyState').style.display = 'none';
-    document.getElementById('distributionErrorCard').classList.remove('visible');
-    document.getElementById('distributionResultCard').classList.remove('visible');
-    document.getElementById('distributionLoadingState').classList.add('visible');
-    document.getElementById('distributionBtn').disabled = true;
-    document.getElementById('distributionBtnText').textContent = 'Membuat plan...';
-    document.getElementById('distributionBtnIcon').textContent = '⏳';
-
-    const iv = animateSteps(
-      ['dstep1','dstep2','dstep3','dstep4','dstep5'],
-      'distributionProgressBar', 1800
-    );
-
-    try {
-      const res = await fetch('/api/distribution', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          content,
-          mode: selectedMode,
-          platforms: selectedPlatform,
-          launch_date: document.getElementById('distributionLaunchDate').value,
-          existing_audience: document.getElementById('distributionAudience').value,
-          context: document.getElementById('distributionContext').value,
-        }),
-      });
-
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error');
-
-      const dur = ((Date.now() - distributionStartTime) / 1000).toFixed(1) + 's';
-      document.getElementById('distributionDuration').textContent = dur;
-      document.getElementById('distributionPlatformCount').textContent =
-        (data.platform_count || '—') + ' platform';
-      document.getElementById('distributionModeStat').textContent = selectedMode;
-
-      document.getElementById('distributionOutput').innerHTML =
-        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
-      document.getElementById('distributionResultCard').classList.add('visible');
-
-    } catch (err) {
-      const card = document.getElementById('distributionErrorCard');
-      card.textContent = '❌ Error: ' + err.message;
-      card.classList.add('visible');
-    } finally {
-      clearInterval(iv);
-      document.getElementById('distributionLoadingState').classList.remove('visible');
-      document.getElementById('distributionBtn').disabled = false;
-      document.getElementById('distributionBtnText').textContent = 'Buat Distribution Plan';
-      document.getElementById('distributionBtnIcon').textContent = '📡';
-    }
-  }
+});
 </script>
 </body>
 </html>

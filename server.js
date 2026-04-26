@@ -1,6 +1,33 @@
 require('dotenv').config();
 const express = require('express');
 const path = require('path');
+const crypto = require('crypto');
+
+// ── Auth config (hardcoded, no database) ──
+const AUTH = {
+  username: 'dino',
+  password: 'solomon2025',
+};
+const sessions = new Set(); // simpan token di memory
+
+function generateToken() {
+  return crypto.randomBytes(32).toString('hex');
+}
+
+function requireAuth(req, res, next) {
+  // Cek dari cookie header manual (tanpa library)
+  const cookieHeader = req.headers.cookie || '';
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(c => {
+      const [k, ...v] = c.trim().split('=');
+      return [k, v.join('=')];
+    }).filter(([k]) => k)
+  );
+  const token = cookies['solomon_session'];
+  if (token && sessions.has(token)) return next();
+  res.redirect('/login');
+}
+
 const { runOrchestrator } = require('./agents/orchestrator');
 const { runTrendAgent } = require('./agents/trendAgent');
 const { runSeoAgent } = require('./agents/seoAgent');
@@ -11,61 +38,81 @@ const { runDistribution } = require('./agents/distribution');
 
 const app = express();
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public'))); // Serve web UI
+app.use(express.static(path.join(__dirname, 'public')));
 
-// ── API Routes ──────────────────────────────────────
+// ── Auth Routes ──────────────────────────────
 
-// Health check
-app.get('/api/health', (req, res) => {
+// Login page
+app.get('/login', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'login.html'));
+});
+
+// Login POST
+app.post('/auth/login', (req, res) => {
+  const { username, password } = req.body;
+  if (username === AUTH.username && password === AUTH.password) {
+    const token = generateToken();
+    sessions.add(token);
+    // Set cookie 7 hari
+    res.setHeader('Set-Cookie',
+      `solomon_session=${token}; Path=/; Max-Age=${7 * 24 * 60 * 60}; HttpOnly; SameSite=Strict`
+    );
+    return res.json({ success: true });
+  }
+  res.status(401).json({ success: false, message: 'Username atau password salah.' });
+});
+
+// Logout
+app.post('/auth/logout', (req, res) => {
+  const cookieHeader = req.headers.cookie || '';
+  const cookies = Object.fromEntries(
+    cookieHeader.split(';').map(c => {
+      const [k, ...v] = c.trim().split('=');
+      return [k, v.join('=')];
+    }).filter(([k]) => k)
+  );
+  const token = cookies['solomon_session'];
+  if (token) sessions.delete(token);
+  res.setHeader('Set-Cookie', 'solomon_session=; Path=/; Max-Age=0');
+  res.json({ success: true });
+});
+
+// ── Protected API Routes ──────────────────────
+
+app.get('/api/health', requireAuth, (req, res) => {
   res.json({
     status: 'ok',
-    agents_ready: ['orchestrator'],
+    agents_ready: ['orchestrator','trendAgent','seoAgent','contentCreator','businessAnalyst','monetization','distribution'],
+    total_agents: 7,
     uptime: process.uptime().toFixed(0) + 's',
     timestamp: new Date().toISOString(),
   });
 });
 
-// Orchestrator endpoint
-app.post('/api/orchestrate', async (req, res) => {
+app.post('/api/orchestrate', requireAuth, async (req, res) => {
   const { goal, business_line, context, time_budget } = req.body;
-
-  if (!goal?.trim()) {
-    return res.status(400).json({ message: 'Goal tidak boleh kosong.' });
-  }
-
+  if (!goal?.trim()) return res.status(400).json({ message: 'Goal tidak boleh kosong.' });
   try {
     const result = await runOrchestrator(goal, {
       businessLine: business_line || 'semua',
       additionalContext: context || '',
       timeBudget: time_budget || 'normal (1 minggu)',
     });
-
-    // Pastikan selalu return field 'explanation'
     return res.json({
-      status: 'success',
-      goal,
+      status: 'success', goal,
       task_plan: result.taskPlan || null,
-      explanation: result.explanation || result.raw || 'Tidak ada output',
+      explanation: result.explanation || result.raw || '',
       full_output: result.raw || '',
       timestamp: result.timestamp,
     });
-
   } catch (err) {
-    console.error('Orchestrate error:', err.message);
     return res.status(500).json({ message: err.message });
   }
 });
 
-// Trend Agent endpoint
-app.post('/api/trend', async (req, res) => {
+app.post('/api/trend', requireAuth, async (req, res) => {
   const { topic, business_line, time_horizon, market_context, context } = req.body;
-
-  if (!topic?.trim()) {
-    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
-  }
-
-  console.log(`\n[TREND] Topic: "${topic.substring(0, 60)}"`);
-
+  if (!topic?.trim()) return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
   try {
     const result = await runTrendAgent(topic, {
       businessLine: business_line || 'semua',
@@ -73,32 +120,13 @@ app.post('/api/trend', async (req, res) => {
       marketContext: market_context || 'indonesia dan global',
       additionalContext: context || '',
     });
-
-    return res.json({
-      status: 'success',
-      topic,
-      report: result.report,
-      high_priority_count: result.highPriorityCount,
-      full_output: result.raw,
-      timestamp: result.timestamp,
-    });
-
-  } catch (err) {
-    console.error('Trend error:', err.message);
-    return res.status(500).json({ message: err.message });
-  }
+    return res.json({ status: 'success', topic, report: result.report, high_priority_count: result.highPriorityCount, full_output: result.raw, timestamp: result.timestamp });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
 });
 
-// SEO Agent endpoint
-app.post('/api/seo', async (req, res) => {
+app.post('/api/seo', requireAuth, async (req, res) => {
   const { topic, platforms, content_type, target_audience, trend_context } = req.body;
-
-  if (!topic?.trim()) {
-    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
-  }
-
-  console.log(`\n[SEO] Topic: "${topic.substring(0, 60)}"`);
-
+  if (!topic?.trim()) return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
   try {
     const result = await runSeoAgent(topic, {
       platforms: platforms || 'youtube,google,kdp',
@@ -106,123 +134,60 @@ app.post('/api/seo', async (req, res) => {
       targetAudience: target_audience || 'Keluarga Indonesia usia 25-40',
       trendContext: trend_context || '',
     });
-
-    return res.json({
-      status: 'success',
-      topic,
-      blueprint: result.blueprint,
-      keyword_table: result.keywordTable,
-      full_output: result.raw,
-      timestamp: result.timestamp,
-    });
-
-  } catch (err) {
-    console.error('SEO error:', err.message);
-    return res.status(500).json({ message: err.message });
-  }
+    return res.json({ status: 'success', topic, blueprint: result.blueprint, keyword_table: result.keywordTable, full_output: result.raw, timestamp: result.timestamp });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
 });
 
-// Content Creator endpoint — STREAMING VERSION
-app.post('/api/content', async (req, res) => {
-  const {
-    topic, content_type, target_audience,
-    primary_keyword, secondary_keywords,
-    seo_brief, trend_context, tone, length, cta
-  } = req.body;
+app.post('/api/content', requireAuth, async (req, res) => {
+  const { topic, content_type, target_audience, primary_keyword, secondary_keywords, seo_brief, trend_context, tone, length, cta } = req.body;
+  if (!topic?.trim()) return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
 
-  if (!topic?.trim()) {
-    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
-  }
-
-  console.log(`\n[CONTENT] Type: ${content_type} | Topic: "${topic.substring(0, 50)}"`);
-
-  // Setup SSE streaming
   res.setHeader('Content-Type', 'text/event-stream');
   res.setHeader('Cache-Control', 'no-cache');
   res.setHeader('Connection', 'keep-alive');
   res.flushHeaders();
 
-  const sendEvent = (data) => {
-    res.write(`data: ${JSON.stringify(data)}\n\n`);
-  };
+  const send = (data) => res.write(`data: ${JSON.stringify(data)}\n\n`);
 
   try {
     const Anthropic = require('@anthropic-ai/sdk');
     const fs = require('fs');
-    const path = require('path');
     const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
-
-    // Load & fill prompt
-    const promptPath = path.join(__dirname, 'prompts', 'contentCreator.txt');
-    let systemPrompt = fs.readFileSync(promptPath, 'utf8');
+    let systemPrompt = fs.readFileSync(path.join(__dirname, 'prompts', 'contentCreator.txt'), 'utf8');
     const vars = {
-      CONTENT_TYPE: content_type || 'artikel',
-      TOPIC: topic,
+      CONTENT_TYPE: content_type || 'artikel', TOPIC: topic,
       TARGET_AUDIENCE: target_audience || 'Keluarga Indonesia usia 25-40',
       PRIMARY_KEYWORD: primary_keyword || topic,
       SECONDARY_KEYWORDS: secondary_keywords || 'Tidak ada.',
-      SEO_BRIEF: seo_brief || 'Tidak ada.',
-      TREND_CONTEXT: trend_context || 'Tidak ada.',
-      TONE: tone || 'kasual-edukatif',
-      LENGTH: length || 'sedang',
+      SEO_BRIEF: seo_brief || 'Tidak ada.', TREND_CONTEXT: trend_context || 'Tidak ada.',
+      TONE: tone || 'kasual-edukatif', LENGTH: length || 'sedang',
       DESIRED_CTA: cta || 'Kunjungi link di bawah',
     };
     Object.entries(vars).forEach(([k, v]) => {
       systemPrompt = systemPrompt.split(`{${k}}`).join(v || 'Tidak tersedia');
     });
 
-    sendEvent({ type: 'status', message: 'Memulai produksi konten...' });
-
-    // Stream response dari Claude
     let fullText = '';
     const stream = await client.messages.stream({
-      model: 'claude-haiku-4-5-20251001', // Haiku: jauh lebih cepat
-      max_tokens: 4096,
+      model: 'claude-haiku-4-5-20251001', max_tokens: 4096,
       system: systemPrompt,
-      messages: [{ role: 'user', content: 'Jalankan tugasmu berdasarkan input di system prompt.' }],
+      messages: [{ role: 'user', content: 'Jalankan tugasmu.' }],
     });
-
     for await (const chunk of stream) {
       if (chunk.type === 'content_block_delta' && chunk.delta?.text) {
         fullText += chunk.delta.text;
-        sendEvent({ type: 'chunk', text: chunk.delta.text });
+        send({ type: 'chunk', text: chunk.delta.text });
       }
     }
-
-    // Ekstrak platform & word count
     const platformMatch = fullText.match(/\[PLATFORM\]:\s*(EBOOK|YOUTUBE|AFFILIATE)/i);
-    const platform = platformMatch ? platformMatch[1] : content_type;
-    const wordCount = fullText.split(/\s+/).length;
-
-    sendEvent({
-      type: 'done',
-      platform,
-      word_count: wordCount,
-      content: fullText,
-    });
-
-  } catch (err) {
-    console.error('Content stream error:', err.message);
-    sendEvent({ type: 'error', message: err.message });
-  } finally {
-    res.end();
-  }
+    send({ type: 'done', platform: platformMatch?.[1] || content_type, word_count: fullText.split(/\s+/).length, content: fullText });
+  } catch (err) { send({ type: 'error', message: err.message }); }
+  finally { res.end(); }
 });
 
-// Business Analyst endpoint
-app.post('/api/analyst', async (req, res) => {
-  const {
-    topic, analysis_mode, business_line,
-    available_data, revenue_target,
-    specific_questions, trend_context
-  } = req.body;
-
-  if (!topic?.trim()) {
-    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
-  }
-
-  console.log(`\n[ANALYST] Mode: ${analysis_mode} | Topic: "${topic.substring(0, 50)}"`);
-
+app.post('/api/analyst', requireAuth, async (req, res) => {
+  const { topic, analysis_mode, business_line, available_data, revenue_target, specific_questions, trend_context } = req.body;
+  if (!topic?.trim()) return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
   try {
     const result = await runBusinessAnalyst(topic, {
       analysisMode: analysis_mode || 'validasi_pasar',
@@ -232,129 +197,52 @@ app.post('/api/analyst', async (req, res) => {
       specificQuestions: specific_questions || '',
       trendContext: trend_context || '',
     });
-
-    return res.json({
-      status: 'success',
-      topic,
-      verdict: result.verdict,
-      summary: result.summary,
-      report: result.report,
-      full_output: result.raw,
-      timestamp: result.timestamp,
-    });
-
-  } catch (err) {
-    console.error('Analyst error:', err.message);
-    return res.status(500).json({ message: err.message });
-  }
+    return res.json({ status: 'success', topic, verdict: result.verdict, summary: result.summary, report: result.report, full_output: result.raw, timestamp: result.timestamp });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
 });
 
-// Monetization endpoint
-app.post('/api/monetization', async (req, res) => {
-  const {
-    product, mode, business_line,
-    revenue_data, revenue_target,
-    competitor_pricing, specific_questions
-  } = req.body;
-
-  if (!product?.trim()) {
-    return res.status(400).json({ message: 'Product tidak boleh kosong.' });
-  }
-
-  console.log(`\n[MONETIZATION] Mode: ${mode} | Product: "${product.substring(0, 50)}"`);
-
+app.post('/api/monetization', requireAuth, async (req, res) => {
+  const { product, mode, business_line, revenue_data, revenue_target, competitor_pricing, specific_questions } = req.body;
+  if (!product?.trim()) return res.status(400).json({ message: 'Product tidak boleh kosong.' });
   try {
     const result = await runMonetization(product, {
-      mode: mode || 'pricing',
-      businessLine: business_line || 'semua',
-      revenueData: revenue_data || '',
-      revenueTarget: revenue_target || '',
-      competitorPricing: competitor_pricing || '',
-      specificQuestions: specific_questions || '',
+      mode: mode || 'pricing', businessLine: business_line || 'semua',
+      revenueData: revenue_data || '', revenueTarget: revenue_target || '',
+      competitorPricing: competitor_pricing || '', specificQuestions: specific_questions || '',
     });
-
-    return res.json({
-      status: 'success',
-      product,
-      report: result.report,
-      projection_table: result.projectionTable,
-      full_output: result.raw,
-      timestamp: result.timestamp,
-    });
-
-  } catch (err) {
-    console.error('Monetization error:', err.message);
-    return res.status(500).json({ message: err.message });
-  }
+    return res.json({ status: 'success', product, report: result.report, projection_table: result.projectionTable, full_output: result.raw, timestamp: result.timestamp });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
 });
 
-// Distribution endpoint
-app.post('/api/distribution', async (req, res) => {
-  const {
-    content, mode, platforms,
-    launch_date, existing_audience, context
-  } = req.body;
-
-  if (!content?.trim()) {
-    return res.status(400).json({ message: 'Konten tidak boleh kosong.' });
-  }
-
-  console.log(`\n[DISTRIBUTION] Mode: ${mode} | Content: "${content.substring(0, 50)}"`);
-
+app.post('/api/distribution', requireAuth, async (req, res) => {
+  const { content, mode, platforms, launch_date, existing_audience, context } = req.body;
+  if (!content?.trim()) return res.status(400).json({ message: 'Konten tidak boleh kosong.' });
   try {
     const result = await runDistribution(content, {
-      mode: mode || 'distribution_plan',
-      platforms: platforms || 'semua',
-      launchDate: launch_date || '',
-      existingAudience: existing_audience || '',
+      mode: mode || 'distribution_plan', platforms: platforms || 'semua',
+      launchDate: launch_date || '', existingAudience: existing_audience || '',
       additionalContext: context || '',
     });
-
-    return res.json({
-      status: 'success',
-      content,
-      platform_count: result.platformCount,
-      report: result.report,
-      checklist: result.checklist,
-      full_output: result.raw,
-      timestamp: result.timestamp,
-    });
-
-  } catch (err) {
-    console.error('Distribution error:', err.message);
-    return res.status(500).json({ message: err.message });
-  }
+    return res.json({ status: 'success', content, platform_count: result.platformCount, report: result.report, checklist: result.checklist, full_output: result.raw, timestamp: result.timestamp });
+  } catch (err) { return res.status(500).json({ message: err.message }); }
 });
 
-// Update health check — semua agen ready
-app.get('/api/health', (req, res) => {
-  res.json({
-    status: 'ok',
-    agents_ready: [
-      'orchestrator', 'trendAgent', 'seoAgent',
-      'contentCreator', 'businessAnalyst',
-      'monetization', 'distribution'
-    ],
-    total_agents: 7,
-    uptime: process.uptime().toFixed(0) + 's',
-    timestamp: new Date().toISOString(),
-  });
+// Root → redirect ke login atau app
+app.get('/', requireAuth, (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Semua route lain → web UI
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// ── Start ────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
   console.log('\n' + '━'.repeat(45));
-  console.log('  🤖  AI AGENT SYSTEM');
+  console.log('  🤖  SOLOMON AGENT SYSTEM');
   console.log('━'.repeat(45));
-  console.log(`  URL    → http://localhost:${PORT}`);
-  console.log(`  API    → http://localhost:${PORT}/api`);
-  console.log(`  Mode   → ${process.env.NODE_ENV || 'development'}`);
-  console.log(`  Key    → ${process.env.ANTHROPIC_API_KEY ? '✅ Loaded' : '❌ MISSING!'}`);
+  console.log(`  URL  → http://localhost:${PORT}`);
+  console.log(`  Auth → username: dino`);
+  console.log(`  Key  → ${process.env.ANTHROPIC_API_KEY ? '✅ Loaded' : '❌ MISSING!'}`);
   console.log('━'.repeat(45) + '\n');
 });
