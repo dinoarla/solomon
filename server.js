@@ -5,6 +5,7 @@ const { runOrchestrator } = require('./agents/orchestrator');
 const { runTrendAgent } = require('./agents/trendAgent');
 const { runSeoAgent } = require('./agents/seoAgent');
 const { runContentCreator } = require('./agents/contentCreator');
+const { runBusinessAnalyst } = require('./agents/businessAnalyst');
 
 const app = express();
 app.use(express.json());
@@ -203,6 +204,46 @@ app.post('/api/content', async (req, res) => {
     sendEvent({ type: 'error', message: err.message });
   } finally {
     res.end();
+  }
+});
+
+// Business Analyst endpoint
+app.post('/api/analyst', async (req, res) => {
+  const {
+    topic, analysis_mode, business_line,
+    available_data, revenue_target,
+    specific_questions, trend_context
+  } = req.body;
+
+  if (!topic?.trim()) {
+    return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
+  }
+
+  console.log(`\n[ANALYST] Mode: ${analysis_mode} | Topic: "${topic.substring(0, 50)}"`);
+
+  try {
+    const result = await runBusinessAnalyst(topic, {
+      analysisMode: analysis_mode || 'validasi_pasar',
+      businessLine: business_line || 'semua',
+      availableData: available_data || '',
+      revenueTarget: revenue_target || '',
+      specificQuestions: specific_questions || '',
+      trendContext: trend_context || '',
+    });
+
+    return res.json({
+      status: 'success',
+      topic,
+      verdict: result.verdict,
+      summary: result.summary,
+      report: result.report,
+      full_output: result.raw,
+      timestamp: result.timestamp,
+    });
+
+  } catch (err) {
+    console.error('Analyst error:', err.message);
+    return res.status(500).json({ message: err.message });
   }
 });
 

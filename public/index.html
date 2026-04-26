@@ -347,6 +347,8 @@
     #seoPanel.visible { display: contents; }
     #contentPanel { display: none; }
     #contentPanel.visible { display: contents; }
+    #analystPanel { display: none; }
+    #analystPanel.visible { display: contents; }
   </style>
 </head>
 <body>
@@ -359,6 +361,7 @@
     <button class="nav-btn" id="nav-trend" onclick="switchTab('trend')">🔥 Trend</button>
     <button class="nav-btn" id="nav-seo" onclick="switchTab('seo')">🔍 SEO</button>
     <button class="nav-btn" id="nav-content" onclick="switchTab('content')">✍️ Content</button>
+    <button class="nav-btn" id="nav-analyst" onclick="switchTab('analyst')">📊 Analyst</button>
   </nav>
   <span id="statusText" style="margin-left:auto">● ONLINE</span>
 </header>
@@ -814,7 +817,119 @@
 
   </div>
   <!-- ── END CONTENT CREATOR PANEL ── -->
+  <!-- ── BUSINESS ANALYST PANEL ── -->
+  <div id="analystPanel">
 
+    <div class="panel panel-left">
+      <div class="panel-label">Business Analyst</div>
+
+      <div>
+        <label>Mode Analisis</label>
+        <select id="analystMode">
+          <option value="validasi_pasar">🔎 Validasi Pasar (produk baru)</option>
+          <option value="analisis_produk">📦 Analisis Produk Existing</option>
+          <option value="proyeksi_finansial">📈 Proyeksi Finansial</option>
+          <option value="laporan_bulanan">📋 Laporan Performa Bulanan</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Topik / Produk</label>
+        <textarea id="analystTopic" placeholder="Contoh: Ebook MPASI 6 bahan lokal, Channel YouTube edukasi anak..."></textarea>
+      </div>
+
+      <div>
+        <label>Lini Bisnis</label>
+        <select id="analystBusinessLine">
+          <option value="semua">🌐 Semua Lini</option>
+          <option value="ebook">📚 Ebook</option>
+          <option value="youtube">🎬 YouTube</option>
+          <option value="affiliate">🛒 Affiliate</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Target Revenue (opsional)</label>
+        <input type="text" id="analystRevTarget"
+          placeholder="Contoh: Rp5.000.000/bulan dalam 3 bulan">
+      </div>
+
+      <div>
+        <label>Data yang Tersedia (opsional)</label>
+        <textarea id="analystData"
+          placeholder="Contoh: Views YouTube 500/hari, penjualan ebook 10 unit/bulan..."
+          style="min-height:60px"></textarea>
+      </div>
+
+      <div>
+        <label>Pertanyaan Spesifik (opsional)</label>
+        <input type="text" id="analystQuestions"
+          placeholder="Contoh: Apakah worth it expand ke KDP? Kapan break-even?">
+      </div>
+
+      <div>
+        <label>Konteks Tren (dari Trend Agent, opsional)</label>
+        <input type="text" id="analystTrendContext"
+          placeholder="Paste insight dari Trend Agent jika ada">
+      </div>
+
+      <button id="analystBtn">
+        <span id="analystBtnIcon">📊</span>
+        <span id="analystBtnText">Analisis Bisnis</span>
+      </button>
+    </div>
+
+    <div class="panel panel-right">
+      <div class="panel-label">Business Report</div>
+
+      <div class="output-empty" id="analystEmptyState">
+        <div class="big-icon">📊</div>
+        <p>Pilih mode analisis dan klik Analisis Bisnis</p>
+      </div>
+
+      <div class="loading-state" id="analystLoadingState">
+        <div class="loading-bar">
+          <div class="loading-bar-fill" id="analystProgressBar"></div>
+        </div>
+        <div class="loading-steps">
+          <div class="step active" id="astep1"><div class="step-dot"></div> Analisis market size...</div>
+          <div class="step" id="astep2"><div class="step-dot"></div> Competitive landscape...</div>
+          <div class="step" id="astep3"><div class="step-dot"></div> Financial modeling...</div>
+          <div class="step" id="astep4"><div class="step-dot"></div> Risk assessment...</div>
+          <div class="step" id="astep5"><div class="step-dot"></div> Report siap ✓</div>
+        </div>
+      </div>
+
+      <div class="error-card" id="analystErrorCard"></div>
+
+      <div class="result-card" id="analystResultCard">
+        <div class="stats-bar">
+          <div class="stat">
+            <div class="stat-label">Durasi</div>
+            <div class="stat-value" id="analystDuration">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Verdict</div>
+            <div class="stat-value" id="analystVerdict">—</div>
+          </div>
+          <div class="stat">
+            <div class="stat-label">Mode</div>
+            <div class="stat-value" id="analystModeStat">—</div>
+          </div>
+        </div>
+
+        <div class="result-section">
+          <div class="result-section-header">
+            Business Analysis Report
+            <button class="copy-btn" onclick="copyText('analystOutput')">copy</button>
+          </div>
+          <div class="result-body" id="analystOutput"></div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <!-- ── END BUSINESS ANALYST PANEL ── -->
 
 </main>
 
@@ -826,10 +941,11 @@
   document.getElementById('trendBtn').addEventListener('click', runTrend);
   document.getElementById('seoBtn').addEventListener('click', runSeo);
   document.getElementById('contentBtn').addEventListener('click', runContent);
+  document.getElementById('analystBtn').addEventListener('click', runAnalyst);
 
   // ── Tab switching ──
   function switchTab(tab) {
-    const tabs = ['orchestrator', 'trend', 'seo', 'content'];
+    const tabs = ['orchestrator', 'trend', 'seo', 'content', 'analyst'];
 
     tabs.forEach(t => {
       const panel = document.getElementById(t + 'Panel');
@@ -1226,6 +1342,80 @@
       document.getElementById('contentBtn').disabled = false;
       document.getElementById('contentBtnText').textContent = 'Buat Konten';
       document.getElementById('contentBtnIcon').textContent = '✍️';
+    }
+  }
+
+  // ══════════════════════════════════
+  // BUSINESS ANALYST AGENT
+  // ══════════════════════════════════
+  let analystStartTime;
+
+  async function runAnalyst() {
+    const topic = document.getElementById('analystTopic').value.trim();
+    if (!topic) { alert('Isi topik dulu!'); return; }
+
+    analystStartTime = Date.now();
+    const selectedMode = document.getElementById('analystMode').value;
+
+    document.getElementById('analystEmptyState').style.display = 'none';
+    document.getElementById('analystErrorCard').classList.remove('visible');
+    document.getElementById('analystResultCard').classList.remove('visible');
+    document.getElementById('analystLoadingState').classList.add('visible');
+    document.getElementById('analystBtn').disabled = true;
+    document.getElementById('analystBtnText').textContent = 'Menganalisis...';
+    document.getElementById('analystBtnIcon').textContent = '⏳';
+
+    const iv = animateSteps(
+      ['astep1','astep2','astep3','astep4','astep5'],
+      'analystProgressBar', 2000
+    );
+
+    try {
+      const res = await fetch('/api/analyst', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          topic,
+          analysis_mode: selectedMode,
+          business_line: document.getElementById('analystBusinessLine').value,
+          revenue_target: document.getElementById('analystRevTarget').value,
+          available_data: document.getElementById('analystData').value,
+          specific_questions: document.getElementById('analystQuestions').value,
+          trend_context: document.getElementById('analystTrendContext').value,
+        }),
+      });
+
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Server error');
+
+      const dur = ((Date.now() - analystStartTime) / 1000).toFixed(1) + 's';
+      document.getElementById('analystDuration').textContent = dur;
+      document.getElementById('analystModeStat').textContent = selectedMode;
+
+      // Verdict dengan warna
+      const verdictEl = document.getElementById('analystVerdict');
+      if (data.verdict) {
+        verdictEl.textContent = data.verdict;
+        verdictEl.style.color = data.verdict === 'GO' ? '#00e5a0' :
+          data.verdict === 'NO-GO' ? '#ff4560' : '#f5a623';
+      } else {
+        verdictEl.textContent = '—';
+      }
+
+      document.getElementById('analystOutput').innerHTML =
+        renderMarkdown(data.report || data.full_output || JSON.stringify(data));
+      document.getElementById('analystResultCard').classList.add('visible');
+
+    } catch (err) {
+      const card = document.getElementById('analystErrorCard');
+      card.textContent = '❌ Error: ' + err.message;
+      card.classList.add('visible');
+    } finally {
+      clearInterval(iv);
+      document.getElementById('analystLoadingState').classList.remove('visible');
+      document.getElementById('analystBtn').disabled = false;
+      document.getElementById('analystBtnText').textContent = 'Analisis Bisnis';
+      document.getElementById('analystBtnIcon').textContent = '📊';
     }
   }
 </script>
