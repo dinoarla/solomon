@@ -593,13 +593,76 @@
   document.getElementById('runBtn').addEventListener('click', runOrchestrator);
   document.getElementById('trendBtn').addEventListener('click', runTrend);
 
+  // ── Tab switching ──
+  function switchTab(tab) {
+    const orchPanel = document.getElementById('orchestratorPanel');
+    const trendPanel = document.getElementById('trendPanel');
+    document.getElementById('nav-orchestrator').classList.toggle('active', tab === 'orchestrator');
+    document.getElementById('nav-trend').classList.toggle('active', tab === 'trend');
+    if (tab === 'orchestrator') {
+      orchPanel.classList.remove('hidden');
+      trendPanel.classList.remove('visible');
+    } else {
+      orchPanel.classList.add('hidden');
+      trendPanel.classList.add('visible');
+    }
+  }
+
+  // ── Markdown renderer ──
+  function renderMarkdown(text) {
+    return text
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/^### (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.85rem;display:block;margin-top:0.6rem">$1</span>')
+      .replace(/^## (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.9rem;display:block;margin-top:0.8rem">$1</span>')
+      .replace(/^# (.+)$/gm, '<span style="color:#00e5a0;font-weight:800;font-size:1rem;display:block;margin-top:1rem">$1</span>')
+      .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
+      .replace(/^- (.+)$/gm, '<span style="display:block;padding-left:1rem">• $1</span>')
+      .replace(/^---+$/gm, '<hr style="border-color:#1e222b;margin:0.5rem 0">')
+      .replace(/\n/g, '<br>');
+  }
+
+  // ── Animate loading steps ──
+  function animateSteps(stepIds, barId, interval = 1200) {
+    const bar = document.getElementById(barId);
+    stepIds.forEach(id => document.getElementById(id).className = 'step');
+    let i = 0;
+    return setInterval(() => {
+      if (i > 0) document.getElementById(stepIds[i-1]).className = 'step done';
+      if (i < stepIds.length) {
+        document.getElementById(stepIds[i]).className = 'step active';
+        bar.style.width = ((i+1) / stepIds.length * 100) + '%';
+        i++;
+      }
+    }, interval);
+  }
+
+  // ── Copy text ──
+  function copyText(id) {
+    navigator.clipboard.writeText(document.getElementById(id).textContent)
+      .then(() => {
+        event.target.textContent = 'copied!';
+        setTimeout(() => event.target.textContent = 'copy', 1500);
+      });
+  }
+
+  // ── Health check ──
+  fetch('/api/health')
+    .then(r => r.json())
+    .then(() => { document.getElementById('statusText').textContent = '● ONLINE'; })
+    .catch(() => {
+      document.getElementById('statusText').textContent = '● OFFLINE';
+      document.getElementById('statusText').style.color = '#ff4560';
+    });
+
+  // ══════════════════════════════════
+  // ORCHESTRATOR AGENT
+  // ══════════════════════════════════
   async function runOrchestrator() {
     const goal = document.getElementById('goalInput').value.trim();
     if (!goal) { alert('Isi goal dulu!'); return; }
 
     startTime = Date.now();
 
-    // Reset UI
     document.getElementById('emptyState').style.display = 'none';
     document.getElementById('errorCard').classList.remove('visible');
     document.getElementById('resultCard').classList.remove('visible');
@@ -608,14 +671,14 @@
     document.getElementById('btnText').textContent = 'Memproses...';
     document.getElementById('btnIcon').textContent = '⏳';
 
-    animateSteps();
+    const iv = animateSteps(['step1','step2','step3','step4','step5'], 'progressBar', 1200);
 
     try {
       const res = await fetch('/api/orchestrate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          goal: goal,
+          goal,
           business_line: document.getElementById('businessLine').value,
           context: document.getElementById('contextInput').value,
           time_budget: document.getElementById('timeBudget').value,
@@ -624,11 +687,14 @@
 
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Server error ' + res.status);
-      showResult(data);
+      showOrchestratorResult(data);
 
     } catch (err) {
-      showError(err.message);
+      const card = document.getElementById('errorCard');
+      card.textContent = '❌ Error: ' + err.message;
+      card.classList.add('visible');
     } finally {
+      clearInterval(iv);
       document.getElementById('loadingState').classList.remove('visible');
       document.getElementById('runBtn').disabled = false;
       document.getElementById('btnText').textContent = 'Jalankan Orchestrator';
@@ -636,33 +702,7 @@
     }
   }
 
-  function animateSteps() {
-    const steps = ['step1','step2','step3','step4','step5'];
-    const bar = document.getElementById('progressBar');
-    steps.forEach(id => document.getElementById(id).className = 'step');
-    let i = 0;
-    const iv = setInterval(() => {
-      if (i > 0) document.getElementById(steps[i-1]).className = 'step done';
-      if (i < steps.length) {
-        document.getElementById(steps[i]).className = 'step active';
-        bar.style.width = ((i+1) / steps.length * 100) + '%';
-        i++;
-      } else { clearInterval(iv); }
-    }, 1200);
-  }
-  function renderMarkdown(text) {
-  return text
-    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
-    .replace(/^### (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.85rem">$1</span>')
-    .replace(/^## (.+)$/gm, '<span style="color:#00e5a0;font-weight:700;font-size:0.9rem;display:block;margin-top:0.8rem">$1</span>')
-    .replace(/^# (.+)$/gm, '<span style="color:#00e5a0;font-weight:800;font-size:1rem;display:block;margin-top:1rem">$1</span>')
-    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:#fff">$1</strong>')
-    .replace(/^- (.+)$/gm, '<span style="display:block;padding-left:1rem">• $1</span>')
-    .replace(/^---+$/gm, '<hr style="border-color:#1e222b;margin:0.5rem 0">')
-    .replace(/\n/g, '<br>');
-  }
-
-  function showResult(data) {
+  function showOrchestratorResult(data) {
     const dur = ((Date.now() - startTime) / 1000).toFixed(1) + 's';
     document.getElementById('statDuration').textContent = dur;
 
@@ -684,45 +724,12 @@
 
     const explanationText = data.explanation || data.full_output || JSON.stringify(data, null, 2);
     document.getElementById('explanationOutput').innerHTML = renderMarkdown(explanationText);
-
     document.getElementById('resultCard').classList.add('visible');
   }
 
-  function showError(msg) {
-    const card = document.getElementById('errorCard');
-    card.textContent = '❌ Error: ' + msg;
-    card.classList.add('visible');
-  }
-
-  function copyText(id) {
-    navigator.clipboard.writeText(document.getElementById(id).textContent)
-      .then(() => { event.target.textContent = 'copied!'; setTimeout(() => event.target.textContent = 'copy', 1500); });
-  }
-
-  fetch('/api/health')
-    .then(r => r.json())
-    .then(() => { document.getElementById('statusText').textContent = '● ONLINE'; })
-    .catch(() => {
-      document.getElementById('statusText').textContent = '● OFFLINE';
-      document.getElementById('statusText').style.color = '#ff4560';
-    });
-
-// ── Tab switching ──
-  function switchTab(tab) {
-    const orchPanel = document.getElementById('orchestratorPanel');
-    const trendPanel = document.getElementById('trendPanel');
-    document.getElementById('nav-orchestrator').classList.toggle('active', tab === 'orchestrator');
-    document.getElementById('nav-trend').classList.toggle('active', tab === 'trend');
-    if (tab === 'orchestrator') {
-      orchPanel.classList.remove('hidden');
-      trendPanel.classList.remove('visible');
-    } else {
-      orchPanel.classList.add('hidden');
-      trendPanel.classList.add('visible');
-    }
-  }
-
-  // ── Trend Agent ──
+  // ══════════════════════════════════
+  // TREND AGENT
+  // ══════════════════════════════════
   let trendStartTime;
 
   async function runTrend() {
@@ -730,6 +737,11 @@
     if (!topic) { alert('Isi topik dulu!'); return; }
 
     trendStartTime = Date.now();
+
+    // Ambil nilai pilihan SEBELUM request
+    const selectedBusinessLine = document.getElementById('trendBusinessLine').value;
+    const selectedMarket = document.getElementById('trendMarket').value;
+    const selectedHorizon = document.getElementById('trendHorizon').value;
 
     document.getElementById('trendEmptyState').style.display = 'none';
     document.getElementById('trendErrorCard').classList.remove('visible');
@@ -739,19 +751,7 @@
     document.getElementById('trendBtnText').textContent = 'Menganalisis...';
     document.getElementById('trendBtnIcon').textContent = '⏳';
 
-    // Animate steps
-    const steps = ['tstep1','tstep2','tstep3','tstep4','tstep5'];
-    const bar = document.getElementById('trendProgressBar');
-    steps.forEach(id => document.getElementById(id).className = 'step');
-    let si = 0;
-    const iv = setInterval(() => {
-      if (si > 0) document.getElementById(steps[si-1]).className = 'step done';
-      if (si < steps.length) {
-        document.getElementById(steps[si]).className = 'step active';
-        bar.style.width = ((si+1)/steps.length*100) + '%';
-        si++;
-      } else { clearInterval(iv); }
-    }, 1500);
+    const iv = animateSteps(['tstep1','tstep2','tstep3','tstep4','tstep5'], 'trendProgressBar', 1500);
 
     try {
       const res = await fetch('/api/trend', {
@@ -759,9 +759,9 @@
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           topic,
-          business_line: document.getElementById('trendBusinessLine').value,
-          time_horizon: document.getElementById('trendHorizon').value,
-          market_context: document.getElementById('trendMarket').value,
+          business_line: selectedBusinessLine,
+          time_horizon: selectedHorizon,
+          market_context: selectedMarket,
           context: document.getElementById('trendContext').value,
         }),
       });
@@ -769,12 +769,18 @@
       const data = await res.json();
       if (!res.ok) throw new Error(data.message || 'Server error');
 
-      // Tampilkan hasil
-      const dur = ((Date.now() - trendStartTime)/1000).toFixed(1) + 's';
+      // Stats
+      const dur = ((Date.now() - trendStartTime) / 1000).toFixed(1) + 's';
       document.getElementById('trendDuration').textContent = dur;
-      document.getElementById('trendHighCount').textContent = data.high_priority_count || '—';
-      document.getElementById('trendMarketStat').textContent =
-        document.getElementById('trendMarket').value;
+      document.getElementById('trendHighCount').textContent = data.high_priority_count ?? '—';
+      document.getElementById('trendMarketStat').textContent = selectedMarket;
+
+      // Label lini bisnis di header
+      const lineLabel = selectedBusinessLine === 'semua' ? 'Semua Lini' : selectedBusinessLine;
+      document.querySelector('#trendResultCard .result-section-header').textContent =
+        `Trend Report — ${lineLabel} | ${selectedHorizon}`;
+
+      // Render output
       document.getElementById('trendOutput').innerHTML =
         renderMarkdown(data.report || data.full_output || JSON.stringify(data));
       document.getElementById('trendResultCard').classList.add('visible');

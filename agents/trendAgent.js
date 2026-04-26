@@ -21,7 +21,7 @@ async function runTrendAgent(topic, options = {}) {
   const reportContent = reportMatch ? reportMatch[1].trim() : rawOutput;
 
   // Hitung jumlah tren prioritas tinggi
-  const highPriorityCount = (rawOutput.match(/Skor: [89]|Skor: 10/g) || []).length;
+  const highPriorityCount = (rawOutput.match(/Skor.*?([89]|10)\/10/g) || []).length;
 
   return {
     raw: rawOutput,

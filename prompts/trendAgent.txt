@@ -45,6 +45,8 @@ Untuk setiap tren skor ≥ 7, berikan angle konten:
 - Prioritaskan tren dengan window of opportunity yang masih terbuka
 - Berikan angka/data spesifik, bukan pernyataan umum
 - Fokus pada peluang yang bisa dieksekusi dengan tim kecil/solo
+- WAJIB: Jika LINI BISNIS FOKUS bukan "semua", HANYA berikan angle konten untuk lini bisnis tersebut saja. Contoh: jika fokus "ebook", jangan tampilkan Angle YouTube atau Angle Affiliate.
+- WAJIB: Sebutkan LINI BISNIS FOKUS di baris pertama output sebelum report dimulai.
 
 ##INPUT
 TOPIK/NICHE: {TOPIC}
