@@ -643,6 +643,184 @@
     /* Panel visibility */
     .agent-panel { display: none; }
     .agent-panel.active { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
+
+    /* ══════════════════════════════════
+   SIDEBAR COLLAPSE & MOBILE
+══════════════════════════════════ */
+
+/* Toggle button di sidebar */
+.sidebar-toggle {
+  position: absolute;
+  top: 1.25rem;
+  right: -14px;
+  width: 28px; height: 28px;
+  background: var(--yellow);
+  border: var(--border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.7rem;
+  z-index: 101;
+  transition: transform 0.2s;
+  box-shadow: var(--shadow-sm);
+}
+.sidebar-toggle:hover { transform: scale(1.1); }
+
+/* Collapsed state */
+.sidebar.collapsed { width: 64px; }
+.sidebar.collapsed .brand-sub,
+.sidebar.collapsed .nav-item > span:not(.nav-icon),
+.sidebar.collapsed .nav-badge,
+.sidebar.collapsed .sidebar-section-label,
+.sidebar.collapsed .user-name,
+.sidebar.collapsed .user-role,
+.sidebar.collapsed .logout-btn { display: none; }
+.sidebar.collapsed .brand-mark { font-size: 0.65rem; letter-spacing: 0; }
+.sidebar.collapsed .nav-item { justify-content: center; padding: 0.6rem; }
+.sidebar.collapsed .user-info { justify-content: center; }
+.sidebar.collapsed .user-avatar { margin: 0; }
+.sidebar.collapsed .sidebar-footer { padding: 1rem 0.5rem; }
+.sidebar.collapsed + .main { margin-left: 64px; }
+
+/* Sidebar transition */
+.sidebar { transition: width 0.25s cubic-bezier(0.4,0,0.2,1); overflow: hidden; }
+.main { transition: margin-left 0.25s cubic-bezier(0.4,0,0.2,1); }
+
+/* Hamburger button — mobile only */
+.hamburger {
+  display: none;
+  width: 36px; height: 36px;
+  background: var(--ink);
+  border: var(--border);
+  border-radius: 8px;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  flex-direction: column;
+  gap: 4px;
+  flex-shrink: 0;
+}
+.hamburger span {
+  display: block;
+  width: 16px; height: 2px;
+  background: white;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+/* Overlay for mobile */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.55);
+  z-index: 99;
+  backdrop-filter: blur(2px);
+}
+.sidebar-overlay.show { display: block; }
+
+/* ── TABLET (768px - 1024px) ── */
+@media (max-width: 1024px) {
+  :root { --sidebar-w: 200px; }
+
+  .content-grid {
+    grid-template-columns: 360px 1fr;
+  }
+}
+
+/* ── MOBILE (≤ 768px) ── */
+@media (max-width: 768px) {
+  body { overflow: auto; }
+
+  /* Sidebar: off-canvas drawer */
+  .sidebar {
+    transform: translateX(-100%);
+    width: 260px !important;
+    z-index: 100;
+    box-shadow: none;
+    transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  }
+  .sidebar.mobile-open {
+    transform: translateX(0);
+    box-shadow: 8px 0 32px rgba(0,0,0,0.4);
+  }
+  .sidebar-toggle { display: none !important; }
+
+  /* Main: full width */
+  .main {
+    margin-left: 0 !important;
+    height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Hamburger visible */
+  .hamburger { display: flex; }
+
+  /* Topbar */
+  .topbar {
+    padding: 0.75rem 1rem;
+    gap: 0.75rem;
+  }
+  .topbar-title { font-size: 1rem; }
+
+  /* Content: single column, scrollable */
+  .content-grid {
+    grid-template-columns: 1fr;
+    overflow: visible;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* Input panel */
+  .input-panel {
+    border-right: none;
+    border-bottom: var(--border-thin);
+    overflow: visible;
+    padding: 1.25rem;
+  }
+
+  /* Output panel */
+  .output-panel {
+    padding: 1.25rem;
+    min-height: 400px;
+  }
+
+  /* Agent panel */
+  .agent-panel.active {
+    height: auto;
+    overflow: visible;
+    flex: 1;
+  }
+
+  /* Stats row: 3 cols still but smaller */
+  .stats-row { gap: 0.5rem; }
+  .stat-card { padding: 0.65rem 0.75rem; }
+  .stat-value { font-size: 1rem; }
+
+  /* Output body */
+  .output-body { max-height: 350px; }
+
+  /* Run button bigger tap target */
+  .run-btn { padding: 1rem; font-size: 1rem; }
+
+  /* Form elements bigger */
+  .field-input, .field-select, .field-textarea {
+    font-size: 16px; /* prevent iOS zoom */
+    padding: 0.8rem 0.9rem;
+  }
+}
+
+/* ── SMALL MOBILE (≤ 480px) ── */
+@media (max-width: 480px) {
+  .stats-row { grid-template-columns: 1fr 1fr; }
+  .stats-row .stat-card:last-child { grid-column: span 2; }
+  .topbar-title em { display: inline; }
+}
+
   </style>
 </head>
 <body>
@@ -650,7 +828,8 @@
 <!-- ══════════════════════════════════
      SIDEBAR
 ══════════════════════════════════ -->
-<aside class="sidebar">
+<aside class="sidebar" id="sidebar">
+  <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Collapse sidebar">‹</button>
   <div class="sidebar-brand">
     <div class="brand-mark">Solomon Agent</div>
     <div class="brand-sub">by Dino Arla · Agentic AI</div>
@@ -728,15 +907,18 @@
 <div class="main">
 
   <!-- Top bar -->
-  <div class="topbar">
-    <div class="topbar-title" id="topbarTitle">
-      🔥 <em>Trend</em> Research
-    </div>
-    <div class="topbar-status">
-      <span class="status-dot"></span>
-      <span id="statusText">Online</span>
-    </div>
+ <div class="topbar">
+  <button class="hamburger" id="hamburger" onclick="openSidebar()" aria-label="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div class="topbar-title" id="topbarTitle">
+    🔥 <em>Trend</em> Research
   </div>
+  <div class="topbar-status">
+    <span class="status-dot"></span>
+    <span id="statusText">Online</span>
+  </div>
+</div>
 
   <!-- ── TREND PANEL ── -->
   <div class="agent-panel active" id="panel-trend">
@@ -1781,6 +1963,72 @@ document.getElementById('orchBtn').addEventListener('click', async ()=>{
     document.getElementById('orchBtnIcon').textContent='🧠';
   }
 });
+
+// ══════════════════════════════════
+// SIDEBAR COLLAPSE & MOBILE
+// ══════════════════════════════════
+
+const sidebar   = document.getElementById('sidebar');
+const overlay   = document.getElementById('sidebarOverlay');
+const toggleBtn = document.getElementById('sidebarToggle');
+const main      = document.querySelector('.main');
+
+// Desktop: collapse/expand
+function toggleSidebar() {
+  const isCollapsed = sidebar.classList.toggle('collapsed');
+  toggleBtn.textContent = isCollapsed ? '›' : '‹';
+  // Simpan preferensi
+  localStorage.setItem('sidebarCollapsed', isCollapsed);
+}
+
+// Mobile: open drawer
+function openSidebar() {
+  sidebar.classList.add('mobile-open');
+  overlay.classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+// Mobile: close drawer
+function closeSidebar() {
+  sidebar.classList.remove('mobile-open');
+  overlay.classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+// Close sidebar when nav item clicked on mobile
+document.querySelectorAll('.nav-item').forEach(item => {
+  item.addEventListener('click', () => {
+    if (window.innerWidth <= 768) closeSidebar();
+  });
+});
+
+// Restore collapse state on desktop
+const wasColl = localStorage.getItem('sidebarCollapsed') === 'true';
+if (wasColl && window.innerWidth > 768) {
+  sidebar.classList.add('collapsed');
+  if(toggleBtn) toggleBtn.textContent = '›';
+}
+
+// Handle resize: cleanup mobile state on desktop
+window.addEventListener('resize', () => {
+  if (window.innerWidth > 768) {
+    sidebar.classList.remove('mobile-open');
+    overlay.classList.remove('show');
+    document.body.style.overflow = '';
+  }
+});
+
+// Handle 401 → redirect to login
+const origFetch = window.fetch;
+window.fetch = async (...args) => {
+  const res = await origFetch(...args);
+  if (res.status === 401) {
+    window.location.href = '/login';
+    return res;
+  }
+  return res;
+};
 </script>
+<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 </body>
 </html>
