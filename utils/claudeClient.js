@@ -8,8 +8,8 @@ const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
 // Model per agen — hemat biaya
 const MODEL_CONFIG = {
   orchestrator:    { model: 'claude-sonnet-4-6',         maxTokens: 2048 },
-  businessAnalyst: { model: 'claude-sonnet-4-6',         maxTokens: 4096 },
-  contentCreator:  { model: 'claude-sonnet-4-6',         maxTokens: 8192 },
+  businessAnalyst: { model: 'claude-sonnet-4-6',         maxTokens: 2048 },
+  contentCreator:  { model: 'claude-sonnet-4-6',         maxTokens: 4096 }, // turun dari 8192
   monetization:    { model: 'claude-sonnet-4-6',         maxTokens: 2048 },
   trendAgent:      { model: 'claude-haiku-4-5-20251001', maxTokens: 2048 },
   seoAgent:        { model: 'claude-haiku-4-5-20251001', maxTokens: 2048 },

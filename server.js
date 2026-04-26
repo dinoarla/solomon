@@ -121,6 +121,11 @@ app.post('/api/seo', async (req, res) => {
 
 // Content Creator endpoint
 app.post('/api/content', async (req, res) => {
+
+  // Set timeout 55 detik (sebelum Hostinger cut)
+  req.setTimeout(55000);
+  res.setTimeout(55000);
+
   const {
     topic, content_type, target_audience,
     primary_keyword, secondary_keywords,
@@ -131,20 +136,28 @@ app.post('/api/content', async (req, res) => {
     return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
   }
 
+  // Timeout promise
+  const timeoutPromise = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error('Request timeout — coba dengan konten lebih pendek')), 50000)
+  );
+
   console.log(`\n[CONTENT] Type: ${content_type} | Topic: "${topic.substring(0, 50)}"`);
 
   try {
-    const result = await runContentCreator(topic, {
-      contentType: content_type || 'artikel',
-      targetAudience: target_audience || 'Keluarga Indonesia usia 25-40',
-      primaryKeyword: primary_keyword || '',
-      secondaryKeywords: secondary_keywords || '',
-      seoBrief: seo_brief || '',
-      trendContext: trend_context || '',
-      tone: tone || 'kasual-edukatif',
-      length: length || 'sedang',
-      desiredCta: cta || 'Kunjungi link di bawah',
-    });
+    const result = await Promise.race([
+      runContentCreator(topic, {
+        contentType: content_type || 'artikel',
+        targetAudience: target_audience || 'Keluarga Indonesia usia 25-40',
+        primaryKeyword: primary_keyword || '',
+        secondaryKeywords: secondary_keywords || '',
+        seoBrief: seo_brief || '',
+        trendContext: trend_context || '',
+        tone: tone || 'kasual-edukatif',
+        length: length || 'sedang',
+        desiredCta: cta || 'Kunjungi link di bawah',
+      }),
+      timeoutPromise
+    ]);
 
     return res.json({
       status: 'success',

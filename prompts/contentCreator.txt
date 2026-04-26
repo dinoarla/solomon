@@ -77,6 +77,9 @@ PRINSIP AFFILIATE:
 - Setiap bagian harus ada contoh konkret, bukan teori saja
 - Untuk script anak: tidak boleh ada kalimat > 10 kata dalam narasi
 - Untuk affiliate: tidak boleh hanya promosi, harus ada info edukatif
+- WAJIB: Output maksimal 1500 kata untuk mode "sedang", 800 kata untuk "pendek"
+- Jangan menulis konten lengkap, cukup outline detail + 1 contoh bab/section penuh
+- Prioritaskan struktur dan kualitas daripada panjang
 
 ##INPUT
 TIPE KONTEN: {CONTENT_TYPE}
