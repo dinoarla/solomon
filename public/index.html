@@ -1146,6 +1146,10 @@
       'contentProgressBar', 2500
     );
 
+    // Tampilkan output area lebih awal untuk streaming
+    document.getElementById('contentResultCard').classList.add('visible');
+    document.getElementById('contentOutput').innerHTML = '<span style="color:var(--muted)">Menulis konten...</span>';
+
     try {
       const res = await fetch('/api/content', {
         method: 'POST',
@@ -1163,23 +1167,59 @@
         }),
       });
 
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.message || 'Server error');
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let buffer = '';
+      let fullContent = '';
 
-      const dur = ((Date.now() - contentStartTime) / 1000).toFixed(1) + 's';
-      document.getElementById('contentDuration').textContent = dur;
-      document.getElementById('contentPlatformStat').textContent = data.platform || selectedType;
-      document.getElementById('contentWordCount').textContent =
-        (data.word_count || '—') + ' kata';
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
 
-      document.getElementById('contentOutput').innerHTML =
-        renderMarkdown(data.content || data.full_output || JSON.stringify(data));
-      document.getElementById('contentResultCard').classList.add('visible');
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop();
+
+        for (const line of lines) {
+          if (!line.startsWith('data: ')) continue;
+          try {
+            const event = JSON.parse(line.slice(6));
+
+            if (event.type === 'chunk') {
+              fullContent += event.text;
+              // Update output secara realtime
+              document.getElementById('contentOutput').innerHTML =
+                renderMarkdown(fullContent);
+            }
+
+            if (event.type === 'done') {
+              const dur = ((Date.now() - contentStartTime) / 1000).toFixed(1) + 's';
+              document.getElementById('contentDuration').textContent = dur;
+              document.getElementById('contentPlatformStat').textContent =
+                event.platform || selectedType;
+              document.getElementById('contentWordCount').textContent =
+                (event.word_count || '—') + ' kata';
+              document.getElementById('contentOutput').innerHTML =
+                renderMarkdown(event.content || fullContent);
+            }
+
+            if (event.type === 'error') {
+              throw new Error(event.message);
+            }
+
+          } catch (e) {
+            if (e.message !== 'Unexpected end of JSON input') {
+              console.error('Parse error:', e);
+            }
+          }
+        }
+      }
 
     } catch (err) {
       const card = document.getElementById('contentErrorCard');
       card.textContent = '❌ Error: ' + err.message;
       card.classList.add('visible');
+      document.getElementById('contentResultCard').classList.remove('visible');
     } finally {
       clearInterval(iv);
       document.getElementById('contentLoadingState').classList.remove('visible');

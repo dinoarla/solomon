@@ -119,13 +119,8 @@ app.post('/api/seo', async (req, res) => {
   }
 });
 
-// Content Creator endpoint
+// Content Creator endpoint — STREAMING VERSION
 app.post('/api/content', async (req, res) => {
-
-  // Set timeout 55 detik (sebelum Hostinger cut)
-  req.setTimeout(55000);
-  res.setTimeout(55000);
-
   const {
     topic, content_type, target_audience,
     primary_keyword, secondary_keywords,
@@ -136,42 +131,78 @@ app.post('/api/content', async (req, res) => {
     return res.status(400).json({ message: 'Topic tidak boleh kosong.' });
   }
 
-  // Timeout promise
-  const timeoutPromise = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error('Request timeout — coba dengan konten lebih pendek')), 50000)
-  );
-
   console.log(`\n[CONTENT] Type: ${content_type} | Topic: "${topic.substring(0, 50)}"`);
 
-  try {
-    const result = await Promise.race([
-      runContentCreator(topic, {
-        contentType: content_type || 'artikel',
-        targetAudience: target_audience || 'Keluarga Indonesia usia 25-40',
-        primaryKeyword: primary_keyword || '',
-        secondaryKeywords: secondary_keywords || '',
-        seoBrief: seo_brief || '',
-        trendContext: trend_context || '',
-        tone: tone || 'kasual-edukatif',
-        length: length || 'sedang',
-        desiredCta: cta || 'Kunjungi link di bawah',
-      }),
-      timeoutPromise
-    ]);
+  // Setup SSE streaming
+  res.setHeader('Content-Type', 'text/event-stream');
+  res.setHeader('Cache-Control', 'no-cache');
+  res.setHeader('Connection', 'keep-alive');
+  res.flushHeaders();
 
-    return res.json({
-      status: 'success',
-      topic,
-      platform: result.platform,
-      word_count: result.wordCount,
-      content: result.content,
-      full_output: result.raw,
-      timestamp: result.timestamp,
+  const sendEvent = (data) => {
+    res.write(`data: ${JSON.stringify(data)}\n\n`);
+  };
+
+  try {
+    const Anthropic = require('@anthropic-ai/sdk');
+    const fs = require('fs');
+    const path = require('path');
+    const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+
+    // Load & fill prompt
+    const promptPath = path.join(__dirname, 'prompts', 'contentCreator.txt');
+    let systemPrompt = fs.readFileSync(promptPath, 'utf8');
+    const vars = {
+      CONTENT_TYPE: content_type || 'artikel',
+      TOPIC: topic,
+      TARGET_AUDIENCE: target_audience || 'Keluarga Indonesia usia 25-40',
+      PRIMARY_KEYWORD: primary_keyword || topic,
+      SECONDARY_KEYWORDS: secondary_keywords || 'Tidak ada.',
+      SEO_BRIEF: seo_brief || 'Tidak ada.',
+      TREND_CONTEXT: trend_context || 'Tidak ada.',
+      TONE: tone || 'kasual-edukatif',
+      LENGTH: length || 'sedang',
+      DESIRED_CTA: cta || 'Kunjungi link di bawah',
+    };
+    Object.entries(vars).forEach(([k, v]) => {
+      systemPrompt = systemPrompt.split(`{${k}}`).join(v || 'Tidak tersedia');
+    });
+
+    sendEvent({ type: 'status', message: 'Memulai produksi konten...' });
+
+    // Stream response dari Claude
+    let fullText = '';
+    const stream = await client.messages.stream({
+      model: 'claude-haiku-4-5-20251001', // Haiku: jauh lebih cepat
+      max_tokens: 4096,
+      system: systemPrompt,
+      messages: [{ role: 'user', content: 'Jalankan tugasmu berdasarkan input di system prompt.' }],
+    });
+
+    for await (const chunk of stream) {
+      if (chunk.type === 'content_block_delta' && chunk.delta?.text) {
+        fullText += chunk.delta.text;
+        sendEvent({ type: 'chunk', text: chunk.delta.text });
+      }
+    }
+
+    // Ekstrak platform & word count
+    const platformMatch = fullText.match(/\[PLATFORM\]:\s*(EBOOK|YOUTUBE|AFFILIATE)/i);
+    const platform = platformMatch ? platformMatch[1] : content_type;
+    const wordCount = fullText.split(/\s+/).length;
+
+    sendEvent({
+      type: 'done',
+      platform,
+      word_count: wordCount,
+      content: fullText,
     });
 
   } catch (err) {
-    console.error('Content error:', err.message);
-    return res.status(500).json({ message: err.message });
+    console.error('Content stream error:', err.message);
+    sendEvent({ type: 'error', message: err.message });
+  } finally {
+    res.end();
   }
 });
 
