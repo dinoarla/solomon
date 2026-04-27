@@ -10,7 +10,7 @@ async function runBusinessAnalyst(topic, options = {}) {
     trendContext = '',
   } = options;
 
-  const rawOutput = await callAgent('businessAnalyst', {
+  const { output: rawOutput } = await callAgent('businessAnalyst', {
     ANALYSIS_MODE: analysisMode,
     TOPIC: topic,
     BUSINESS_LINE: businessLine,

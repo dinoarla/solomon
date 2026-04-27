@@ -8,7 +8,7 @@ async function runSeoAgent(topic, options = {}) {
     trendContext = '',
   } = options;
 
-  const rawOutput = await callAgent('seoAgent', {
+  const { output: rawOutput } = await callAgent('seoAgent', {
     TOPIC: topic,
     PLATFORMS: platforms,
     CONTENT_TYPE: contentType,

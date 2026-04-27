@@ -7,7 +7,7 @@ async function runOrchestrator(ownerGoal, options = {}) {
     timeBudget = 'normal (1 minggu)',
   } = options;
 
-  const rawOutput = await callAgent('orchestrator', {
+  const { output: rawOutput } = await callAgent('orchestrator', {
     OWNER_GOAL: ownerGoal,
     BUSINESS_LINE: businessLine,
     ADDITIONAL_CONTEXT: additionalContext || 'Tidak ada.',

@@ -10,7 +10,7 @@ async function runMonetization(product, options = {}) {
     specificQuestions = '',
   } = options;
 
-  const rawOutput = await callAgent('monetization', {
+  const { output: rawOutput } = await callAgent('monetization', {
     MODE: mode,
     PRODUCT: product,
     BUSINESS_LINE: businessLine,

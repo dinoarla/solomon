@@ -8,7 +8,7 @@ async function runTrendAgent(topic, options = {}) {
     additionalContext = '',
   } = options;
 
-  const rawOutput = await callAgent('trendAgent', {
+  const { output: rawOutput } = await callAgent('trendAgent', {
     TOPIC: topic,
     BUSINESS_LINE: businessLine,
     TIME_HORIZON: timeHorizon,

@@ -13,7 +13,7 @@ async function runContentCreator(topic, options = {}) {
     desiredCta = 'Kunjungi link di bawah untuk info lebih lanjut',
   } = options;
 
-  const rawOutput = await callAgent('contentCreator', {
+  const { output: rawOutput } = await callAgent('contentCreator', {
     CONTENT_TYPE: contentType,
     TOPIC: topic,
     TARGET_AUDIENCE: targetAudience,

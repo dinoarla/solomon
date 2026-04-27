@@ -9,7 +9,7 @@ async function runDistribution(content, options = {}) {
     additionalContext = '',
   } = options;
 
-  const rawOutput = await callAgent('distribution', {
+  const { output: rawOutput } = await callAgent('distribution', {
     MODE: mode,
     CONTENT: content,
     PLATFORMS: platforms,
