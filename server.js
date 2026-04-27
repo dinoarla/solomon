@@ -7,9 +7,13 @@ const crypto  = require('crypto');
 const db = require('./utils/db');
 db.initDB().catch(err => console.warn('[DB] Init gagal:', err.message));
 
-// ── Token cost estimation ──────────────────────────────────
-const TOKEN_COST_PER_K = { 'haiku-4.5': 40, 'sonnet-4.6': 147 };
+// ── Agent model map ──────────────────────────────────────
 const AGENT_MODELS = {
+  trend:'claude-haiku-4-5-20251001', analyst:'claude-sonnet-4-6',
+  seo:'claude-haiku-4-5-20251001', content:'claude-haiku-4-5-20251001',
+  monetization:'claude-sonnet-4-6', distribution:'claude-haiku-4-5-20251001',
+  orchestrator:'claude-sonnet-4-6',
+};
 
 function dbLog(agentId, topic, result, durationMs, req) {
   // result dapat berupa string (content agent) atau object dari callAgent {output, usage, costIdr}
