@@ -721,6 +721,8 @@
 .cnode-model { display:inline-flex; align-items:center; gap:.25rem; font-family:var(--font-mono); font-size:.52rem; background:var(--cream-mid); border:1px solid var(--cream-dark); border-radius:4px; padding:.12rem .35rem; color:var(--ink-mid); }
 .cnode-orch .cnode-model { background:rgba(255,214,0,.1); border-color:rgba(255,214,0,.2); color:rgba(255,214,0,.75); }
 .cnode-mdot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.cnode-tokens { font-family:var(--font-mono); font-size:.48rem; color:var(--ink-light); margin-top:.15rem; }
+.cnode-orch .cnode-tokens { color:rgba(255,255,255,.3); }
 .canvas-legend { display:flex; gap:.65rem; align-items:center; padding:.5rem 1rem; border-top:var(--border-thin); font-family:var(--font-mono); font-size:.57rem; color:var(--ink-light); background:var(--cream-dark); }
 .legend-item { display:flex; align-items:center; gap:.28rem; }
 .legend-dot { width:7px; height:7px; border-radius:50%; }
@@ -874,6 +876,26 @@
   .stats-row .stat-card:last-child { grid-column: span 2; }
 }
 
+
+    /* Agent config modal */
+    .agent-modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center}
+    .agent-modal-overlay.show{display:flex}
+    .agent-modal{background:var(--cream);border:var(--border);border-radius:var(--radius);width:340px;box-shadow:var(--shadow)}
+    .agent-modal-head{padding:.85rem 1.1rem;border-bottom:var(--border-thin);display:flex;align-items:center;gap:.6rem;background:var(--cream-dark)}
+    .agent-modal-icon{font-size:1.1rem}
+    .agent-modal-title{font-family:var(--font-display);font-size:.95rem;font-weight:700;color:var(--ink);flex:1}
+    .agent-modal-close{width:24px;height:24px;border:var(--border-thin);border-radius:5px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-mid)}
+    .agent-modal-body{padding:1.1rem;display:flex;flex-direction:column;gap:.85rem}
+    .agent-modal-label{font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-mid);margin-bottom:.3rem;display:block}
+    .agent-modal-select,.agent-modal-input{padding:.6rem .85rem;border:var(--border);border-radius:8px;font-family:var(--font-ui);font-size:.85rem;color:var(--ink);background:white;outline:none;width:100%;appearance:none}
+    .agent-modal-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23111' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .85rem center;padding-right:2.2rem;cursor:pointer}
+    .agent-modal-select:focus,.agent-modal-input:focus{box-shadow:var(--shadow-sm)}
+    .agent-modal-hint{font-family:var(--font-mono);font-size:.6rem;color:var(--ink-light);margin-top:.2rem}
+    .agent-modal-foot{padding:.85rem 1.1rem;border-top:var(--border-thin);display:flex;gap:.5rem;justify-content:flex-end}
+    .agent-modal-cancel{padding:.55rem 1rem;border:var(--border);border-radius:7px;background:var(--cream-mid);font-family:var(--font-ui);font-size:.82rem;cursor:pointer;color:var(--ink-mid)}
+    .agent-modal-save{padding:.55rem 1.1rem;border:var(--border);border-radius:7px;background:var(--orange);color:white;font-family:var(--font-ui);font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:.4rem}
+    .agent-modal-save:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow)}
+    .agent-modal-save:disabled{background:var(--ink-light);cursor:not-allowed;transform:none}
   </style>
 </head>
 <body>
@@ -893,7 +915,7 @@
   <!-- Dashboard -->
   <div class="sidebar-section">
     <div class="sidebar-section-label">Overview</div>
-    <div class="nav-item" id="nav-dashboard" onclick="switchAgent('dashboard')">
+    <div class="nav-item active" id="nav-dashboard" onclick="switchAgent('dashboard')">
       <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
       <div class="nav-content"><span>Dashboard</span></div>
     </div>
@@ -905,7 +927,7 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Workflow</div>
 
-    <div class="nav-item active" id="nav-trend" onclick="switchAgent('trend')">
+    <div class="nav-item" id="nav-trend" onclick="switchAgent('trend')">
       <span class="nav-icon"><i class="fa-solid fa-fire"></i></span>
       <div class="nav-content">
         <span>Trend Research</span>
@@ -1087,30 +1109,6 @@
         </div>
 
       </div>
-
-      <!-- Agent Config Panel -->
-      <div class="db-config-card">
-        <div class="db-section-head">
-          <span class="db-section-title"><i class="fa-solid fa-sliders"></i> Konfigurasi Agent</span>
-          <span style="font-family:var(--font-mono);font-size:.6rem;color:var(--ink-light)">Max tokens per agen — tersimpan di database</span>
-        </div>
-        <table class="db-config-table">
-          <thead>
-            <tr>
-              <th>Agen</th>
-              <th>Model</th>
-              <th>Max Tokens</th>
-              <th>Status</th>
-              <th></th>
-            </tr>
-          </thead>
-          <tbody id="agentConfigBody">
-            <tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--ink-light);font-family:var(--font-mono);font-size:.7rem">Memuat konfigurasi...</td></tr>
-          </tbody>
-        </table>
-      </div>
-
-    </div>
   </div>
 
   <!-- ── TREND PANEL ── -->
@@ -1776,9 +1774,10 @@ function renderDashboard() {
     el.className = 'cnode' + (a.orch ? ' cnode-orch' : '');
     el.style.left = a.pos.x + 'px';
     el.style.top  = a.pos.y + 'px';
-    el.title = 'Buka ' + a.name;
-    el.onclick = () => switchAgent(a.id);
-    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div>`;
+    const tokVal = _agentTokenMap[a.id] || _agentDefaultTokens[a.id] || 2048;
+    el.title = 'Klik untuk konfigurasi ' + a.name;
+    el.onclick = () => openAgentModal(a.id);
+    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div><div class="cnode-tokens"><i class="fa-solid fa-gauge-simple" style="font-size:.42rem"></i> max ${tokVal} tk</div>`;
     inner.appendChild(el);
   });
 }
@@ -2392,7 +2391,122 @@ function clearActivityLog() {
   renderActivityLog();
 }
 
+
+// ══════════════════════════════════════════════════════
+// AGENT CONFIG FROM DB
+// ══════════════════════════════════════════════════════
+const _agentDefaultTokens = {
+  trend:2048, analyst:2048, seo:2048, content:4096,
+  monetization:2048, distribution:1024, orchestrator:2048
+};
+let _agentTokenMap = {};
+
+async function loadAgentConfig() {
+  try {
+    const res = await fetch('/api/db/agent-config');
+    if (!res.ok) return;
+    const data = await res.json();
+    (data.data || []).forEach(r => { _agentTokenMap[r.agent] = r.max_tokens; });
+    // Re-render canvas to show updated tokens
+    if (document.getElementById('panel-dashboard').classList.contains('active')) {
+      renderDashboard();
+    }
+  } catch(e) { /* silent */ }
+}
+
+
+// ── Modal functions ──
+let _currentModalAgent = null;
+
+function openAgentModal(agentId) {
+  const ag = CANVAS_AGENTS.find(a => a.id === agentId);
+  if (!ag) return;
+  _currentModalAgent = agentId;
+  document.getElementById('modalAgentIcon').innerHTML = '<i class="fa-solid ' + ag.faicon + '"></i>';
+  document.getElementById('modalAgentTitle').textContent = ag.name;
+  const haiku = ['trend','seo','content','distribution'];
+  document.getElementById('modalModel').value = haiku.includes(agentId)
+    ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-6';
+  document.getElementById('modalMaxTokens').value = _agentTokenMap[agentId] || _agentDefaultTokens[agentId] || 2048;
+  document.getElementById('agentModalOverlay').classList.add('show');
+}
+
+function closeAgentModal(e) {
+  if (e && e.target !== document.getElementById('agentModalOverlay')) return;
+  document.getElementById('agentModalOverlay').classList.remove('show');
+  _currentModalAgent = null;
+}
+
+async function saveAgentModalConfig() {
+  if (!_currentModalAgent) return;
+  const model = document.getElementById('modalModel').value;
+  const maxTokens = parseInt(document.getElementById('modalMaxTokens').value);
+  if (isNaN(maxTokens) || maxTokens < 256 || maxTokens > 8192) {
+    alert('Max tokens harus antara 256 – 8192'); return;
+  }
+  const btn = document.getElementById('modalSaveBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+  try {
+    const res = await fetch('/api/db/agent-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent: _currentModalAgent, model, maxTokens }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    _agentTokenMap[_currentModalAgent] = maxTokens;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersimpan!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      document.getElementById('agentModalOverlay').classList.remove('show');
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
+      btn.style.background = ''; btn.disabled = false;
+      _currentModalAgent = null;
+      renderDashboard();
+    }, 1200);
+  } catch(ex) {
+    btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Gagal';
+    btn.style.background = 'var(--red)';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
+      btn.style.background = ''; btn.disabled = false;
+    }, 2000);
+  }
+}
+
 </script>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+<!-- Agent Config Modal -->
+<div class="agent-modal-overlay" id="agentModalOverlay" onclick="closeAgentModal(event)">
+  <div class="agent-modal" onclick="event.stopPropagation()">
+    <div class="agent-modal-head">
+      <span class="agent-modal-icon" id="modalAgentIcon"></span>
+      <div class="agent-modal-title" id="modalAgentTitle">Konfigurasi Agen</div>
+      <button class="agent-modal-close" onclick="closeAgentModal()">✕</button>
+    </div>
+    <div class="agent-modal-body">
+      <div>
+        <label class="agent-modal-label">Model</label>
+        <select class="agent-modal-select" id="modalModel">
+          <option value="claude-haiku-4-5-20251001">⚡ haiku-4.5 — Cepat, Hemat</option>
+          <option value="claude-sonnet-4-6">🧠 sonnet-4.6 — Cerdas, Akurat</option>
+        </select>
+      </div>
+      <div>
+        <label class="agent-modal-label">Max Tokens</label>
+        <input class="agent-modal-input" id="modalMaxTokens" type="number" min="256" max="8192" step="256">
+        <div class="agent-modal-hint">256 – 8192 · Lebih tinggi = output lebih panjang, biaya lebih tinggi</div>
+      </div>
+    </div>
+    <div class="agent-modal-foot">
+      <button class="agent-modal-cancel" onclick="closeAgentModal()">Batal</button>
+      <button class="agent-modal-save" id="modalSaveBtn" onclick="saveAgentModalConfig()">
+        <i class="fa-solid fa-floppy-disk"></i> Simpan
+      </button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
