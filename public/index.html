@@ -287,7 +287,6 @@
     /* Content grid */
     .content-grid {
       flex: 1;
-      min-height: 0;
       display: grid;
       grid-template-columns: 420px 1fr;
       overflow: hidden;
@@ -297,7 +296,6 @@
     .input-panel {
       border-right: var(--border-thin);
       overflow-y: auto;
-      min-height: 0;
       padding: 1.75rem;
       background: var(--cream);
       display: flex;
@@ -308,7 +306,6 @@
     /* Output panel */
     .output-panel {
       overflow-y: auto;
-      min-height: 0;
       padding: 1.75rem;
       background: var(--cream-mid);
     }
@@ -675,7 +672,7 @@
 
     /* Panel visibility */
     .agent-panel { display: none; }
-    .agent-panel.active { display: flex; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+    .agent-panel.active { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
     /* ══════════════════════════════════
    DASHBOARD
@@ -684,7 +681,7 @@
 .dashboard-panel.active { display: flex; }
 
 /* Dashboard layout */
-.db-body { flex:1; min-height:0; overflow-y:auto; padding:1.5rem 1.75rem; display:flex; flex-direction:column; gap:1.25rem; }
+.db-body { flex:1; overflow-y:auto; padding:1.5rem 1.75rem; display:flex; flex-direction:column; gap:1.25rem; }
 
 /* Usage stats row */
 .db-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; }
@@ -1113,6 +1110,8 @@
 
       </div>
   </div>
+
+  </div><!-- /panel-dashboard -->
 
   <!-- ── TREND PANEL ── -->
   <div class="agent-panel" id="panel-trend">
