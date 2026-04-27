@@ -591,30 +591,6 @@
       overflow-y: auto;
     }
 
-    /* Agent config modal */
-    .agent-modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center}
-    .agent-modal-overlay.show{display:flex}
-    .agent-modal{background:var(--cream);border:var(--border);border-radius:var(--radius);width:340px;box-shadow:var(--shadow)}
-    .agent-modal-head{padding:.85rem 1.1rem;border-bottom:var(--border-thin);display:flex;align-items:center;gap:.6rem;background:var(--cream-dark)}
-    .agent-modal-icon{font-size:1.1rem}
-    .agent-modal-title{font-family:var(--font-display);font-size:.95rem;font-weight:700;color:var(--ink);flex:1}
-    .agent-modal-close{width:24px;height:24px;border:var(--border-thin);border-radius:5px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-mid)}
-    .agent-modal-body{padding:1.1rem;display:flex;flex-direction:column;gap:.85rem}
-    .agent-modal-field{display:flex;flex-direction:column;gap:.3rem}
-    .agent-modal-label{font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-mid)}
-    .agent-modal-select,.agent-modal-input{padding:.6rem .85rem;border:var(--border);border-radius:8px;font-family:var(--font-ui);font-size:.85rem;color:var(--ink);background:white;outline:none;width:100%;appearance:none}
-    .agent-modal-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23111' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .85rem center;padding-right:2.2rem;cursor:pointer}
-    .agent-modal-select:focus,.agent-modal-input:focus{box-shadow:var(--shadow-sm)}
-    .agent-modal-hint{font-family:var(--font-mono);font-size:.6rem;color:var(--ink-light)}
-    .agent-modal-foot{padding:.85rem 1.1rem;border-top:var(--border-thin);display:flex;gap:.5rem;justify-content:flex-end}
-    .agent-modal-cancel{padding:.55rem 1rem;border:var(--border);border-radius:7px;background:var(--cream-mid);font-family:var(--font-ui);font-size:.82rem;cursor:pointer;color:var(--ink-mid)}
-    .agent-modal-save{padding:.55rem 1.1rem;border:var(--border);border-radius:7px;background:var(--orange);color:white;font-family:var(--font-ui);font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:.4rem}
-    .agent-modal-save:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow)}
-    .agent-modal-save:disabled{background:var(--ink-light);cursor:not-allowed;transform:none}
-    /* Token badge on cnode */
-    .cnode-tokens{font-family:var(--font-mono);font-size:.5rem;color:var(--ink-light);margin-top:.18rem}
-    .cnode-orch .cnode-tokens{color:rgba(255,255,255,.3)}
-
     /* Agent config panel */
     .db-config-card{background:white;border:var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
     .db-config-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.72rem}
@@ -917,7 +893,7 @@
   <!-- Dashboard -->
   <div class="sidebar-section">
     <div class="sidebar-section-label">Overview</div>
-    <div class="nav-item active" id="nav-dashboard" onclick="switchAgent('dashboard')">
+    <div class="nav-item" id="nav-dashboard" onclick="switchAgent('dashboard')">
       <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
       <div class="nav-content"><span>Dashboard</span></div>
     </div>
@@ -929,7 +905,7 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Workflow</div>
 
-    <div class="nav-item" id="nav-trend" onclick="switchAgent('trend')">
+    <div class="nav-item active" id="nav-trend" onclick="switchAgent('trend')">
       <span class="nav-icon"><i class="fa-solid fa-fire"></i></span>
       <div class="nav-content">
         <span>Trend Research</span>
@@ -1023,7 +999,7 @@
     <span></span><span></span><span></span>
   </button>
   <div class="topbar-title" id="topbarTitle">
-    <i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard
+    <i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research
   </div>
   <div class="topbar-status">
     <span class="status-dot"></span>
@@ -1032,7 +1008,7 @@
 </div>
 
   <!-- ── DASHBOARD PANEL ── -->
-  <div class="dashboard-panel active" id="panel-dashboard">
+  <div class="dashboard-panel" id="panel-dashboard">
     <div class="db-body">
 
       <!-- Token Usage Stats -->
@@ -1111,9 +1087,117 @@
         </div>
 
       </div>
+
+      <!-- Agent Config Panel -->
+      <div class="db-config-card">
+        <div class="db-section-head">
+          <span class="db-section-title"><i class="fa-solid fa-sliders"></i> Konfigurasi Agent</span>
+          <span style="font-family:var(--font-mono);font-size:.6rem;color:var(--ink-light)">Max tokens per agen — tersimpan di database</span>
+        </div>
+        <table class="db-config-table">
+          <thead>
+            <tr>
+              <th>Agen</th>
+              <th>Model</th>
+              <th>Max Tokens</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="agentConfigBody">
+            <tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--ink-light);font-family:var(--font-mono);font-size:.7rem">Memuat konfigurasi...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
-</div>
+
+  <!-- ── TREND PANEL ── -->
+  <div class="agent-panel active" id="panel-trend">
+    <div class="content-grid">
+      <div class="input-panel">
+        <div class="section-label">Input</div>
+
+        <div class="field-group">
+          <label class="field-label">Topik / Niche</label>
+          <textarea class="field-textarea" id="trendTopic"
+            placeholder="Contoh: MPASI, produktivitas ibu rumah tangga, air fryer..."></textarea>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Lini Bisnis</label>
+          <select class="field-select" id="trendBusinessLine">
+            <option value="semua">🌐 Semua Lini</option>
+            <option value="ebook">📚 Ebook</option>
+            <option value="youtube">🎬 YouTube</option>
+            <option value="affiliate">🛒 Affiliate</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Periode Tren</label>
+          <select class="field-select" id="trendHorizon">
+            <option value="1-3 bulan">📅 1-3 Bulan ke depan</option>
+            <option value="minggu ini">⚡ Minggu ini</option>
+            <option value="6-12 bulan">🔭 6-12 Bulan</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Fokus Pasar</label>
+          <select class="field-select" id="trendMarket">
+            <option value="indonesia dan global">🌏 Indonesia + Global</option>
+            <option value="indonesia">🇮🇩 Indonesia</option>
+            <option value="global">🌍 Global</option>
+          </select>
+        </div>
+
+        <div class="field-group">
+          <label class="field-label">Konteks Tambahan</label>
+          <input class="field-input" id="trendContext" type="text"
+            placeholder="Opsional — info tambahan">
+        </div>
+
+        <button class="run-btn" id="trendBtn">
+          <span id="trendBtnIcon"><i class="fa-solid fa-fire"></i></span>
+          <span id="trendBtnText">Analisis Tren</span>
+        </button>
+      </div>
+
+      <div class="output-panel" id="trendOutputPanel">
+        <div class="empty-state" id="trendEmpty">
+          <div class="empty-icon"><i class="fa-solid fa-fire"></i></div>
+          <div class="empty-text">Temukan tren sebelum kompetitor</div>
+          <div class="empty-hint">Isi topik → klik Analisis Tren</div>
+        </div>
+        <div class="loading-card" id="trendLoading">
+          <div class="loading-title">Scanning tren global & Indonesia...</div>
+          <div class="progress-bar"><div class="progress-fill" id="trendBar"></div></div>
+          <div class="step-list">
+            <div class="step-item active" id="ts1"><div class="step-dot"></div>Scanning global trends</div>
+            <div class="step-item" id="ts2"><div class="step-dot"></div>Analisis pasar Indonesia</div>
+            <div class="step-item" id="ts3"><div class="step-dot"></div>Scoring peluang</div>
+            <div class="step-item" id="ts4"><div class="step-dot"></div>Menyusun angle konten</div>
+            <div class="step-item" id="ts5"><div class="step-dot"></div>Report siap ✓</div>
+          </div>
+        </div>
+        <div class="error-card" id="trendError"></div>
+        <div class="result-wrap" id="trendResult">
+          <div class="stats-row">
+            <div class="stat-card"><div class="stat-label">Durasi</div><div class="stat-value" id="trendDur">—</div></div>
+            <div class="stat-card"><div class="stat-label">Tren Tinggi</div><div class="stat-value" id="trendHigh">—</div></div>
+            <div class="stat-card"><div class="stat-label">Pasar</div><div class="stat-value" id="trendMkt">—</div></div>
+          </div>
+          <div class="output-card">
+            <div class="output-card-header">
+              <span class="output-card-title">Trend Report</span>
+              <button class="copy-btn" onclick="copyEl('trendOut')">Copy</button>
+            </div>
+            <div class="output-body" id="trendOut"></div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -1639,37 +1723,6 @@
     </div>
   </div>
 
-<!-- Agent Config Modal -->
-<div class="agent-modal-overlay" id="agentModalOverlay" onclick="closeAgentModal(event)">
-  <div class="agent-modal" onclick="event.stopPropagation()">
-    <div class="agent-modal-head">
-      <span class="agent-modal-icon" id="modalAgentIcon"></span>
-      <div class="agent-modal-title" id="modalAgentTitle">Konfigurasi Agen</div>
-      <button class="agent-modal-close" onclick="closeAgentModal()">✕</button>
-    </div>
-    <div class="agent-modal-body">
-      <div class="agent-modal-field">
-        <label class="agent-modal-label">Model</label>
-        <select class="agent-modal-select" id="modalModel">
-          <option value="claude-haiku-4-5-20251001">⚡ claude-haiku-4.5 (Cepat, Hemat)</option>
-          <option value="claude-sonnet-4-6">🧠 claude-sonnet-4.6 (Cerdas, Akurat)</option>
-        </select>
-      </div>
-      <div class="agent-modal-field">
-        <label class="agent-modal-label">Max Tokens</label>
-        <input class="agent-modal-input" id="modalMaxTokens" type="number" min="256" max="8192" step="256" placeholder="2048">
-        <span class="agent-modal-hint">256 – 8192 · Lebih tinggi = output lebih panjang, biaya lebih tinggi</span>
-      </div>
-    </div>
-    <div class="agent-modal-foot">
-      <button class="agent-modal-cancel" onclick="closeAgentModal()">Batal</button>
-      <button class="agent-modal-save" id="modalSaveBtn" onclick="saveAgentModalConfig()">
-        <i class="fa-solid fa-floppy-disk"></i> Simpan
-      </button>
-    </div>
-  </div>
-</div>
-
 </div><!-- end .main -->
 
 <script>
@@ -1679,7 +1732,7 @@
 
 const AGENT_TITLES = {
   dashboard: '<i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard',
-  trend: '<i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard',
+  trend: '<i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research',
   analyst: '<i class="fa-solid fa-chart-column" style="font-size:.9rem"></i> <em>Market</em> Analysis',
   seo: '<i class="fa-solid fa-magnifying-glass" style="font-size:.9rem"></i> <em>SEO</em> Intelligence',
   content: '<i class="fa-solid fa-pen-nib" style="font-size:.9rem"></i> <em>Content</em> Studio',
@@ -1723,10 +1776,9 @@ function renderDashboard() {
     el.className = 'cnode' + (a.orch ? ' cnode-orch' : '');
     el.style.left = a.pos.x + 'px';
     el.style.top  = a.pos.y + 'px';
-    el.title = 'Klik untuk konfigurasi ' + a.name;
-    const tokensVal = _agentTokenMap[a.id] || _agentDefaultTokens[a.id] || 2048;
-    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div><div class="cnode-tokens"><i class="fa-solid fa-gauge-simple" style="font-size:.45rem"></i> max ${tokensVal} tk</div>`;
-    el.onclick = (e) => { e.stopPropagation(); openAgentModal(a.id); };
+    el.title = 'Buka ' + a.name;
+    el.onclick = () => switchAgent(a.id);
+    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div>`;
     inner.appendChild(el);
   });
 }
