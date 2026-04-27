@@ -915,7 +915,7 @@
   <!-- Dashboard -->
   <div class="sidebar-section">
     <div class="sidebar-section-label">Overview</div>
-    <div class="nav-item active" id="nav-dashboard" onclick="switchAgent('dashboard')">
+    <div class="nav-item" id="nav-dashboard" onclick="switchAgent('dashboard')">
       <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
       <div class="nav-content"><span>Dashboard</span></div>
     </div>
@@ -1021,7 +1021,7 @@
     <span></span><span></span><span></span>
   </button>
   <div class="topbar-title" id="topbarTitle">
-    <i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research
+    <i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard
   </div>
   <div class="topbar-status">
     <span class="status-dot"></span>
@@ -1030,7 +1030,7 @@
 </div>
 
   <!-- ── DASHBOARD PANEL ── -->
-  <div class="dashboard-panel" id="panel-dashboard">
+  <div class="dashboard-panel active" id="panel-dashboard">
     <div class="db-body">
 
       <!-- Token Usage Stats -->
@@ -1112,7 +1112,7 @@
   </div>
 
   <!-- ── TREND PANEL ── -->
-  <div class="agent-panel active" id="panel-trend">
+  <div class="agent-panel" id="panel-trend">
     <div class="content-grid">
       <div class="input-panel">
         <div class="section-label">Input</div>
@@ -2474,6 +2474,14 @@ async function saveAgentModalConfig() {
     }, 2000);
   }
 }
+
+// ── INIT ──────────────────────────────────────────────
+// Dashboard adalah halaman default — render saat page load
+document.getElementById('nav-dashboard').classList.add('active');
+renderDashboard();
+refreshDashboardStats();
+renderActivityLog();
+loadAgentConfig();
 
 </script>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
