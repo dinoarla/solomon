@@ -26,23 +26,17 @@
       min-height:100vh;
     }
 
-    /* Animated grid background */
-    .hero-grid{
-      position:absolute;inset:0;
-      background-image:
-        linear-gradient(rgba(255,214,0,.04) 1px,transparent 1px),
-        linear-gradient(90deg,rgba(255,214,0,.04) 1px,transparent 1px);
-      background-size:48px 48px;
-      animation:grid-drift 20s linear infinite;
+    /* Neural canvas */
+    #neuralCanvas{
+      position:absolute;inset:0;width:100%;height:100%;
+      pointer-events:none;z-index:1;
     }
-    @keyframes grid-drift{0%{background-position:0 0}100%{background-position:48px 48px}}
-
-    /* Glowing orbs */
-    .orb{position:absolute;border-radius:50%;filter:blur(80px);pointer-events:none}
-    .orb1{width:400px;height:400px;background:rgba(255,77,0,.12);top:-100px;right:-100px;animation:orb-float 8s ease-in-out infinite}
-    .orb2{width:300px;height:300px;background:rgba(255,214,0,.07);bottom:-80px;left:-60px;animation:orb-float 10s ease-in-out infinite reverse}
-    .orb3{width:200px;height:200px;background:rgba(255,77,0,.06);top:40%;right:15%;animation:orb-float 6s ease-in-out infinite 2s}
-    @keyframes orb-float{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(-30px) scale(1.05)}}
+    /* Subtle dark radial for depth */
+    .hero::after{
+      content:'';position:absolute;inset:0;z-index:1;
+      background:radial-gradient(ellipse 60% 80% at 20% 50%,transparent 40%,rgba(0,0,0,.45) 100%);
+      pointer-events:none;
+    }
 
     .hero-brand{
       position:relative;z-index:2;
@@ -63,87 +57,123 @@
       color:rgba(255,255,255,.45);line-height:1.75;max-width:340px;
     }
 
-    /* ── WORKFLOW DIAGRAM ── */
-    .workflow{
+    .hero-powered{
+      position:relative;z-index:2;
+      margin-top:.55rem;
+      font-family:'DM Mono',monospace;font-size:.58rem;
+      color:rgba(255,214,0,.3);letter-spacing:.1em;text-transform:uppercase;
+    }
+    .hero-powered strong{color:rgba(255,214,0,.65)}
+
+    /* ── OS TERMINAL PANEL ── */
+    .os-panel{
       position:relative;z-index:2;
       margin-top:auto;padding-top:2rem;
-      display:flex;flex-direction:column;gap:0;
     }
 
-    .wf-row{
-      display:flex;align-items:center;gap:.5rem;
-      animation:wf-in .5s ease both;
-    }
-    @keyframes wf-in{from{opacity:0;transform:translateX(-18px)}to{opacity:1;transform:translateX(0)}}
-
-    .wf-card{
-      display:flex;align-items:center;gap:.6rem;
-      padding:.52rem .9rem;
-      border-radius:10px;
-      border:1px solid rgba(255,255,255,.08);
+    /* Top status bar */
+    .os-statusbar{
+      display:flex;align-items:center;justify-content:space-between;
+      padding:.35rem .8rem;
       background:rgba(255,255,255,.04);
-      backdrop-filter:blur(8px);
-      cursor:pointer;
-      transition:all .2s;
-      position:relative;
-      transform-style:preserve-3d;
-      perspective:600px;
-      flex:1;max-width:260px;
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:8px 8px 0 0;
+      border-bottom:none;
+      font-family:'DM Mono',monospace;font-size:.6rem;
+      color:rgba(255,255,255,.3);
     }
-    .wf-card:hover{
-      background:rgba(255,255,255,.1);
-      border-color:rgba(255,255,255,.2);
-      transform:translateY(-2px) scale(1.02);
-      box-shadow:0 8px 32px rgba(0,0,0,.4);
-    }
-    .wf-card.active-card{
-      background:rgba(255,214,0,.12);
-      border-color:rgba(255,214,0,.35);
-    }
-
-    /* Colored left accent per agent */
-    .wf-card::before{
-      content:'';position:absolute;left:0;top:20%;bottom:20%;
-      width:2.5px;border-radius:0 2px 2px 0;
-      background:var(--agent-color,rgba(255,255,255,.2));
-      transition:all .2s;
-    }
-    .wf-card:hover::before{top:10%;bottom:10%;background:var(--agent-color)}
-
-    .wf-icon{font-size:1rem;flex-shrink:0;filter:drop-shadow(0 0 6px var(--agent-color,transparent))}
-    .wf-label{font-family:'DM Mono',monospace;font-size:.68rem;color:rgba(255,255,255,.7);letter-spacing:.02em}
-    .wf-step{
-      font-family:'DM Mono',monospace;font-size:.55rem;
-      color:rgba(255,255,255,.25);margin-left:auto;
-      padding:.1rem .35rem;border-radius:3px;
-      background:rgba(255,255,255,.06);
-    }
-    .wf-card.active-card .wf-label{color:var(--yellow)}
-    .wf-card.active-card .wf-step{color:rgba(255,214,0,.5);background:rgba(255,214,0,.08)}
-
-    /* Arrow connector */
-    .wf-arrow{
-      display:flex;flex-direction:column;align-items:flex-start;
-      padding-left:1.1rem;margin:1px 0;
-      gap:0;
-    }
-    .wf-arrow-line{
-      width:1.5px;height:12px;
-      background:linear-gradient(to bottom,rgba(255,255,255,.15),rgba(255,255,255,.06));
-    }
-    .wf-arrow-head{
-      font-size:.5rem;color:rgba(255,255,255,.15);
-      margin-left:-.15rem;line-height:1;
-    }
-
-    /* Auto-cycle highlight */
-    .wf-dot{
-      width:6px;height:6px;border-radius:50%;
-      background:var(--agent-color,rgba(255,255,255,.2));
+    .os-statusbar-left{display:flex;align-items:center;gap:.8rem}
+    .os-statusbar-dot{
+      width:8px;height:8px;border-radius:50%;
+      background:#2ecc71;box-shadow:0 0 6px #2ecc71;
       animation:dot-pulse 2s ease-in-out infinite;
-      flex-shrink:0;
     }
-    @keyframes dot-pulse{0%,100%{opacity:.4;transform:scale(1)}50%{opacity:1;transform:scale(1.4)}}
+    @keyframes dot-pulse{0%,100%{opacity:.5}50%{opacity:1}}
+    .os-uptime{color:rgba(255,214,0,.4)}
+
+    /* Main terminal window */
+    .os-window{
+      background:rgba(0,0,0,.55);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:0 0 10px 10px;
+      backdrop-filter:blur(12px);
+      overflow:hidden;
+    }
+
+    /* Process monitor header */
+    .os-proc-header{
+      display:grid;
+      grid-template-columns:24px 1fr 60px 50px 55px;
+      gap:.4rem;
+      padding:.45rem .9rem;
+      background:rgba(255,255,255,.03);
+      border-bottom:1px solid rgba(255,255,255,.05);
+      font-family:'DM Mono',monospace;font-size:.55rem;
+      color:rgba(255,255,255,.2);letter-spacing:.06em;text-transform:uppercase;
+    }
+
+    /* Process rows */
+    .os-proc-list{padding:.35rem 0}
+    .os-proc{
+      display:grid;
+      grid-template-columns:24px 1fr 60px 50px 55px;
+      gap:.4rem;align-items:center;
+      padding:.4rem .9rem;
+      font-family:'DM Mono',monospace;font-size:.62rem;
+      color:rgba(255,255,255,.5);
+      cursor:pointer;
+      transition:background .15s;
+    }
+    .os-proc:hover{background:rgba(255,255,255,.04)}
+    .os-proc.proc-active{
+      background:rgba(255,214,0,.06);
+      color:rgba(255,255,255,.85);
+    }
+    .os-proc.proc-active .proc-status{color:#2ecc71}
+    .os-proc.proc-idle .proc-status{color:rgba(255,255,255,.2)}
+    .os-proc.proc-busy .proc-status{color:#FF4D00}
+
+    .proc-id{color:rgba(255,255,255,.2);font-size:.55rem}
+    .proc-name{color:inherit;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+    .proc-active .proc-name{color:var(--yellow)}
+    .proc-bar-wrap{
+      height:3px;background:rgba(255,255,255,.06);
+      border-radius:2px;overflow:hidden;
+    }
+    .proc-bar{
+      height:100%;border-radius:2px;
+      background:rgba(255,214,0,.5);
+      transition:width .8s ease;
+    }
+    .proc-active .proc-bar{background:var(--yellow)}
+    .proc-busy .proc-bar{background:var(--orange)}
+    .proc-mem{color:rgba(255,255,255,.3);font-size:.55rem;text-align:right}
+    .proc-status{font-size:.55rem;text-align:right}
+
+    /* Activity log at bottom */
+    .os-log{
+      border-top:1px solid rgba(255,255,255,.05);
+      padding:.5rem .9rem;
+      height:70px;overflow:hidden;
+      position:relative;
+    }
+    .os-log-line{
+      font-family:'DM Mono',monospace;font-size:.58rem;
+      color:rgba(255,255,255,.25);line-height:1.7;
+      white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+    }
+    .os-log-line .log-time{color:rgba(255,214,0,.3);margin-right:.5rem}
+    .os-log-line .log-ok{color:#2ecc71}
+    .os-log-line .log-run{color:#FF4D00}
+    .os-log-line .log-info{color:rgba(99,179,237,.6)}
+
+    /* Cursor blink */
+    .cursor{
+      display:inline-block;width:6px;height:.7em;
+      background:var(--yellow);vertical-align:middle;
+      animation:blink .9s step-end infinite;margin-left:2px;
+    }
+    @keyframes blink{0%,100%{opacity:1}50%{opacity:0}}
 
     /* ── RIGHT: LOGIN ── */
     .login-side{
@@ -222,10 +252,7 @@
 
 <!-- ── LEFT HERO ── -->
 <div class="hero">
-  <div class="hero-grid"></div>
-  <div class="orb orb1"></div>
-  <div class="orb orb2"></div>
-  <div class="orb orb3"></div>
+  <canvas id="neuralCanvas"></canvas>
 
   <div class="hero-brand">Solomon Agent</div>
 
@@ -235,9 +262,30 @@
   <p class="hero-desc">
     7 AI agents bekerja bersama untuk mengotomasi riset, konten, SEO, dan distribusi bisnis digital kamu.
   </p>
+  <p class="hero-powered">Powered by <strong>Arla Industri Teknopatih</strong></p>
 
-  <!-- Workflow diagram interactive -->
-  <div class="workflow" id="workflow"></div>
+  <!-- OS Terminal Panel -->
+  <div class="os-panel">
+    <div class="os-statusbar">
+      <div class="os-statusbar-left">
+        <div class="os-statusbar-dot"></div>
+        <span>solomon-agent · v2.0.1</span>
+        <span class="os-uptime" id="uptimeEl">uptime: --</span>
+      </div>
+      <span id="clockEl">--:--:--</span>
+    </div>
+    <div class="os-window">
+      <div class="os-proc-header">
+        <span></span>
+        <span>PROCESS</span>
+        <span>CPU</span>
+        <span>MEM</span>
+        <span>STATUS</span>
+      </div>
+      <div class="os-proc-list" id="procList"></div>
+      <div class="os-log" id="logPanel"></div>
+    </div>
+  </div>
 </div>
 
 <!-- ── RIGHT LOGIN ── -->
@@ -338,75 +386,100 @@ buildGreeting();
 setInterval(buildGreeting, 8000);
 
 // ══════════════════════════
-// WORKFLOW DIAGRAM
+// OS PROCESS MONITOR
 // ══════════════════════════
-const AGENTS = [
-  { icon:'🔥', label:'Trend Research',   step:'Step 1', color:'#FF6B35' },
-  { icon:'📊', label:'Market Analysis',  step:'Step 2', color:'#4CAF50' },
-  { icon:'🔍', label:'SEO Intelligence', step:'Step 3', color:'#9C27B0' },
-  { icon:'✍️', label:'Content Studio',   step:'Step 4', color:'#FF7043' },
-  { icon:'💰', label:'Monetization',     step:'Step 5', color:'#FFA726' },
-  { icon:'📡', label:'Distribution',     step:'Step 6', color:'#E53935' },
-  { icon:'🧠', label:'Orchestrator',     step:'Auto',   color:'#78909C' },
+const PROCESSES = [
+  { pid:'3421', name:'intel.trend_scanner',  baseCpu:12, baseMem:148 },
+  { pid:'3422', name:'core.market_analyzer', baseCpu:28, baseMem:214 },
+  { pid:'3423', name:'sys.seo_crawler',      baseCpu:8,  baseMem:96  },
+  { pid:'3424', name:'proc.content_engine',  baseCpu:45, baseMem:312 },
+  { pid:'3425', name:'mod.revenue_calc',     baseCpu:6,  baseMem:78  },
+  { pid:'3426', name:'net.distrib_daemon',   baseCpu:18, baseMem:132 },
+  { pid:'3427', name:'root.orchestrator',    baseCpu:3,  baseMem:56  },
 ];
 
-const wf = document.getElementById('workflow');
-let activeIdx = 0;
+const LOG_TEMPLATES = [
+  (p) => `[${p}] <span class="log-ok">✓</span> pipeline completed in <span class="log-info">${(Math.random()*8+2).toFixed(1)}s</span>`,
+  (p) => `[${p}] <span class="log-run">↻</span> spawning worker thread #${Math.floor(Math.random()*9+1)}`,
+  (p) => `[${p}] <span class="log-ok">✓</span> cache hit — ${Math.floor(Math.random()*90+10)} tokens saved`,
+  (p) => `[${p}] <span class="log-info">→</span> passing context to downstream process`,
+  (p) => `[${p}] <span class="log-run">⚡</span> api call dispatched — awaiting response`,
+  (p) => `[${p}] <span class="log-ok">✓</span> output validated — ${Math.floor(Math.random()*4+2)} tables generated`,
+  (p) => `[${p}] <span class="log-info">→</span> embedding ${Math.floor(Math.random()*500+200)} tokens`,
+  (p) => `[${p}] <span class="log-ok">✓</span> task queue flushed`,
+];
 
-function renderWorkflow() {
-  wf.innerHTML = '';
-  AGENTS.forEach((ag, i) => {
-    // Arrow between cards (except before first)
-    if (i > 0 && i < AGENTS.length - 1) {
-      const arrow = document.createElement('div');
-      arrow.className = 'wf-arrow';
-      arrow.innerHTML = `<div class="wf-arrow-line"></div><div class="wf-arrow-head">▼</div>`;
-      wf.appendChild(arrow);
-    }
-    // Separator line before Orchestrator
-    if (i === AGENTS.length - 1) {
-      const sep = document.createElement('div');
-      sep.style.cssText = 'height:1px;background:rgba(255,255,255,.08);margin:8px 0 6px;';
-      wf.appendChild(sep);
-    }
+let activeProcIdx = 0;
+let startTime = Date.now();
 
-    const row = document.createElement('div');
-    row.className = 'wf-row';
-    row.style.animationDelay = (i * 0.08) + 's';
+function getRandCpu(base) {
+  return Math.min(99, Math.max(1, base + Math.floor((Math.random()-0.5)*20)));
+}
 
-    const card = document.createElement('div');
-    card.className = 'wf-card' + (i === activeIdx ? ' active-card' : '');
-    card.style.setProperty('--agent-color', ag.color);
-    card.style.animationDelay = (i * 0.08) + 's';
-    card.dataset.idx = i;
+function renderProcs() {
+  const list = document.getElementById('procList');
+  list.innerHTML = PROCESSES.map((p, i) => {
+    const isActive = i === activeProcIdx;
+    const isBusy   = i === (activeProcIdx + 1) % PROCESSES.length;
+    const cpu = isActive ? getRandCpu(p.baseCpu + 30) : isBusy ? getRandCpu(p.baseCpu + 10) : getRandCpu(p.baseCpu);
+    const mem = isActive ? p.baseMem + Math.floor(Math.random()*40) : p.baseMem;
+    const barW = Math.min(98, cpu);
+    const stateClass = isActive ? 'proc-active' : isBusy ? 'proc-busy' : 'proc-idle';
+    const statusTxt  = isActive ? 'running' : isBusy ? 'ready' : 'idle';
+    return `
+      <div class="os-proc ${stateClass}" data-idx="${i}">
+        <span class="proc-id">${p.pid}</span>
+        <span class="proc-name">${p.name}</span>
+        <div class="proc-bar-wrap"><div class="proc-bar" style="width:${barW}%"></div></div>
+        <span class="proc-mem">${mem}M</span>
+        <span class="proc-status">${statusTxt}</span>
+      </div>`;
+  }).join('');
 
-    card.innerHTML = `
-      <div class="wf-dot" style="animation-delay:${i * 0.3}s"></div>
-      <span class="wf-icon">${ag.icon}</span>
-      <span class="wf-label">${ag.label}</span>
-      <span class="wf-step">${ag.step}</span>
-    `;
-
-    card.addEventListener('mouseenter', () => {
-      activeIdx = i;
-      renderWorkflow();
+  // Hover interaction
+  list.querySelectorAll('.os-proc').forEach(el => {
+    el.addEventListener('mouseenter', () => {
+      activeProcIdx = parseInt(el.dataset.idx);
+      renderProcs();
     });
-
-    row.appendChild(card);
-    wf.appendChild(row);
   });
 }
 
-renderWorkflow();
+function addLog() {
+  const panel = document.getElementById('logPanel');
+  const now = new Date();
+  const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  const proc = PROCESSES[Math.floor(Math.random() * PROCESSES.length)];
+  const tmpl = LOG_TEMPLATES[Math.floor(Math.random() * LOG_TEMPLATES.length)];
+  const line = document.createElement('div');
+  line.className = 'os-log-line';
+  line.innerHTML = `<span class="log-time">${ts}</span>${tmpl(proc.pid)}`;
+  panel.insertBefore(line, panel.firstChild);
+  if (panel.children.length > 4) panel.removeChild(panel.lastChild);
+}
 
-// Auto-cycle active highlight
+function updateClock() {
+  const now = new Date();
+  const ts = `${String(now.getHours()).padStart(2,'0')}:${String(now.getMinutes()).padStart(2,'0')}:${String(now.getSeconds()).padStart(2,'0')}`;
+  document.getElementById('clockEl').textContent = ts;
+
+  const elapsed = Math.floor((Date.now() - startTime) / 1000);
+  const m = Math.floor(elapsed / 60), s = elapsed % 60;
+  document.getElementById('uptimeEl').textContent = `uptime: ${m}m ${s}s`;
+}
+
+renderProcs();
+addLog(); addLog();
+
+// Tick every 1s: update clock & log
+setInterval(() => { updateClock(); }, 1000);
+// Tick every 1.6s: cycle active process + re-render
 setInterval(() => {
-  activeIdx = (activeIdx + 1) % AGENTS.length;
-  // Only re-render cards, not full DOM rebuild (smooth)
-  document.querySelectorAll('.wf-card').forEach((c, i) => {
-    c.classList.toggle('active-card', i === activeIdx);
-  });
-}, 1800);
+  activeProcIdx = (activeProcIdx + 1) % PROCESSES.length;
+  renderProcs();
+}, 1600);
+// Add log line every 2.2s
+setInterval(() => { addLog(); }, 2200);
 
 // ══════════════════════════
 // LOGIN
@@ -444,6 +517,148 @@ async function handleLogin(e) {
     txt.textContent = 'Masuk ke Solomon Agent →';
   }
 }
+
+// ══════════════════════════
+// NEURAL NETWORK CANVAS
+// ══════════════════════════
+(function() {
+  const canvas = document.getElementById('neuralCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  let W, H, nodes, mouse = { x: -999, y: -999 };
+  const NODE_COUNT   = 60;
+  const CONNECT_DIST = 140;
+  const MOUSE_DIST   = 180;
+  const MOUSE_FORCE  = 0.012;
+
+  // Colour palette
+  const COLORS = [
+    'rgba(100,120,160,',  // muted blue-grey
+    'rgba(70,90,130,',    // deeper blue-grey
+  ];
+
+  function resize() {
+    W = canvas.width  = canvas.offsetWidth;
+    H = canvas.height = canvas.offsetHeight;
+  }
+
+  function makeNode() {
+    const col = COLORS[Math.floor(Math.random() * COLORS.length)];
+    return {
+      x:   Math.random() * W,
+      y:   Math.random() * H,
+      vx:  (Math.random() - 0.5) * 0.35,
+      vy:  (Math.random() - 0.5) * 0.35,
+      r:   Math.random() * 2 + 1.2,
+      col,
+      pulse: Math.random() * Math.PI * 2,   // phase offset for glow
+      pulseSpeed: 0.02 + Math.random() * 0.03,
+    };
+  }
+
+  function init() {
+    resize();
+    nodes = Array.from({ length: NODE_COUNT }, makeNode);
+  }
+
+  function drawFrame() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Update positions
+    nodes.forEach(n => {
+      // Mouse repulsion / attraction (subtle)
+      const dx = n.x - mouse.x, dy = n.y - mouse.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < MOUSE_DIST) {
+        const force = (1 - dist / MOUSE_DIST) * MOUSE_FORCE;
+        n.vx += dx * force;
+        n.vy += dy * force;
+      }
+
+      // Dampen velocity
+      n.vx *= 0.98; n.vy *= 0.98;
+
+      n.x += n.vx; n.y += n.vy;
+      n.pulse += n.pulseSpeed;
+
+      // Bounce off edges softly
+      if (n.x < 0)  { n.x = 0;  n.vx = Math.abs(n.vx); }
+      if (n.x > W)  { n.x = W;  n.vx = -Math.abs(n.vx); }
+      if (n.y < 0)  { n.y = 0;  n.vy = Math.abs(n.vy); }
+      if (n.y > H)  { n.y = H;  n.vy = -Math.abs(n.vy); }
+    });
+
+    // Draw connections
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const a = nodes[i], b = nodes[j];
+        const dx = a.x - b.x, dy = a.y - b.y;
+        const d  = Math.sqrt(dx * dx + dy * dy);
+        if (d < CONNECT_DIST) {
+          const alpha = (1 - d / CONNECT_DIST) * 0.22;
+          // Blend colours of both endpoints
+          ctx.beginPath();
+          const grad = ctx.createLinearGradient(a.x, a.y, b.x, b.y);
+          grad.addColorStop(0, a.col + alpha + ')');
+          grad.addColorStop(1, b.col + alpha + ')');
+          ctx.strokeStyle = grad;
+          ctx.lineWidth   = alpha * 2.5;
+          ctx.moveTo(a.x, a.y);
+          ctx.lineTo(b.x, b.y);
+          ctx.stroke();
+
+          // Pulse packet travelling along the edge
+          const t = (Date.now() % 3000) / 3000;
+          const px = a.x + (b.x - a.x) * t;
+          const py = a.y + (b.y - a.y) * t;
+          if (Math.random() < 0.002) {
+            ctx.beginPath();
+            ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+            ctx.fillStyle = a.col + '0.9)';
+            ctx.fill();
+          }
+        }
+      }
+    }
+
+    // Draw nodes
+    nodes.forEach(n => {
+      const glow = 0.5 + 0.5 * Math.sin(n.pulse);
+
+      // Outer glow
+      const g = ctx.createRadialGradient(n.x, n.y, 0, n.x, n.y, n.r * 5);
+      g.addColorStop(0, n.col + (0.25 * glow) + ')');
+      g.addColorStop(1, n.col + '0)');
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r * 5, 0, Math.PI * 2);
+      ctx.fillStyle = g;
+      ctx.fill();
+
+      // Core dot
+      ctx.beginPath();
+      ctx.arc(n.x, n.y, n.r, 0, Math.PI * 2);
+      ctx.fillStyle = n.col + (0.7 + 0.3 * glow) + ')';
+      ctx.fill();
+    });
+
+    requestAnimationFrame(drawFrame);
+  }
+
+  // Mouse tracking on hero panel
+  const hero = canvas.parentElement;
+  hero.addEventListener('mousemove', e => {
+    const rect = hero.getBoundingClientRect();
+    mouse.x = e.clientX - rect.left;
+    mouse.y = e.clientY - rect.top;
+  });
+  hero.addEventListener('mouseleave', () => { mouse.x = -999; mouse.y = -999; });
+
+  window.addEventListener('resize', () => { resize(); });
+
+  init();
+  drawFrame();
+})();
 </script>
 </body>
 </html>

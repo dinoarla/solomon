@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Solomon Agent</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
   <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -130,7 +131,8 @@
       font-weight: 600;
     }
 
-    .nav-icon { font-size: 0.95rem; width: 18px; text-align: center; }
+    .nav-icon { font-size: 0.9rem; width: 18px; text-align: center; display:flex;align-items:center;justify-content:center; }
+    .nav-icon i { font-size: 0.85rem; }
 
     .nav-badge {
       margin-left: auto;
@@ -146,6 +148,18 @@
       background: rgba(0,0,0,0.15);
       color: var(--ink);
     }
+
+    /* Model badge under agent name */
+    .nav-content { display: flex; flex-direction: column; gap: 0.1rem; flex: 1; min-width: 0; }
+    .nav-model {
+      font-family: var(--font-mono);
+      font-size: 0.5rem;
+      color: rgba(255,255,255,0.28);
+      display: flex; align-items: center; gap: 0.28rem;
+      margin-top: 0.05rem;
+    }
+    .nav-model-dot { width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0; }
+    .nav-item.active .nav-model { color: rgba(0,0,0,0.45); }
 
     .sidebar-divider {
       height: 1px;
@@ -409,7 +423,9 @@
     .empty-icon {
       font-size: 3.5rem;
       opacity: 0.3;
+      line-height: 1;
     }
+    .empty-icon i { font-size: 3.2rem; }
 
     .empty-text {
       font-family: var(--font-display);
@@ -645,6 +661,78 @@
     .agent-panel.active { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
 
     /* ══════════════════════════════════
+   DASHBOARD
+══════════════════════════════════ */
+.dashboard-panel { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.dashboard-panel.active { display: flex; }
+
+/* Dashboard layout */
+.db-body { flex:1; overflow-y:auto; padding:1.5rem 1.75rem; display:flex; flex-direction:column; gap:1.25rem; }
+
+/* Usage stats row */
+.db-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:.75rem; }
+.db-stat { background:white; border:var(--border); border-radius:var(--radius); padding:1rem 1.1rem; box-shadow:var(--shadow-sm); }
+.db-stat-head { display:flex; align-items:center; justify-content:space-between; margin-bottom:.5rem; }
+.db-stat-label { font-family:var(--font-mono); font-size:.6rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-light); }
+.db-stat-badge { font-family:var(--font-mono); font-size:.55rem; padding:.12rem .4rem; border-radius:4px; }
+.db-stat-badge.daily  { background:#EBF5FF; color:#0052CC; }
+.db-stat-badge.weekly { background:#E3FCF3; color:#00875A; }
+.db-stat-badge.monthly{ background:#FFF0EB; color:#FF4D00; }
+.db-stat-badge.total  { background:var(--yellow-soft); color:#7A6000; }
+.db-stat-tokens { font-family:var(--font-display); font-size:1.4rem; font-weight:700; color:var(--ink); line-height:1.1; }
+.db-stat-cost { font-family:var(--font-mono); font-size:.65rem; color:var(--ink-mid); margin-top:.2rem; }
+.db-stat-runs { font-family:var(--font-mono); font-size:.62rem; color:var(--ink-light); margin-top:.15rem; }
+
+/* Main two-col: org chart + activity log */
+.db-main { display:grid; grid-template-columns:1fr 380px; gap:1rem; flex:1; min-height:0; }
+
+/* Org chart section */
+.db-org { background:white; border:var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; }
+.db-section-head { padding:.7rem 1rem; border-bottom:var(--border-thin); display:flex; align-items:center; gap:.5rem; background:var(--cream-dark); }
+.db-section-title { font-family:var(--font-mono); font-size:.62rem; font-weight:600; letter-spacing:.1em; text-transform:uppercase; color:var(--ink-mid); }
+.db-section-title i { margin-right:.35rem; color:var(--ink-light); }
+.canvas-wrap { flex:1; overflow:auto; background:var(--cream); background-image:radial-gradient(circle,rgba(0,0,0,.05) 1px,transparent 1px); background-size:28px 28px; position:relative; min-height:400px; }
+.canvas-inner { position:relative; min-width:720px; min-height:520px; padding:2rem 1.5rem; }
+.canvas-svg { position:absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; overflow:visible; }
+.cnode { position:absolute; background:white; border:var(--border); border-radius:var(--radius); padding:.75rem .9rem; width:155px; box-shadow:var(--shadow-sm); cursor:pointer; transition:all .2s; user-select:none; }
+.cnode:hover { transform:translate(-2px,-2px); box-shadow:var(--shadow); z-index:5; }
+.cnode.cnode-orch { background:var(--sidebar-bg); border-color:var(--yellow); width:170px; }
+.cnode-icon { font-size:.95rem; margin-bottom:.25rem; color:var(--ink-mid); }
+.cnode-icon i { font-size:.9rem; }
+.cnode-orch .cnode-icon i { color:rgba(255,255,255,.5); }
+.cnode-name { font-family:var(--font-display); font-size:.82rem; font-weight:700; color:var(--ink); margin-bottom:.12rem; line-height:1.2; }
+.cnode-orch .cnode-name { color:white; }
+.cnode-step { font-family:var(--font-mono); font-size:.5rem; color:var(--ink-light); margin-bottom:.4rem; }
+.cnode-orch .cnode-step { color:rgba(255,255,255,.35); }
+.cnode-model { display:inline-flex; align-items:center; gap:.25rem; font-family:var(--font-mono); font-size:.52rem; background:var(--cream-mid); border:1px solid var(--cream-dark); border-radius:4px; padding:.12rem .35rem; color:var(--ink-mid); }
+.cnode-orch .cnode-model { background:rgba(255,214,0,.1); border-color:rgba(255,214,0,.2); color:rgba(255,214,0,.75); }
+.cnode-mdot { width:5px; height:5px; border-radius:50%; flex-shrink:0; }
+.canvas-legend { display:flex; gap:.65rem; align-items:center; padding:.5rem 1rem; border-top:var(--border-thin); font-family:var(--font-mono); font-size:.57rem; color:var(--ink-light); background:var(--cream-dark); }
+.legend-item { display:flex; align-items:center; gap:.28rem; }
+.legend-dot { width:7px; height:7px; border-radius:50%; }
+
+/* Activity log section */
+.db-log { background:white; border:var(--border); border-radius:var(--radius); overflow:hidden; box-shadow:var(--shadow-sm); display:flex; flex-direction:column; }
+.db-log-body { flex:1; overflow-y:auto; }
+.db-log-empty { padding:2rem; text-align:center; color:var(--ink-light); font-family:var(--font-mono); font-size:.7rem; }
+.db-log-empty i { font-size:1.8rem; display:block; margin-bottom:.5rem; opacity:.3; }
+.log-row { display:grid; grid-template-columns:1fr 80px 70px; gap:.5rem; align-items:center; padding:.6rem 1rem; border-bottom:var(--border-thin); font-family:var(--font-mono); font-size:.65rem; transition:background .1s; }
+.log-row:hover { background:var(--cream); }
+.log-agent { display:flex; align-items:center; gap:.45rem; color:var(--ink); font-weight:500; overflow:hidden; }
+.log-agent i { width:14px; text-align:center; color:var(--ink-light); flex-shrink:0; }
+.log-agent-topic { color:var(--ink-light); overflow:hidden; text-overflow:ellipsis; white-space:nowrap; font-size:.58rem; margin-top:.1rem; }
+.log-tokens { text-align:right; color:var(--ink-mid); }
+.log-time { text-align:right; color:var(--ink-light); font-size:.6rem; }
+.log-cost { font-size:.58rem; color:var(--orange); }
+
+/* Clear button */
+.db-clear-btn { font-family:var(--font-mono); font-size:.58rem; padding:.18rem .5rem; background:transparent; border:var(--border-thin); border-radius:4px; cursor:pointer; color:var(--ink-light); margin-left:auto; transition:all .15s; }
+.db-clear-btn:hover { background:var(--orange-soft); color:var(--orange); border-color:var(--orange); }
+
+@media (max-width:1200px) { .db-main { grid-template-columns:1fr; } .db-stats { grid-template-columns:repeat(2,1fr); } }
+@media (max-width:768px) { .db-stats { grid-template-columns:1fr 1fr; } .db-body { padding:1rem; } }
+
+/* ══════════════════════════════════
    SIDEBAR COLLAPSE & MOBILE
 ══════════════════════════════════ */
 
@@ -678,6 +766,8 @@
 .sidebar.collapsed { width: 64px; min-width: 64px; }
 .sidebar.collapsed .sidebar-brand-text,
 .sidebar.collapsed .nav-item > span:not(.nav-icon),
+.sidebar.collapsed .nav-content,
+.sidebar.collapsed .nav-model,
 .sidebar.collapsed .nav-badge,
 .sidebar.collapsed .sidebar-section-label,
 .sidebar.collapsed .user-name,
@@ -786,43 +876,72 @@
   <button class="sidebar-toggle" id="sidebarToggle" onclick="toggleSidebar()" title="Collapse sidebar">‹</button>
 </div>
 
+  <!-- Dashboard -->
+  <div class="sidebar-section">
+    <div class="sidebar-section-label">Overview</div>
+    <div class="nav-item" id="nav-dashboard" onclick="switchAgent('dashboard')">
+      <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
+      <div class="nav-content"><span>Dashboard</span></div>
+    </div>
+  </div>
+
+  <div class="sidebar-divider"></div>
+
   <!-- Workflow nav -->
   <div class="sidebar-section">
     <div class="sidebar-section-label">Workflow</div>
 
     <div class="nav-item active" id="nav-trend" onclick="switchAgent('trend')">
-      <span class="nav-icon">🔥</span>
-      <span>Trend Research</span>
+      <span class="nav-icon"><i class="fa-solid fa-fire"></i></span>
+      <div class="nav-content">
+        <span>Trend Research</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#FF6B35"></span>haiku-4.5</span>
+      </div>
       <span class="nav-badge">Step 1</span>
     </div>
 
     <div class="nav-item" id="nav-analyst" onclick="switchAgent('analyst')">
-      <span class="nav-icon">📊</span>
-      <span>Market Analysis</span>
+      <span class="nav-icon"><i class="fa-solid fa-chart-column"></i></span>
+      <div class="nav-content">
+        <span>Market Analysis</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#4CAF50"></span>sonnet-4.6</span>
+      </div>
       <span class="nav-badge">Step 2</span>
     </div>
 
     <div class="nav-item" id="nav-seo" onclick="switchAgent('seo')">
-      <span class="nav-icon">🔍</span>
-      <span>SEO Intelligence</span>
+      <span class="nav-icon"><i class="fa-solid fa-magnifying-glass"></i></span>
+      <div class="nav-content">
+        <span>SEO Intelligence</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#FF6B35"></span>haiku-4.5</span>
+      </div>
       <span class="nav-badge">Step 3</span>
     </div>
 
     <div class="nav-item" id="nav-content" onclick="switchAgent('content')">
-      <span class="nav-icon">✍️</span>
-      <span>Content Studio</span>
+      <span class="nav-icon"><i class="fa-solid fa-pen-nib"></i></span>
+      <div class="nav-content">
+        <span>Content Studio</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#FF6B35"></span>haiku-4.5</span>
+      </div>
       <span class="nav-badge">Step 4</span>
     </div>
 
     <div class="nav-item" id="nav-monetization" onclick="switchAgent('monetization')">
-      <span class="nav-icon">💰</span>
-      <span>Monetization</span>
+      <span class="nav-icon"><i class="fa-solid fa-coins"></i></span>
+      <div class="nav-content">
+        <span>Monetization</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#4CAF50"></span>sonnet-4.6</span>
+      </div>
       <span class="nav-badge">Step 5</span>
     </div>
 
     <div class="nav-item" id="nav-distribution" onclick="switchAgent('distribution')">
-      <span class="nav-icon">📡</span>
-      <span>Distribution</span>
+      <span class="nav-icon"><i class="fa-solid fa-satellite-dish"></i></span>
+      <div class="nav-content">
+        <span>Distribution</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#FF6B35"></span>haiku-4.5</span>
+      </div>
       <span class="nav-badge">Step 6</span>
     </div>
   </div>
@@ -832,8 +951,11 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Automation</div>
     <div class="nav-item" id="nav-orchestrator" onclick="switchAgent('orchestrator')">
-      <span class="nav-icon">🧠</span>
-      <span>Orchestrator</span>
+      <span class="nav-icon"><i class="fa-solid fa-brain"></i></span>
+      <div class="nav-content">
+        <span>Orchestrator</span>
+        <span class="nav-model"><span class="nav-model-dot" style="background:#4CAF50"></span>sonnet-4.6</span>
+      </div>
       <span class="nav-badge">Auto</span>
     </div>
   </div>
@@ -863,13 +985,96 @@
     <span></span><span></span><span></span>
   </button>
   <div class="topbar-title" id="topbarTitle">
-    🔥 <em>Trend</em> Research
+    <i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research
   </div>
   <div class="topbar-status">
     <span class="status-dot"></span>
     <span id="statusText">Online</span>
   </div>
 </div>
+
+  <!-- ── DASHBOARD PANEL ── -->
+  <div class="dashboard-panel" id="panel-dashboard">
+    <div class="db-body">
+
+      <!-- Token Usage Stats -->
+      <div class="db-stats">
+        <div class="db-stat">
+          <div class="db-stat-head">
+            <span class="db-stat-label"><i class="fa-solid fa-calendar-day"></i> Hari Ini</span>
+            <span class="db-stat-badge daily">Daily</span>
+          </div>
+          <div class="db-stat-tokens" id="db-daily-tokens">0</div>
+          <div class="db-stat-cost" id="db-daily-cost">Rp 0</div>
+          <div class="db-stat-runs" id="db-daily-runs">0 runs</div>
+        </div>
+        <div class="db-stat">
+          <div class="db-stat-head">
+            <span class="db-stat-label"><i class="fa-solid fa-calendar-week"></i> Minggu Ini</span>
+            <span class="db-stat-badge weekly">Weekly</span>
+          </div>
+          <div class="db-stat-tokens" id="db-weekly-tokens">0</div>
+          <div class="db-stat-cost" id="db-weekly-cost">Rp 0</div>
+          <div class="db-stat-runs" id="db-weekly-runs">0 runs</div>
+        </div>
+        <div class="db-stat">
+          <div class="db-stat-head">
+            <span class="db-stat-label"><i class="fa-solid fa-calendar"></i> Bulan Ini</span>
+            <span class="db-stat-badge monthly">Monthly</span>
+          </div>
+          <div class="db-stat-tokens" id="db-monthly-tokens">0</div>
+          <div class="db-stat-cost" id="db-monthly-cost">Rp 0</div>
+          <div class="db-stat-runs" id="db-monthly-runs">0 runs</div>
+        </div>
+        <div class="db-stat">
+          <div class="db-stat-head">
+            <span class="db-stat-label"><i class="fa-solid fa-infinity"></i> Total</span>
+            <span class="db-stat-badge total">All Time</span>
+          </div>
+          <div class="db-stat-tokens" id="db-total-tokens">0</div>
+          <div class="db-stat-cost" id="db-total-cost">Rp 0</div>
+          <div class="db-stat-runs" id="db-total-runs">0 runs</div>
+        </div>
+      </div>
+
+      <!-- Org chart + Activity Log -->
+      <div class="db-main">
+
+        <!-- Agent Org Chart -->
+        <div class="db-org">
+          <div class="db-section-head">
+            <span class="db-section-title"><i class="fa-solid fa-diagram-project"></i> Agent Workflow</span>
+            <div class="canvas-legend" style="border:none;padding:0;background:transparent;margin-left:auto">
+              <div class="legend-item"><div class="legend-dot" style="background:#FF6B35"></div>haiku-4.5</div>
+              <div class="legend-item"><div class="legend-dot" style="background:#4CAF50"></div>sonnet-4.6</div>
+            </div>
+          </div>
+          <div class="canvas-wrap">
+            <div class="canvas-inner" id="canvasInner">
+              <svg class="canvas-svg" id="canvasSvg"></svg>
+            </div>
+          </div>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="db-log">
+          <div class="db-section-head">
+            <span class="db-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Activity Log</span>
+            <button class="db-clear-btn" onclick="clearActivityLog()">
+              <i class="fa-solid fa-trash"></i> Clear
+            </button>
+          </div>
+          <div class="db-log-body" id="dbLogBody">
+            <div class="db-log-empty">
+              <i class="fa-solid fa-clock-rotate-left"></i>
+              Belum ada aktivitas.<br>Jalankan agen untuk mulai tracking.
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
 
   <!-- ── TREND PANEL ── -->
   <div class="agent-panel active" id="panel-trend">
@@ -918,14 +1123,14 @@
         </div>
 
         <button class="run-btn" id="trendBtn">
-          <span id="trendBtnIcon">🔥</span>
+          <span id="trendBtnIcon"><i class="fa-solid fa-fire"></i></span>
           <span id="trendBtnText">Analisis Tren</span>
         </button>
       </div>
 
       <div class="output-panel" id="trendOutputPanel">
         <div class="empty-state" id="trendEmpty">
-          <div class="empty-icon">🔥</div>
+          <div class="empty-icon"><i class="fa-solid fa-fire"></i></div>
           <div class="empty-text">Temukan tren sebelum kompetitor</div>
           <div class="empty-hint">Isi topik → klik Analisis Tren</div>
         </div>
@@ -1003,13 +1208,13 @@
             placeholder="Contoh: Apakah worth it? Kapan break-even?">
         </div>
         <button class="run-btn" id="analystBtn">
-          <span id="analystBtnIcon">📊</span>
+          <span id="analystBtnIcon"><i class="fa-solid fa-chart-column"></i></span>
           <span id="analystBtnText">Analisis Bisnis</span>
         </button>
       </div>
       <div class="output-panel">
         <div class="empty-state" id="analystEmpty">
-          <div class="empty-icon">📊</div>
+          <div class="empty-icon"><i class="fa-solid fa-chart-column"></i></div>
           <div class="empty-text">Validasi sebelum eksekusi</div>
           <div class="empty-hint">Isi topik → klik Analisis Bisnis</div>
         </div>
@@ -1083,13 +1288,13 @@
             placeholder="Paste insight dari Trend Agent">
         </div>
         <button class="run-btn" id="seoBtn">
-          <span id="seoBtnIcon">🔍</span>
+          <span id="seoBtnIcon"><i class="fa-solid fa-magnifying-glass"></i></span>
           <span id="seoBtnText">Analisis SEO</span>
         </button>
       </div>
       <div class="output-panel">
         <div class="empty-state" id="seoEmpty">
-          <div class="empty-icon">🔍</div>
+          <div class="empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
           <div class="empty-text">Keyword yang tepat = traffic gratis</div>
           <div class="empty-hint">Isi topik → klik Analisis SEO</div>
         </div>
@@ -1181,13 +1386,13 @@
             placeholder="Paste output SEO Agent..." style="min-height:60px"></textarea>
         </div>
         <button class="run-btn" id="contentBtn">
-          <span id="contentBtnIcon">✍️</span>
+          <span id="contentBtnIcon"><i class="fa-solid fa-pen-nib"></i></span>
           <span id="contentBtnText">Buat Konten</span>
         </button>
       </div>
       <div class="output-panel">
         <div class="empty-state" id="contentEmpty">
-          <div class="empty-icon">✍️</div>
+          <div class="empty-icon"><i class="fa-solid fa-pen-nib"></i></div>
           <div class="empty-text">Konten berkualitas, otomatis</div>
           <div class="empty-hint">Isi topik → klik Buat Konten</div>
         </div>
@@ -1266,13 +1471,13 @@
             placeholder="Contoh: Kompetitor A Rp99K">
         </div>
         <button class="run-btn" id="monoBtn">
-          <span id="monoBtnIcon">💰</span>
+          <span id="monoBtnIcon"><i class="fa-solid fa-coins"></i></span>
           <span id="monoBtnText">Analisis Monetisasi</span>
         </button>
       </div>
       <div class="output-panel">
         <div class="empty-state" id="monoEmpty">
-          <div class="empty-icon">💰</div>
+          <div class="empty-icon"><i class="fa-solid fa-coins"></i></div>
           <div class="empty-text">Maksimalkan setiap rupiah</div>
           <div class="empty-hint">Isi produk → klik Analisis Monetisasi</div>
         </div>
@@ -1351,13 +1556,13 @@
             placeholder="Opsional" style="min-height:60px"></textarea>
         </div>
         <button class="run-btn" id="distBtn">
-          <span id="distBtnIcon">📡</span>
+          <span id="distBtnIcon"><i class="fa-solid fa-satellite-dish"></i></span>
           <span id="distBtnText">Buat Distribution Plan</span>
         </button>
       </div>
       <div class="output-panel">
         <div class="empty-state" id="distEmpty">
-          <div class="empty-icon">📡</div>
+          <div class="empty-icon"><i class="fa-solid fa-satellite-dish"></i></div>
           <div class="empty-text">Distribusi ke semua platform otomatis</div>
           <div class="empty-hint">Isi konten → klik Buat Distribution Plan</div>
         </div>
@@ -1430,13 +1635,13 @@
           </select>
         </div>
         <button class="run-btn" id="orchBtn">
-          <span id="orchBtnIcon">🧠</span>
+          <span id="orchBtnIcon"><i class="fa-solid fa-brain"></i></span>
           <span id="orchBtnText">Jalankan Orchestrator</span>
         </button>
       </div>
       <div class="output-panel">
         <div class="empty-state" id="orchEmpty">
-          <div class="empty-icon">🧠</div>
+          <div class="empty-icon"><i class="fa-solid fa-brain"></i></div>
           <div class="empty-text">Satu goal, rencana lengkap</div>
           <div class="empty-hint">Isi goal → klik Jalankan Orchestrator</div>
         </div>
@@ -1489,18 +1694,61 @@
 // ══════════════════════════════════
 
 const AGENT_TITLES = {
-  trend: '🔥 <em>Trend</em> Research',
-  analyst: '📊 <em>Market</em> Analysis',
-  seo: '🔍 <em>SEO</em> Intelligence',
-  content: '✍️ <em>Content</em> Studio',
-  monetization: '💰 <em>Monetization</em>',
-  distribution: '📡 <em>Distribution</em>',
-  orchestrator: '🧠 <em>Orchestrator</em>',
+  dashboard: '<i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard',
+  trend: '<i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research',
+  analyst: '<i class="fa-solid fa-chart-column" style="font-size:.9rem"></i> <em>Market</em> Analysis',
+  seo: '<i class="fa-solid fa-magnifying-glass" style="font-size:.9rem"></i> <em>SEO</em> Intelligence',
+  content: '<i class="fa-solid fa-pen-nib" style="font-size:.9rem"></i> <em>Content</em> Studio',
+  monetization: '<i class="fa-solid fa-coins" style="font-size:.9rem"></i> <em>Monetization</em>',
+  distribution: '<i class="fa-solid fa-satellite-dish" style="font-size:.9rem"></i> <em>Distribution</em>',
+  orchestrator: '<i class="fa-solid fa-brain" style="font-size:.9rem"></i> <em>Orchestrator</em>',
 };
+
+// ── CANVAS DASHBOARD CONFIG ──
+const CANVAS_AGENTS = [
+  {id:'trend',       icon:'🔥', faicon:'fa-solid fa-fire',            name:'Trend Research',   step:'Step 1', model:'haiku-4.5',  mc:'#FF6B35', pos:{x:55, y:50}},
+  {id:'analyst',     icon:'📊', faicon:'fa-solid fa-chart-column',    name:'Market Analysis',  step:'Step 2', model:'sonnet-4.6', mc:'#4CAF50', pos:{x:285,y:50}},
+  {id:'seo',         icon:'🔍', faicon:'fa-solid fa-magnifying-glass',name:'SEO Intelligence', step:'Step 3', model:'haiku-4.5',  mc:'#FF6B35', pos:{x:515,y:50}},
+  {id:'content',     icon:'✍️', faicon:'fa-solid fa-pen-nib',         name:'Content Studio',   step:'Step 4', model:'haiku-4.5',  mc:'#FF6B35', pos:{x:55, y:220}},
+  {id:'monetization',icon:'💰', faicon:'fa-solid fa-coins',           name:'Monetization',     step:'Step 5', model:'sonnet-4.6', mc:'#4CAF50', pos:{x:285,y:220}},
+  {id:'distribution',icon:'📡', faicon:'fa-solid fa-satellite-dish',  name:'Distribution',     step:'Step 6', model:'haiku-4.5',  mc:'#FF6B35', pos:{x:515,y:220}},
+  {id:'orchestrator',icon:'🧠', faicon:'fa-solid fa-brain',           name:'Orchestrator',     step:'Auto',   model:'sonnet-4.6', mc:'#4CAF50', pos:{x:265,y:395}, orch:true},
+];
+const CANVAS_EDGES = [
+  ['trend','analyst'],['analyst','seo'],['seo','content'],
+  ['content','monetization'],['monetization','distribution'],
+  ['trend','orchestrator'],['analyst','orchestrator'],['seo','orchestrator'],
+  ['content','orchestrator'],['monetization','orchestrator'],['distribution','orchestrator'],
+];
+
+function renderDashboard() {
+  const inner = document.getElementById('canvasInner');
+  const svg = document.getElementById('canvasSvg');
+  inner.querySelectorAll('.cnode').forEach(n => n.remove());
+  const W = 162, H = 100;
+  svg.innerHTML = CANVAS_EDGES.map(([f, t]) => {
+    const fp = CANVAS_AGENTS.find(a => a.id === f).pos;
+    const tp = CANVAS_AGENTS.find(a => a.id === t).pos;
+    const x1 = fp.x + W/2, y1 = fp.y + H;
+    const x2 = tp.x + (t === 'orchestrator' ? 89 : W/2), y2 = tp.y;
+    const my = (y1 + y2) / 2;
+    return `<path d="M${x1},${y1} C${x1},${my} ${x2},${my} ${x2},${y2}" fill="none" stroke="rgba(0,0,0,.08)" stroke-width="1.5" stroke-dasharray="4,3"/>`;
+  }).join('');
+  CANVAS_AGENTS.forEach(a => {
+    const el = document.createElement('div');
+    el.className = 'cnode' + (a.orch ? ' cnode-orch' : '');
+    el.style.left = a.pos.x + 'px';
+    el.style.top  = a.pos.y + 'px';
+    el.title = 'Buka ' + a.name;
+    el.onclick = () => switchAgent(a.id);
+    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div>`;
+    inner.appendChild(el);
+  });
+}
 
 function switchAgent(agent) {
   // Update panels
-  document.querySelectorAll('.agent-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.agent-panel, .dashboard-panel').forEach(p => p.classList.remove('active'));
   document.getElementById('panel-' + agent).classList.add('active');
 
   // Update nav
@@ -1509,6 +1757,12 @@ function switchAgent(agent) {
 
   // Update topbar
   document.getElementById('topbarTitle').innerHTML = AGENT_TITLES[agent];
+
+  // Render dashboard canvas if needed
+  if (agent === 'dashboard') { renderDashboard(); refreshDashboardStats(); renderActivityLog(); }
+
+  // Close mobile sidebar
+  if (window.innerWidth <= 768) closeSidebar();
 }
 
 function renderMd(text) {
@@ -1556,7 +1810,7 @@ function copyEl(id) {
 
 function showErr(id, msg) {
   const el=document.getElementById(id);
-  if(el){el.textContent='❌ '+msg;el.classList.add('show');}
+  if(el){el.innerHTML='<i class="fa-solid fa-circle-xmark"></i> '+msg;el.classList.add('show');}
 }
 
 function hideErr(id){
@@ -1594,7 +1848,7 @@ document.getElementById('trendBtn').addEventListener('click', async ()=>{
   document.getElementById('trendLoading').classList.add('show');
   document.getElementById('trendBtn').disabled=true;
   document.getElementById('trendBtnText').textContent='Menganalisis...';
-  document.getElementById('trendBtnIcon').textContent='⏳';
+  document.getElementById('trendBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['ts1','ts2','ts3','ts4','ts5'],'trendBar',1500);
   try{
@@ -1608,13 +1862,14 @@ document.getElementById('trendBtn').addEventListener('click', async ()=>{
     document.getElementById('trendMkt').textContent=selMkt;
     document.getElementById('trendOut').innerHTML=renderMd(data.report||data.full_output||'');
     document.getElementById('trendResult').classList.add('show');
+    logRun('trend', data.report||data.full_output||'', Date.now()-trendT0, document.getElementById('trendTopic').value);
   }catch(e){showErr('trendError',e.message);}
   finally{
     clearInterval(iv);
     document.getElementById('trendLoading').classList.remove('show');
     document.getElementById('trendBtn').disabled=false;
     document.getElementById('trendBtnText').textContent='Analisis Tren';
-    document.getElementById('trendBtnIcon').textContent='🔥';
+    document.getElementById('trendBtnIcon').innerHTML='<i class="fa-solid fa-fire"></i>';
   }
 });
 
@@ -1634,7 +1889,7 @@ document.getElementById('analystBtn').addEventListener('click', async ()=>{
   document.getElementById('analystLoading').classList.add('show');
   document.getElementById('analystBtn').disabled=true;
   document.getElementById('analystBtnText').textContent='Menganalisis...';
-  document.getElementById('analystBtnIcon').textContent='⏳';
+  document.getElementById('analystBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['as1','as2','as3','as4','as5'],'analystBar',2000);
   try{
@@ -1655,13 +1910,14 @@ document.getElementById('analystBtn').addEventListener('click', async ()=>{
     }
     document.getElementById('analystOut').innerHTML=renderMd(data.report||data.full_output||'');
     document.getElementById('analystResult').classList.add('show');
+    logRun('analyst', data.report||data.full_output||'', Date.now()-analystT0, document.getElementById('analystTopic').value);
   }catch(e){showErr('analystError',e.message);}
   finally{
     clearInterval(iv);
     document.getElementById('analystLoading').classList.remove('show');
     document.getElementById('analystBtn').disabled=false;
     document.getElementById('analystBtnText').textContent='Analisis Bisnis';
-    document.getElementById('analystBtnIcon').textContent='📊';
+    document.getElementById('analystBtnIcon').innerHTML='<i class="fa-solid fa-chart-column"></i>';
   }
 });
 
@@ -1682,7 +1938,7 @@ document.getElementById('seoBtn').addEventListener('click', async ()=>{
   document.getElementById('seoLoading').classList.add('show');
   document.getElementById('seoBtn').disabled=true;
   document.getElementById('seoBtnText').textContent='Menganalisis...';
-  document.getElementById('seoBtnIcon').textContent='⏳';
+  document.getElementById('seoBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['ss1','ss2','ss3','ss4','ss5'],'seoBar',1800);
   try{
@@ -1698,13 +1954,14 @@ document.getElementById('seoBtn').addEventListener('click', async ()=>{
     document.getElementById('seoTypeStat').textContent=selType;
     document.getElementById('seoOut').innerHTML=renderMd(data.blueprint||data.full_output||'');
     document.getElementById('seoResult').classList.add('show');
+    logRun('seo', data.blueprint||data.full_output||'', Date.now()-seoT0, document.getElementById('seoTopic').value);
   }catch(e){showErr('seoError',e.message);}
   finally{
     clearInterval(iv);
     document.getElementById('seoLoading').classList.remove('show');
     document.getElementById('seoBtn').disabled=false;
     document.getElementById('seoBtnText').textContent='Analisis SEO';
-    document.getElementById('seoBtnIcon').textContent='🔍';
+    document.getElementById('seoBtnIcon').innerHTML='<i class="fa-solid fa-magnifying-glass"></i>';
   }
 });
 
@@ -1725,7 +1982,7 @@ document.getElementById('contentBtn').addEventListener('click', async ()=>{
   document.getElementById('contentLoading').classList.add('show');
   document.getElementById('contentBtn').disabled=true;
   document.getElementById('contentBtnText').textContent='Menulis...';
-  document.getElementById('contentBtnIcon').textContent='⏳';
+  document.getElementById('contentBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['cs1','cs2','cs3','cs4','cs5'],'contentBar',2500);
   try{
@@ -1772,7 +2029,7 @@ document.getElementById('contentBtn').addEventListener('click', async ()=>{
     document.getElementById('contentLoading').classList.remove('show');
     document.getElementById('contentBtn').disabled=false;
     document.getElementById('contentBtnText').textContent='Buat Konten';
-    document.getElementById('contentBtnIcon').textContent='✍️';
+    document.getElementById('contentBtnIcon').innerHTML='<i class="fa-solid fa-pen-nib"></i>';
   }
 });
 
@@ -1793,7 +2050,7 @@ document.getElementById('monoBtn').addEventListener('click', async ()=>{
   document.getElementById('monoLoading').classList.add('show');
   document.getElementById('monoBtn').disabled=true;
   document.getElementById('monoBtnText').textContent='Menganalisis...';
-  document.getElementById('monoBtnIcon').textContent='⏳';
+  document.getElementById('monoBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['ms1','ms2','ms3','ms4','ms5'],'monoBar',1800);
   try{
@@ -1810,13 +2067,14 @@ document.getElementById('monoBtn').addEventListener('click', async ()=>{
     document.getElementById('monoLineStat').textContent=selLine;
     document.getElementById('monoOut').innerHTML=renderMd(data.report||data.full_output||'');
     document.getElementById('monoResult').classList.add('show');
+    logRun('monetization', data.report||data.full_output||'', Date.now()-monoT0, document.getElementById('monoProduct').value);
   }catch(e){showErr('monoError',e.message);}
   finally{
     clearInterval(iv);
     document.getElementById('monoLoading').classList.remove('show');
     document.getElementById('monoBtn').disabled=false;
     document.getElementById('monoBtnText').textContent='Analisis Monetisasi';
-    document.getElementById('monoBtnIcon').textContent='💰';
+    document.getElementById('monoBtnIcon').innerHTML='<i class="fa-solid fa-coins"></i>';
   }
 });
 
@@ -1837,7 +2095,7 @@ document.getElementById('distBtn').addEventListener('click', async ()=>{
   document.getElementById('distLoading').classList.add('show');
   document.getElementById('distBtn').disabled=true;
   document.getElementById('distBtnText').textContent='Membuat plan...';
-  document.getElementById('distBtnIcon').textContent='⏳';
+  document.getElementById('distBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['ds1','ds2','ds3','ds4','ds5'],'distBar',1800);
   try{
@@ -1854,13 +2112,14 @@ document.getElementById('distBtn').addEventListener('click', async ()=>{
     document.getElementById('distModeStat').textContent=selMode;
     document.getElementById('distOut').innerHTML=renderMd(data.report||data.full_output||'');
     document.getElementById('distResult').classList.add('show');
+    logRun('distribution', data.report||data.full_output||'', Date.now()-distT0, document.getElementById('distContent').value);
   }catch(e){showErr('distError',e.message);}
   finally{
     clearInterval(iv);
     document.getElementById('distLoading').classList.remove('show');
     document.getElementById('distBtn').disabled=false;
     document.getElementById('distBtnText').textContent='Buat Distribution Plan';
-    document.getElementById('distBtnIcon').textContent='📡';
+    document.getElementById('distBtnIcon').innerHTML='<i class="fa-solid fa-satellite-dish"></i>';
   }
 });
 
@@ -1879,7 +2138,7 @@ document.getElementById('orchBtn').addEventListener('click', async ()=>{
   document.getElementById('orchLoading').classList.add('show');
   document.getElementById('orchBtn').disabled=true;
   document.getElementById('orchBtnText').textContent='Memproses...';
-  document.getElementById('orchBtnIcon').textContent='⏳';
+  document.getElementById('orchBtnIcon').innerHTML='<i class="fa-solid fa-spinner fa-spin"></i>';
 
   const iv=animSteps(['os1','os2','os3','os4','os5'],'orchBar',1200);
   try{
@@ -1905,13 +2164,14 @@ document.getElementById('orchBtn').addEventListener('click', async ()=>{
     document.getElementById('orchExplain').innerHTML=renderMd(data.explanation||data.full_output||'');
     document.getElementById('orchJson').textContent=plan?JSON.stringify(plan,null,2):'(tidak ada)';
     document.getElementById('orchResult').classList.add('show');
+    logRun('orchestrator', data.explanation||data.full_output||'', Date.now()-orchT0, document.getElementById('orchGoal').value);
   }catch(e){showErr('orchError',e.message);}
   finally{
     clearInterval(iv);
     document.getElementById('orchLoading').classList.remove('show');
     document.getElementById('orchBtn').disabled=false;
     document.getElementById('orchBtnText').textContent='Jalankan Orchestrator';
-    document.getElementById('orchBtnIcon').textContent='🧠';
+    document.getElementById('orchBtnIcon').innerHTML='<i class="fa-solid fa-brain"></i>';
   }
 });
 
@@ -1944,11 +2204,7 @@ function closeSidebar() {
   document.body.style.overflow = '';
 }
 
-document.querySelectorAll('.nav-item').forEach(item => {
-  item.addEventListener('click', () => {
-    if (window.innerWidth <= 768) closeSidebar();
-  });
-});
+// Mobile close handled in switchAgent
 
 // Restore state
 const wasColl = localStorage.getItem('sidebarCollapsed') === 'true';
@@ -1977,6 +2233,128 @@ window.fetch = async (...args) => {
   if (res.status === 401) { window.location.href = '/login'; return res; }
   return res;
 };
+
+// ══════════════════════════════════════════════════════
+// DASHBOARD — MySQL DB via API
+// Data diambil dari /api/db/stats dan /api/db/activity
+// logRun() di client hanya untuk live-refresh dashboard;
+// penyimpanan sesungguhnya dilakukan di server (db.js)
+// ══════════════════════════════════════════════════════
+
+const AGENT_FA_ICONS = {
+  trend: 'fa-fire', analyst: 'fa-chart-column', seo: 'fa-magnifying-glass',
+  content: 'fa-pen-nib', monetization: 'fa-coins', distribution: 'fa-satellite-dish',
+  orchestrator: 'fa-brain'
+};
+const AGENT_NAMES_MAP = {
+  trend:'Trend Research', analyst:'Market Analysis', seo:'SEO Intelligence',
+  content:'Content Studio', monetization:'Monetization',
+  distribution:'Distribution', orchestrator:'Orchestrator'
+};
+
+// Dipanggil setelah run agent selesai — hanya trigger refresh dashboard jika sedang dibuka
+function logRun(agentId, outputText, durationMs, topic) {
+  if (document.getElementById('panel-dashboard').classList.contains('active')) {
+    refreshDashboardStats();
+    renderActivityLog();
+  }
+}
+
+function fmtTokens(n) {
+  n = parseInt(n) || 0;
+  if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
+  if (n >= 1000)    return (n/1000).toFixed(1)+'K';
+  return String(n);
+}
+function fmtIDR(n) {
+  n = parseInt(n) || 0;
+  if (n >= 1000000) return 'Rp '+(n/1000000).toFixed(2)+'jt';
+  if (n >= 1000)    return 'Rp '+(n/1000).toFixed(1)+'rb';
+  return 'Rp '+n;
+}
+function timeAgo(ts) {
+  // ts bisa berupa datetime string dari MySQL atau unix ms
+  const ms = typeof ts === 'string' ? new Date(ts).getTime() : ts;
+  const s = Math.floor((Date.now() - ms) / 1000);
+  if (s < 60) return s+'d ago';
+  if (s < 3600) return Math.floor(s/60)+'m ago';
+  if (s < 86400) return Math.floor(s/3600)+'h ago';
+  return Math.floor(s/86400)+'d ago';
+}
+
+// Fetch stats dari /api/db/stats dan update 4 stat cards
+async function refreshDashboardStats() {
+  try {
+    const res  = await fetch('/api/db/stats');
+    if (!res.ok) return;
+    const data = await res.json();
+
+    const map = {
+      daily:   data.today,
+      weekly:  data.week,
+      monthly: data.month,
+      total:   data.all,
+    };
+
+    Object.entries(map).forEach(([key, s]) => {
+      if (!s) return;
+      const elT = document.getElementById('db-'+key+'-tokens');
+      const elC = document.getElementById('db-'+key+'-cost');
+      const elR = document.getElementById('db-'+key+'-runs');
+      if (elT) elT.textContent = fmtTokens(s.tokens_total);
+      if (elC) elC.textContent = fmtIDR(s.cost_idr);
+      if (elR) elR.textContent = (s.runs||0) + ((s.runs===1)?' run':' runs');
+    });
+  } catch(e) {
+    console.warn('[Dashboard] Stats fetch gagal:', e.message);
+  }
+}
+
+// Fetch activity log dari /api/db/activity dan render
+async function renderActivityLog() {
+  const body = document.getElementById('dbLogBody');
+  if (!body) return;
+
+  body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-spinner fa-spin"></i></div>';
+
+  try {
+    const res  = await fetch('/api/db/activity?limit=50');
+    if (!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    const log  = data.data || [];
+
+    if (!log.length) {
+      body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-clock-rotate-left"></i>Belum ada aktivitas.<br>Jalankan agen untuk mulai tracking.</div>';
+      return;
+    }
+
+    body.innerHTML = log.map(e => `
+      <div class="log-row">
+        <div>
+          <div class="log-agent">
+            <i class="fa-solid ${AGENT_FA_ICONS[e.agent] || 'fa-robot'}"></i>
+            ${AGENT_NAMES_MAP[e.agent] || e.agent}
+          </div>
+          ${e.topic ? `<div class="log-agent-topic">${e.topic}</div>` : ''}
+        </div>
+        <div class="log-tokens">
+          ${fmtTokens(e.tokens_total)}
+          <div class="log-cost">${fmtIDR(e.cost_idr)}</div>
+        </div>
+        <div class="log-time">${timeAgo(e.created_at)}</div>
+      </div>`).join('');
+  } catch(e) {
+    body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-circle-xmark"></i>Gagal memuat log.<br><small>'+e.message+'</small></div>';
+  }
+}
+
+// DB belum ada (lokal) — clear hanya reset tampilan
+function clearActivityLog() {
+  if (!confirm('Refresh activity log?')) return;
+  refreshDashboardStats();
+  renderActivityLog();
+}
+
 </script>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 </body>
