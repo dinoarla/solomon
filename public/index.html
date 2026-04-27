@@ -2340,6 +2340,97 @@ function clearActivityLog() {
   renderActivityLog();
 }
 
+
+// ══════════════════════════════════════════════════════
+// AGENT CONFIG MODAL
+// ══════════════════════════════════════════════════════
+const _agentDefaultTokens = {
+  trend:2048, analyst:2048, seo:2048, content:4096,
+  monetization:2048, distribution:1024, orchestrator:2048
+};
+let _agentTokenMap = {};
+let _currentModalAgent = null;
+
+async function loadAgentConfig() {
+  try {
+    const res = await fetch('/api/db/agent-config');
+    if (!res.ok) return;
+    const data = await res.json();
+    (data.data || []).forEach(r => { _agentTokenMap[r.agent] = r.max_tokens; });
+    if (document.getElementById('panel-dashboard').classList.contains('active')) {
+      renderDashboard();
+    }
+  } catch(e) { /* silent */ }
+}
+
+function openAgentModal(agentId) {
+  const ag = CANVAS_AGENTS.find(a => a.id === agentId);
+  if (!ag) return;
+  _currentModalAgent = agentId;
+  const icon = document.getElementById('modalAgentIcon');
+  const title = document.getElementById('modalAgentTitle');
+  if (icon) icon.innerHTML = '<i class="fa-solid ' + ag.faicon + '"></i>';
+  if (title) title.textContent = ag.name;
+  const haiku = ['trend','seo','content','distribution'];
+  const modelEl = document.getElementById('modalModel');
+  if (modelEl) modelEl.value = haiku.includes(agentId)
+    ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-6';
+  const tokEl = document.getElementById('modalMaxTokens');
+  if (tokEl) tokEl.value = _agentTokenMap[agentId] || _agentDefaultTokens[agentId] || 2048;
+  const overlay = document.getElementById('agentModalOverlay');
+  if (overlay) overlay.classList.add('show');
+}
+
+function closeAgentModal(e) {
+  if (e && e.target !== document.getElementById('agentModalOverlay')) return;
+  const overlay = document.getElementById('agentModalOverlay');
+  if (overlay) overlay.classList.remove('show');
+  _currentModalAgent = null;
+}
+
+async function saveAgentModalConfig() {
+  if (!_currentModalAgent) return;
+  const modelEl = document.getElementById('modalModel');
+  const tokEl   = document.getElementById('modalMaxTokens');
+  const btn      = document.getElementById('modalSaveBtn');
+  if (!modelEl || !tokEl) return;
+  const model = modelEl.value;
+  const maxTokens = parseInt(tokEl.value);
+  if (isNaN(maxTokens) || maxTokens < 256 || maxTokens > 8192) {
+    alert('Max tokens harus antara 256 – 8192'); return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
+  try {
+    const res = await fetch('/api/db/agent-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ agent: _currentModalAgent, model, maxTokens }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message);
+    _agentTokenMap[_currentModalAgent] = maxTokens;
+    btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersimpan!';
+    btn.style.background = 'var(--green)';
+    setTimeout(() => {
+      document.getElementById('agentModalOverlay').classList.remove('show');
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
+      btn.style.background = '';
+      btn.disabled = false;
+      _currentModalAgent = null;
+      renderDashboard();
+    }, 1200);
+  } catch(ex) {
+    btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Gagal';
+    btn.style.background = 'var(--red)';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
+      btn.style.background = '';
+      btn.disabled = false;
+    }, 2000);
+  }
+}
+
 </script>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
 </body>
