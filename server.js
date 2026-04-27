@@ -10,27 +10,20 @@ db.initDB().catch(err => console.warn('[DB] Init gagal:', err.message));
 // ── Token cost estimation ──────────────────────────────────
 const TOKEN_COST_PER_K = { 'haiku-4.5': 40, 'sonnet-4.6': 147 };
 const AGENT_MODELS = {
-  trend:'haiku-4.5', analyst:'sonnet-4.6', seo:'haiku-4.5',
-  content:'haiku-4.5', monetization:'sonnet-4.6', distribution:'haiku-4.5',
-  orchestrator:'sonnet-4.6',
-};
 
-function estimateTokens(outputText) {
-  const outTokens = Math.round((outputText || '').length / 4);
-  const inTokens  = Math.round(outTokens * 0.35 + 400);
-  return { in: inTokens, out: outTokens };
-}
-
-function dbLog(agentId, topic, outputText, durationMs, req) {
-  const model    = AGENT_MODELS[agentId] || 'haiku-4.5';
-  const tokens   = estimateTokens(outputText);
-  const total    = tokens.in + tokens.out;
-  const costIdr  = Math.round((total / 1000) * (TOKEN_COST_PER_K[model] || 40));
-  const session  = getSessionToken(req);
-  const ip       = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
-  db.logRun({ agent:agentId, model, tokensIn:tokens.in, tokensOut:tokens.out,
-    costIdr, durationMs, topic:(topic||'').slice(0,200), sessionToken:session, ip }).catch(()=>{});
-  db.saveMemory({ agent:agentId, topic, output:outputText, sessionToken:session }).catch(()=>{});
+function dbLog(agentId, topic, result, durationMs, req) {
+  // result dapat berupa string (content agent) atau object dari callAgent {output, usage, costIdr}
+  const isObj    = result && typeof result === 'object';
+  const output   = isObj ? result.output || '' : result || '';
+  const model    = isObj ? result.model  : (AGENT_MODELS[agentId] || 'haiku-4.5');
+  const tokensIn  = isObj ? result.usage?.input_tokens  || 0 : 0;
+  const tokensOut = isObj ? result.usage?.output_tokens || 0 : 0;
+  const costIdr   = isObj ? result.costIdr || 0 : 0;
+  const session   = getSessionToken(req);
+  const ip        = req.headers['x-forwarded-for']?.split(',')[0] || req.socket.remoteAddress;
+  db.logRun({ agent:agentId, model, tokensIn, tokensOut, costIdr, durationMs,
+    topic:(topic||'').slice(0,200), sessionToken:session, ip }).catch(()=>{});
+  db.saveMemory({ agent:agentId, topic, sessionToken:session }).catch(()=>{});
 }
 
 // ── Auth ──────────────────────────────────────────────────
@@ -130,7 +123,7 @@ app.post('/api/orchestrate', requireAuth, async (req, res) => {
       timeBudget: time_budget || 'normal (1 minggu)',
     });
     const output = result.explanation || result.raw || '';
-    dbLog('orchestrator', goal, output, Date.now()-t0, req);
+    dbLog('orchestrator', goal, result, Date.now()-t0, req);
     return res.json({ status:'success', goal, task_plan:result.taskPlan||null,
       explanation:output, full_output:result.raw||'', timestamp:result.timestamp });
   } catch (err) { return res.status(500).json({ message: err.message }); }
@@ -148,7 +141,7 @@ app.post('/api/trend', requireAuth, async (req, res) => {
       additionalContext: context || '',
     });
     const output = result.report || result.raw || '';
-    dbLog('trend', topic, output, Date.now()-t0, req);
+    dbLog('trend', topic, result, Date.now()-t0, req);
     return res.json({ status:'success', topic, report:output,
       high_priority_count:result.highPriorityCount, full_output:result.raw, timestamp:result.timestamp });
   } catch (err) { return res.status(500).json({ message: err.message }); }
@@ -166,7 +159,7 @@ app.post('/api/seo', requireAuth, async (req, res) => {
       trendContext: trend_context || '',
     });
     const output = result.blueprint || result.raw || '';
-    dbLog('seo', topic, output, Date.now()-t0, req);
+    dbLog('seo', topic, result, Date.now()-t0, req);
     return res.json({ status:'success', topic, blueprint:output,
       keyword_table:result.keywordTable, full_output:result.raw, timestamp:result.timestamp });
   } catch (err) { return res.status(500).json({ message: err.message }); }
@@ -212,7 +205,15 @@ app.post('/api/content', requireAuth, async (req, res) => {
       }
     }
     const platformMatch = fullText.match(/\[PLATFORM\]:\s*(EBOOK|YOUTUBE|AFFILIATE)/i);
-    dbLog('content', topic, fullText, Date.now()-t0, req);
+    // Capture real usage from streaming
+    const finalMsg = await stream.finalMessage();
+    const streamResult = {
+      output: fullText,
+      model: 'claude-haiku-4-5-20251001',
+      usage: finalMsg.usage,
+      costIdr: Math.round(((finalMsg.usage.input_tokens / 1_000_000) * 0.80 + (finalMsg.usage.output_tokens / 1_000_000) * 4.00) * 16300),
+    };
+    dbLog('content', topic, streamResult, Date.now()-t0, req);
     send({ type:'done', platform:platformMatch?.[1]||content_type, word_count:fullText.split(/\s+/).length, content:fullText });
   } catch (err) { send({ type:'error', message:err.message }); }
   finally { res.end(); }
@@ -229,7 +230,7 @@ app.post('/api/analyst', requireAuth, async (req, res) => {
       specificQuestions: specific_questions||'', trendContext: trend_context||'',
     });
     const output = result.report || result.raw || '';
-    dbLog('analyst', topic, output, Date.now()-t0, req);
+    dbLog('analyst', topic, result, Date.now()-t0, req);
     return res.json({ status:'success', topic, verdict:result.verdict,
       summary:result.summary, report:output, full_output:result.raw, timestamp:result.timestamp });
   } catch (err) { return res.status(500).json({ message: err.message }); }
@@ -246,7 +247,7 @@ app.post('/api/monetization', requireAuth, async (req, res) => {
       competitorPricing: competitor_pricing||'', specificQuestions: specific_questions||'',
     });
     const output = result.report || result.raw || '';
-    dbLog('monetization', product, output, Date.now()-t0, req);
+    dbLog('monetization', product, result, Date.now()-t0, req);
     return res.json({ status:'success', product, report:output,
       projection_table:result.projectionTable, full_output:result.raw, timestamp:result.timestamp });
   } catch (err) { return res.status(500).json({ message: err.message }); }
@@ -263,7 +264,7 @@ app.post('/api/distribution', requireAuth, async (req, res) => {
       additionalContext: context||'',
     });
     const output = result.report || result.raw || '';
-    dbLog('distribution', content, output, Date.now()-t0, req);
+    dbLog('distribution', content, result, Date.now()-t0, req);
     return res.json({ status:'success', content, platform_count:result.platformCount,
       report:output, checklist:result.checklist, full_output:result.raw, timestamp:result.timestamp });
   } catch (err) { return res.status(500).json({ message: err.message }); }
@@ -309,6 +310,29 @@ app.get('/api/db/userlog', requireAuth, async (req, res) => {
       db.getUserLog(limit), db.getActiveSessions(),
     ]);
     res.json({ status:'ok', data: rows || [], active_sessions: sessions?.[0]?.count || 0 });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// GET /api/db/agent-config
+app.get('/api/db/agent-config', requireAuth, async (req, res) => {
+  try {
+    const data = await db.getAgentConfigs();
+    res.json({ status:'ok', data: data || [] });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// POST /api/db/agent-config  { agent, model, maxTokens }
+app.post('/api/db/agent-config', requireAuth, async (req, res) => {
+  try {
+    const { agent, model, maxTokens } = req.body;
+    if (!agent || !maxTokens) return res.status(400).json({ message: 'agent dan maxTokens wajib diisi.' });
+    const validAgents = ['trend','analyst','seo','content','monetization','distribution','orchestrator'];
+    if (!validAgents.includes(agent)) return res.status(400).json({ message: 'Agent tidak valid.' });
+    const tokens = Math.min(Math.max(parseInt(maxTokens) || 1024, 256), 8192);
+    await db.upsertAgentConfig({ agent, model: model || db.AGENT_DEFAULTS[agent]?.model, maxTokens: tokens });
+    const { invalidateConfigCache } = require('./utils/claudeClient');
+    invalidateConfigCache();
+    res.json({ status:'ok', agent, maxTokens: tokens });
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 

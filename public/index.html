@@ -591,6 +591,20 @@
       overflow-y: auto;
     }
 
+    /* Agent config panel */
+    .db-config-card{background:white;border:var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
+    .db-config-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.72rem}
+    .db-config-table th{background:var(--cream-dark);padding:.5rem .85rem;text-align:left;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mid);font-weight:600;border-bottom:var(--border-thin)}
+    .db-config-table td{padding:.55rem .85rem;border-bottom:var(--border-thin);vertical-align:middle}
+    .db-config-table tr:last-child td{border-bottom:none}
+    .db-config-table tr:hover td{background:var(--cream)}
+    .cfg-model-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:.4rem;vertical-align:middle}
+    .cfg-input{width:70px;padding:.2rem .4rem;border:var(--border-thin);border-radius:4px;font-family:var(--font-mono);font-size:.7rem;color:var(--ink);text-align:center}
+    .cfg-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,77,0,.15)}
+    .cfg-save-btn{font-family:var(--font-mono);font-size:.6rem;padding:.2rem .55rem;background:var(--orange);color:white;border:var(--border);border-radius:4px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
+    .cfg-save-btn:hover{transform:translate(-1px,-1px);box-shadow:2px 2px 0 #111}
+    .cfg-save-btn:disabled{background:var(--ink-light);cursor:not-allowed;transform:none}
+
     /* Agent flow */
     .agent-flow-card {
       background: var(--yellow-soft);
@@ -1061,7 +1075,7 @@
           <div class="db-section-head">
             <span class="db-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Activity Log</span>
             <button class="db-clear-btn" onclick="clearActivityLog()">
-              <i class="fa-solid fa-trash"></i> Clear
+              <i class="fa-solid fa-trash"></i> Refresh
             </button>
           </div>
           <div class="db-log-body" id="dbLogBody">
@@ -1073,6 +1087,29 @@
         </div>
 
       </div>
+
+      <!-- Agent Config Panel -->
+      <div class="db-config-card">
+        <div class="db-section-head">
+          <span class="db-section-title"><i class="fa-solid fa-sliders"></i> Konfigurasi Agent</span>
+          <span style="font-family:var(--font-mono);font-size:.6rem;color:var(--ink-light)">Max tokens per agen — tersimpan di database</span>
+        </div>
+        <table class="db-config-table">
+          <thead>
+            <tr>
+              <th>Agen</th>
+              <th>Model</th>
+              <th>Max Tokens</th>
+              <th>Status</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="agentConfigBody">
+            <tr><td colspan="5" style="text-align:center;padding:1rem;color:var(--ink-light);font-family:var(--font-mono);font-size:.7rem">Memuat konfigurasi...</td></tr>
+          </tbody>
+        </table>
+      </div>
+
     </div>
   </div>
 
@@ -1759,7 +1796,7 @@ function switchAgent(agent) {
   document.getElementById('topbarTitle').innerHTML = AGENT_TITLES[agent];
 
   // Render dashboard canvas if needed
-  if (agent === 'dashboard') { renderDashboard(); refreshDashboardStats(); renderActivityLog(); }
+  if (agent === 'dashboard') { renderDashboard(); refreshDashboardStats(); renderActivityLog(); loadAgentConfig(); }
 
   // Close mobile sidebar
   if (window.innerWidth <= 768) closeSidebar();

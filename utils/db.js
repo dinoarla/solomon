@@ -59,13 +59,14 @@ async function query(sql, params = []) {
  * @param {string} opts.ip           - IP address (opsional)
  */
 async function logRun({ agent, model, tokensIn, tokensOut, costIdr, durationMs, topic, sessionToken, ip }) {
+  const totalTokens = (tokensIn || 0) + (tokensOut || 0);
   return query(
     `INSERT INTO sol_token_usage
        (agent, model, tokens_in, tokens_out, tokens_total, cost_idr, duration_ms, topic, session_token, ip, created_at)
      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())`,
     [
       agent, model,
-      tokensIn || 0, tokensOut || 0, (tokensIn || 0) + (tokensOut || 0),
+      tokensIn || 0, tokensOut || 0, totalTokens,
       costIdr || 0, durationMs || 0,
       (topic || '').slice(0, 200),
       sessionToken || null, ip || null,
@@ -144,14 +145,14 @@ async function getActivityLog(limit = 50) {
 /**
  * Simpan topik yang pernah ditanyakan ke agen.
  */
-async function saveMemory({ agent, topic, output, sessionToken }) {
+async function saveMemory({ agent, topic, sessionToken }) {
+  // output_snippet dihapus — tidak ditampilkan di app, hemat storage
   return query(
-    `INSERT INTO sol_memory (agent, topic, output_snippet, session_token, created_at)
-     VALUES (?, ?, ?, ?, NOW())`,
+    `INSERT INTO sol_memory (agent, topic, session_token, created_at)
+     VALUES (?, ?, ?, NOW())`,
     [
       agent,
       (topic || '').slice(0, 200),
-      (output || '').slice(0, 500), // snippet output untuk preview
       sessionToken || null,
     ]
   );
@@ -165,14 +166,14 @@ async function saveMemory({ agent, topic, output, sessionToken }) {
 async function getMemory(agent = null, limit = 30) {
   if (agent) {
     return await query(
-      `SELECT id, agent, topic, output_snippet, created_at
+      `SELECT id, agent, topic, created_at
        FROM sol_memory WHERE agent = ?
        ORDER BY created_at DESC LIMIT ?`,
       [agent, limit]
     );
   }
   return await query(
-    `SELECT id, agent, topic, output_snippet, created_at
+    `SELECT id, agent, topic, created_at
      FROM sol_memory
      ORDER BY created_at DESC LIMIT ?`,
     [limit]
@@ -184,7 +185,7 @@ async function getMemory(agent = null, limit = 30) {
  */
 async function searchMemory(agent, keyword) {
   return await query(
-    `SELECT topic, output_snippet, created_at
+    `SELECT topic, created_at
      FROM sol_memory
      WHERE agent = ? AND topic LIKE ?
      ORDER BY created_at DESC LIMIT 5`,
@@ -270,7 +271,6 @@ async function initDB() {
       id             INT AUTO_INCREMENT PRIMARY KEY,
       agent          VARCHAR(30)   NOT NULL,
       topic          VARCHAR(200)  NOT NULL,
-      output_snippet TEXT,
       session_token  VARCHAR(100),
       created_at     DATETIME      NOT NULL,
       INDEX idx_agent_topic (agent, topic(50)),
@@ -289,6 +289,13 @@ async function initDB() {
       INDEX idx_event (event_type),
       INDEX idx_created (created_at)
     ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
+    // Tabel 4: Agent Config
+    `CREATE TABLE IF NOT EXISTS sol_agent_config (
+      agent       VARCHAR(30)  PRIMARY KEY,
+      model       VARCHAR(50)  NOT NULL,
+      max_tokens  INT          DEFAULT 2048,
+      updated_at  DATETIME     DEFAULT NOW()
+    ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4`,
   ];
 
   for (const sql of sqls) {
@@ -298,6 +305,40 @@ async function initDB() {
       console.log(`[DB] Tabel siap: ${tableName}`);
     }
   }
+}
+
+// ──────────────────────────────────────────────────────────
+// 5. AGENT CONFIG (max_tokens per agent)
+// ──────────────────────────────────────────────────────────
+
+const AGENT_DEFAULTS = {
+  trend:        { model: 'claude-haiku-4-5-20251001', max_tokens: 2048 },
+  analyst:      { model: 'claude-sonnet-4-6',         max_tokens: 2048 },
+  seo:          { model: 'claude-haiku-4-5-20251001', max_tokens: 2048 },
+  content:      { model: 'claude-haiku-4-5-20251001', max_tokens: 4096 },
+  monetization: { model: 'claude-sonnet-4-6',         max_tokens: 2048 },
+  distribution: { model: 'claude-haiku-4-5-20251001', max_tokens: 1024 },
+  orchestrator: { model: 'claude-sonnet-4-6',         max_tokens: 2048 },
+};
+
+async function getAgentConfigs() {
+  const rows = await query('SELECT agent, model, max_tokens, updated_at FROM sol_agent_config ORDER BY agent');
+  if (!rows?.length) {
+    // Return defaults jika tabel kosong
+    return Object.entries(AGENT_DEFAULTS).map(([agent, cfg]) => ({
+      agent, model: cfg.model, max_tokens: cfg.max_tokens, updated_at: null, is_default: true
+    }));
+  }
+  return rows.map(r => ({ ...r, is_default: false }));
+}
+
+async function upsertAgentConfig({ agent, model, maxTokens }) {
+  return query(
+    `INSERT INTO sol_agent_config (agent, model, max_tokens, updated_at)
+     VALUES (?, ?, ?, NOW())
+     ON DUPLICATE KEY UPDATE model=VALUES(model), max_tokens=VALUES(max_tokens), updated_at=NOW()`,
+    [agent, model, maxTokens]
+  );
 }
 
 module.exports = {
@@ -317,4 +358,8 @@ module.exports = {
   logUserEvent,
   getUserLog,
   getActiveSessions,
+  // Agent Config
+  getAgentConfigs,
+  upsertAgentConfig,
+  AGENT_DEFAULTS,
 };
