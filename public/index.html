@@ -591,44 +591,6 @@
       overflow-y: auto;
     }
 
-    /* Agent config modal */
-    .agent-modal-overlay{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.45);backdrop-filter:blur(3px);align-items:center;justify-content:center}
-    .agent-modal-overlay.show{display:flex}
-    .agent-modal{background:var(--cream);border:var(--border);border-radius:var(--radius);width:340px;box-shadow:var(--shadow)}
-    .agent-modal-head{padding:.85rem 1.1rem;border-bottom:var(--border-thin);display:flex;align-items:center;gap:.6rem;background:var(--cream-dark)}
-    .agent-modal-icon{font-size:1.1rem}
-    .agent-modal-title{font-family:var(--font-display);font-size:.95rem;font-weight:700;color:var(--ink);flex:1}
-    .agent-modal-close{width:24px;height:24px;border:var(--border-thin);border-radius:5px;background:white;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.75rem;color:var(--ink-mid)}
-    .agent-modal-body{padding:1.1rem;display:flex;flex-direction:column;gap:.85rem}
-    .agent-modal-field{display:flex;flex-direction:column;gap:.3rem}
-    .agent-modal-label{font-size:.65rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink-mid)}
-    .agent-modal-select,.agent-modal-input{padding:.6rem .85rem;border:var(--border);border-radius:8px;font-family:var(--font-ui);font-size:.85rem;color:var(--ink);background:white;outline:none;width:100%;appearance:none}
-    .agent-modal-select{background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%23111' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right .85rem center;padding-right:2.2rem;cursor:pointer}
-    .agent-modal-select:focus,.agent-modal-input:focus{box-shadow:var(--shadow-sm)}
-    .agent-modal-hint{font-family:var(--font-mono);font-size:.6rem;color:var(--ink-light)}
-    .agent-modal-foot{padding:.85rem 1.1rem;border-top:var(--border-thin);display:flex;gap:.5rem;justify-content:flex-end}
-    .agent-modal-cancel{padding:.55rem 1rem;border:var(--border);border-radius:7px;background:var(--cream-mid);font-family:var(--font-ui);font-size:.82rem;cursor:pointer;color:var(--ink-mid)}
-    .agent-modal-save{padding:.55rem 1.1rem;border:var(--border);border-radius:7px;background:var(--orange);color:white;font-family:var(--font-ui);font-size:.82rem;font-weight:600;cursor:pointer;box-shadow:var(--shadow-sm);display:flex;align-items:center;gap:.4rem}
-    .agent-modal-save:hover{transform:translate(-1px,-1px);box-shadow:var(--shadow)}
-    .agent-modal-save:disabled{background:var(--ink-light);cursor:not-allowed;transform:none}
-    /* Token badge on cnode */
-    .cnode-tokens{font-family:var(--font-mono);font-size:.5rem;color:var(--ink-light);margin-top:.18rem}
-    .cnode-orch .cnode-tokens{color:rgba(255,255,255,.3)}
-
-    /* Agent config panel */
-    .db-config-card{background:white;border:var(--border);border-radius:var(--radius);overflow:hidden;box-shadow:var(--shadow-sm)}
-    .db-config-table{width:100%;border-collapse:collapse;font-family:var(--font-mono);font-size:.72rem}
-    .db-config-table th{background:var(--cream-dark);padding:.5rem .85rem;text-align:left;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-mid);font-weight:600;border-bottom:var(--border-thin)}
-    .db-config-table td{padding:.55rem .85rem;border-bottom:var(--border-thin);vertical-align:middle}
-    .db-config-table tr:last-child td{border-bottom:none}
-    .db-config-table tr:hover td{background:var(--cream)}
-    .cfg-model-dot{width:7px;height:7px;border-radius:50%;display:inline-block;margin-right:.4rem;vertical-align:middle}
-    .cfg-input{width:70px;padding:.2rem .4rem;border:var(--border-thin);border-radius:4px;font-family:var(--font-mono);font-size:.7rem;color:var(--ink);text-align:center}
-    .cfg-input:focus{outline:none;border-color:var(--orange);box-shadow:0 0 0 2px rgba(255,77,0,.15)}
-    .cfg-save-btn{font-family:var(--font-mono);font-size:.6rem;padding:.2rem .55rem;background:var(--orange);color:white;border:var(--border);border-radius:4px;cursor:pointer;transition:all .15s;box-shadow:var(--shadow-sm)}
-    .cfg-save-btn:hover{transform:translate(-1px,-1px);box-shadow:2px 2px 0 #111}
-    .cfg-save-btn:disabled{background:var(--ink-light);cursor:not-allowed;transform:none}
-
     /* Agent flow */
     .agent-flow-card {
       background: var(--yellow-soft);
@@ -917,7 +879,7 @@
   <!-- Dashboard -->
   <div class="sidebar-section">
     <div class="sidebar-section-label">Overview</div>
-    <div class="nav-item active" id="nav-dashboard" onclick="switchAgent('dashboard')">
+    <div class="nav-item" id="nav-dashboard" onclick="switchAgent('dashboard')">
       <span class="nav-icon"><i class="fa-solid fa-layer-group"></i></span>
       <div class="nav-content"><span>Dashboard</span></div>
     </div>
@@ -929,7 +891,7 @@
   <div class="sidebar-section">
     <div class="sidebar-section-label">Workflow</div>
 
-    <div class="nav-item" id="nav-trend" onclick="switchAgent('trend')">
+    <div class="nav-item active" id="nav-trend" onclick="switchAgent('trend')">
       <span class="nav-icon"><i class="fa-solid fa-fire"></i></span>
       <div class="nav-content">
         <span>Trend Research</span>
@@ -1023,7 +985,7 @@
     <span></span><span></span><span></span>
   </button>
   <div class="topbar-title" id="topbarTitle">
-    <i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard
+    <i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research
   </div>
   <div class="topbar-status">
     <span class="status-dot"></span>
@@ -1032,7 +994,7 @@
 </div>
 
   <!-- ── DASHBOARD PANEL ── -->
-  <div class="dashboard-panel active" id="panel-dashboard">
+  <div class="dashboard-panel" id="panel-dashboard">
     <div class="db-body">
 
       <!-- Token Usage Stats -->
@@ -1099,7 +1061,7 @@
           <div class="db-section-head">
             <span class="db-section-title"><i class="fa-solid fa-clock-rotate-left"></i> Activity Log</span>
             <button class="db-clear-btn" onclick="clearActivityLog()">
-              <i class="fa-solid fa-trash"></i> Refresh
+              <i class="fa-solid fa-trash"></i> Clear
             </button>
           </div>
           <div class="db-log-body" id="dbLogBody">
@@ -1113,12 +1075,9 @@
       </div>
     </div>
   </div>
-</div>
-    </div>
-  </div>
 
   <!-- ── TREND PANEL ── -->
-  <div class="agent-panel" id="panel-trend">
+  <div class="agent-panel active" id="panel-trend">
     <div class="content-grid">
       <div class="input-panel">
         <div class="section-label">Input</div>
@@ -1204,7 +1163,6 @@
       </div>
     </div>
   </div>
-
 
   <!-- ── ANALYST PANEL ── -->
   <div class="agent-panel" id="panel-analyst">
@@ -1728,37 +1686,6 @@
     </div>
   </div>
 
-<!-- Agent Config Modal -->
-<div class="agent-modal-overlay" id="agentModalOverlay" onclick="closeAgentModal(event)">
-  <div class="agent-modal" onclick="event.stopPropagation()">
-    <div class="agent-modal-head">
-      <span class="agent-modal-icon" id="modalAgentIcon"></span>
-      <div class="agent-modal-title" id="modalAgentTitle">Konfigurasi Agen</div>
-      <button class="agent-modal-close" onclick="closeAgentModal()">✕</button>
-    </div>
-    <div class="agent-modal-body">
-      <div class="agent-modal-field">
-        <label class="agent-modal-label">Model</label>
-        <select class="agent-modal-select" id="modalModel">
-          <option value="claude-haiku-4-5-20251001">⚡ claude-haiku-4.5 (Cepat, Hemat)</option>
-          <option value="claude-sonnet-4-6">🧠 claude-sonnet-4.6 (Cerdas, Akurat)</option>
-        </select>
-      </div>
-      <div class="agent-modal-field">
-        <label class="agent-modal-label">Max Tokens</label>
-        <input class="agent-modal-input" id="modalMaxTokens" type="number" min="256" max="8192" step="256" placeholder="2048">
-        <span class="agent-modal-hint">256 – 8192 · Lebih tinggi = output lebih panjang, biaya lebih tinggi</span>
-      </div>
-    </div>
-    <div class="agent-modal-foot">
-      <button class="agent-modal-cancel" onclick="closeAgentModal()">Batal</button>
-      <button class="agent-modal-save" id="modalSaveBtn" onclick="saveAgentModalConfig()">
-        <i class="fa-solid fa-floppy-disk"></i> Simpan
-      </button>
-    </div>
-  </div>
-</div>
-
 </div><!-- end .main -->
 
 <script>
@@ -1768,7 +1695,7 @@
 
 const AGENT_TITLES = {
   dashboard: '<i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard',
-  trend: '<i class="fa-solid fa-layer-group" style="font-size:.9rem"></i> <em>Agent</em> Dashboard',
+  trend: '<i class="fa-solid fa-fire" style="font-size:.9rem"></i> <em>Trend</em> Research',
   analyst: '<i class="fa-solid fa-chart-column" style="font-size:.9rem"></i> <em>Market</em> Analysis',
   seo: '<i class="fa-solid fa-magnifying-glass" style="font-size:.9rem"></i> <em>SEO</em> Intelligence',
   content: '<i class="fa-solid fa-pen-nib" style="font-size:.9rem"></i> <em>Content</em> Studio',
@@ -1812,10 +1739,9 @@ function renderDashboard() {
     el.className = 'cnode' + (a.orch ? ' cnode-orch' : '');
     el.style.left = a.pos.x + 'px';
     el.style.top  = a.pos.y + 'px';
-    el.title = 'Klik untuk konfigurasi ' + a.name;
-    const tokensVal = _agentTokenMap[a.id] || _agentDefaultTokens[a.id] || 2048;
-    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div><div class="cnode-tokens"><i class="fa-solid fa-gauge-simple" style="font-size:.45rem"></i> max ${tokensVal} tk</div>`;
-    el.onclick = (e) => { e.stopPropagation(); openAgentModal(a.id); };
+    el.title = 'Buka ' + a.name;
+    el.onclick = () => switchAgent(a.id);
+    el.innerHTML = `<div class="cnode-icon"><i class="${a.faicon}"></i></div><div class="cnode-name">${a.name}</div><div class="cnode-step">${a.step}</div><div class="cnode-model"><span class="cnode-mdot" style="background:${a.mc}"></span>${a.model}</div>`;
     inner.appendChild(el);
   });
 }
@@ -1833,7 +1759,7 @@ function switchAgent(agent) {
   document.getElementById('topbarTitle').innerHTML = AGENT_TITLES[agent];
 
   // Render dashboard canvas if needed
-  if (agent === 'dashboard') { renderDashboard(); refreshDashboardStats(); renderActivityLog(); loadAgentConfig(); }
+  if (agent === 'dashboard') { renderDashboard(); refreshDashboardStats(); renderActivityLog(); }
 
   // Close mobile sidebar
   if (window.innerWidth <= 768) closeSidebar();
@@ -2309,25 +2235,71 @@ window.fetch = async (...args) => {
 };
 
 // ══════════════════════════════════════════════════════
-// DASHBOARD — MySQL DB via API
-// Data diambil dari /api/db/stats dan /api/db/activity
-// logRun() di client hanya untuk live-refresh dashboard;
-// penyimpanan sesungguhnya dilakukan di server (db.js)
+// TOKEN TRACKING & ACTIVITY LOG (localStorage)
+// ──────────────────────────────────────────────────────
+// Estimasi biaya token (IDR, kurs ~Rp16.300/USD):
+//   haiku-4.5:  input $0.80/M  output $4.00/M → avg ~Rp40/1K tokens
+//   sonnet-4.6: input $3.00/M  output $15.00/M → avg ~Rp147/1K tokens
+//
+// NOTE: Untuk multi-session & analytics persisten, gunakan MySQL Hostinger.
+// Schema siap pakai ada di komentar di bawah fungsi ini.
 // ══════════════════════════════════════════════════════
 
+const TOKEN_COST_PER_K = { 'haiku-4.5': 40, 'sonnet-4.6': 147 }; // IDR per 1000 tokens (avg in+out)
 const AGENT_FA_ICONS = {
   trend: 'fa-fire', analyst: 'fa-chart-column', seo: 'fa-magnifying-glass',
   content: 'fa-pen-nib', monetization: 'fa-coins', distribution: 'fa-satellite-dish',
   orchestrator: 'fa-brain'
 };
-const AGENT_NAMES_MAP = {
-  trend:'Trend Research', analyst:'Market Analysis', seo:'SEO Intelligence',
-  content:'Content Studio', monetization:'Monetization',
-  distribution:'Distribution', orchestrator:'Orchestrator'
+const AGENT_MODELS = {
+  trend:'haiku-4.5', analyst:'sonnet-4.6', seo:'haiku-4.5',
+  content:'haiku-4.5', monetization:'sonnet-4.6', distribution:'haiku-4.5',
+  orchestrator:'sonnet-4.6'
 };
 
-// Dipanggil setelah run agent selesai — hanya trigger refresh dashboard jika sedang dibuka
+function getActivityLog() {
+  try { return JSON.parse(localStorage.getItem('sol_activity') || '[]'); } catch { return []; }
+}
+function saveActivityLog(log) {
+  // Keep max 200 entries
+  localStorage.setItem('sol_activity', JSON.stringify(log.slice(-200)));
+}
+
+/**
+ * Estimate token count from text length (~4 chars/token average)
+ * prompt_tokens: estimated from output chars since we don't have actual from API
+ */
+function estimateTokens(outputText, agentId) {
+  const outChars = (outputText || '').length;
+  const outTokens = Math.round(outChars / 4);
+  // Estimate input as ~30% of output (system prompt + user input approximation)
+  const inTokens  = Math.round(outTokens * 0.35 + 400);
+  return { in: inTokens, out: outTokens, total: inTokens + outTokens };
+}
+
 function logRun(agentId, outputText, durationMs, topic) {
+  const model = AGENT_MODELS[agentId] || 'haiku-4.5';
+  const tokens = estimateTokens(outputText, agentId);
+  const costPerK = TOKEN_COST_PER_K[model] || 40;
+  const costIDR = Math.round((tokens.total / 1000) * costPerK);
+
+  const entry = {
+    ts: Date.now(),
+    agent: agentId,
+    model,
+    tokens_in: tokens.in,
+    tokens_out: tokens.out,
+    tokens_total: tokens.total,
+    cost_idr: costIDR,
+    duration_ms: durationMs,
+    topic: (topic || '').slice(0, 60),
+  };
+
+  const log = getActivityLog();
+  log.push(entry);
+  saveActivityLog(log);
+
+  // Refresh dashboard if it's open
   if (document.getElementById('panel-dashboard').classList.contains('active')) {
     refreshDashboardStats();
     renderActivityLog();
@@ -2335,194 +2307,96 @@ function logRun(agentId, outputText, durationMs, topic) {
 }
 
 function fmtTokens(n) {
-  n = parseInt(n) || 0;
   if (n >= 1000000) return (n/1000000).toFixed(1)+'M';
   if (n >= 1000)    return (n/1000).toFixed(1)+'K';
   return String(n);
 }
 function fmtIDR(n) {
-  n = parseInt(n) || 0;
   if (n >= 1000000) return 'Rp '+(n/1000000).toFixed(2)+'jt';
   if (n >= 1000)    return 'Rp '+(n/1000).toFixed(1)+'rb';
   return 'Rp '+n;
 }
 function timeAgo(ts) {
-  // ts bisa berupa datetime string dari MySQL atau unix ms
-  const ms = typeof ts === 'string' ? new Date(ts).getTime() : ts;
-  const s = Math.floor((Date.now() - ms) / 1000);
-  if (s < 60) return s+'d ago';
+  const s = Math.floor((Date.now()-ts)/1000);
+  if (s < 60) return s+'s ago';
   if (s < 3600) return Math.floor(s/60)+'m ago';
   if (s < 86400) return Math.floor(s/3600)+'h ago';
   return Math.floor(s/86400)+'d ago';
 }
 
-// Fetch stats dari /api/db/stats dan update 4 stat cards
-async function refreshDashboardStats() {
-  try {
-    const res  = await fetch('/api/db/stats');
-    if (!res.ok) return;
-    const data = await res.json();
-
-    const map = {
-      daily:   data.today,
-      weekly:  data.week,
-      monthly: data.month,
-      total:   data.all,
-    };
-
-    Object.entries(map).forEach(([key, s]) => {
-      if (!s) return;
-      const elT = document.getElementById('db-'+key+'-tokens');
-      const elC = document.getElementById('db-'+key+'-cost');
-      const elR = document.getElementById('db-'+key+'-runs');
-      if (elT) elT.textContent = fmtTokens(s.tokens_total);
-      if (elC) elC.textContent = fmtIDR(s.cost_idr);
-      if (elR) elR.textContent = (s.runs||0) + ((s.runs===1)?' run':' runs');
-    });
-  } catch(e) {
-    console.warn('[Dashboard] Stats fetch gagal:', e.message);
-  }
+function getPeriodLog(log, periodMs) {
+  const cutoff = Date.now() - periodMs;
+  return log.filter(e => e.ts >= cutoff);
 }
 
-// Fetch activity log dari /api/db/activity dan render
-async function renderActivityLog() {
+function calcStats(entries) {
+  return {
+    tokens: entries.reduce((s,e) => s + e.tokens_total, 0),
+    cost:   entries.reduce((s,e) => s + e.cost_idr, 0),
+    runs:   entries.length,
+  };
+}
+
+function refreshDashboardStats() {
+  const log = getActivityLog();
+  const DAY  = 86400000, WEEK = 7*DAY, MONTH = 30*DAY;
+  const periods = [
+    { key:'daily',   entries: getPeriodLog(log, DAY) },
+    { key:'weekly',  entries: getPeriodLog(log, WEEK) },
+    { key:'monthly', entries: getPeriodLog(log, MONTH) },
+    { key:'total',   entries: log },
+  ];
+  periods.forEach(({ key, entries }) => {
+    const s = calcStats(entries);
+    const elT = document.getElementById('db-'+key+'-tokens');
+    const elC = document.getElementById('db-'+key+'-cost');
+    const elR = document.getElementById('db-'+key+'-runs');
+    if (elT) elT.textContent = fmtTokens(s.tokens);
+    if (elC) elC.textContent = fmtIDR(s.cost);
+    if (elR) elR.textContent = s.runs + (s.runs===1?' run':' runs');
+  });
+}
+
+function renderActivityLog() {
   const body = document.getElementById('dbLogBody');
   if (!body) return;
+  const log = getActivityLog().slice().reverse(); // newest first
 
-  body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-spinner fa-spin"></i></div>';
-
-  try {
-    const res  = await fetch('/api/db/activity?limit=50');
-    if (!res.ok) throw new Error('HTTP '+res.status);
-    const data = await res.json();
-    const log  = data.data || [];
-
-    if (!log.length) {
-      body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-clock-rotate-left"></i>Belum ada aktivitas.<br>Jalankan agen untuk mulai tracking.</div>';
-      return;
-    }
-
-    body.innerHTML = log.map(e => `
-      <div class="log-row">
-        <div>
-          <div class="log-agent">
-            <i class="fa-solid ${AGENT_FA_ICONS[e.agent] || 'fa-robot'}"></i>
-            ${AGENT_NAMES_MAP[e.agent] || e.agent}
-          </div>
-          ${e.topic ? `<div class="log-agent-topic">${e.topic}</div>` : ''}
-        </div>
-        <div class="log-tokens">
-          ${fmtTokens(e.tokens_total)}
-          <div class="log-cost">${fmtIDR(e.cost_idr)}</div>
-        </div>
-        <div class="log-time">${timeAgo(e.created_at)}</div>
-      </div>`).join('');
-  } catch(e) {
-    body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-circle-xmark"></i>Gagal memuat log.<br><small>'+e.message+'</small></div>';
+  if (!log.length) {
+    body.innerHTML = '<div class="db-log-empty"><i class="fa-solid fa-clock-rotate-left"></i>Belum ada aktivitas.<br>Jalankan agen untuk mulai tracking.</div>';
+    return;
   }
+
+  const AGENT_NAMES = {
+    trend:'Trend Research', analyst:'Market Analysis', seo:'SEO Intelligence',
+    content:'Content Studio', monetization:'Monetization',
+    distribution:'Distribution', orchestrator:'Orchestrator'
+  };
+
+  body.innerHTML = log.map(e => `
+    <div class="log-row">
+      <div>
+        <div class="log-agent">
+          <i class="fa-solid ${AGENT_FA_ICONS[e.agent] || 'fa-robot'}"></i>
+          ${AGENT_NAMES[e.agent] || e.agent}
+        </div>
+        ${e.topic ? `<div class="log-agent-topic">${e.topic}</div>` : ''}
+      </div>
+      <div class="log-tokens">
+        ${fmtTokens(e.tokens_total)}
+        <div class="log-cost">${fmtIDR(e.cost_idr)}</div>
+      </div>
+      <div class="log-time">${timeAgo(e.ts)}</div>
+    </div>`).join('');
 }
 
-// DB belum ada (lokal) — clear hanya reset tampilan
 function clearActivityLog() {
-  if (!confirm('Refresh activity log?')) return;
+  if (!confirm('Hapus semua activity log?')) return;
+  localStorage.removeItem('sol_activity');
   refreshDashboardStats();
   renderActivityLog();
 }
 
-
-// ── INIT ──────────────────────────────────────────────
-// Dashboard adalah halaman default — render saat load
-renderDashboard();
-refreshDashboardStats();
-renderActivityLog();
-loadAgentConfig();
-
-// ══════════════════════════════════════════════════════
-// AGENT CONFIG MODAL
-// ── Agent config state ──
-const _agentDefaultTokens = {
-  trend:2048, analyst:2048, seo:2048, content:4096,
-  monetization:2048, distribution:1024, orchestrator:2048
-};
-let _agentTokenMap = {};
-let _currentModalAgent = null;
-
-
-// ══════════════════════════════════════════════════════
-async function loadAgentConfig() {
-  try {
-    const res = await fetch('/api/db/agent-config');
-    if (!res.ok) return;
-    const data = await res.json();
-    (data.data || []).forEach(r => { _agentTokenMap[r.agent] = r.max_tokens; });
-    renderDashboard();
-  } catch(e) { /* silent */ }
-}
-
-function openAgentModal(agentId) {
-  const ag = CANVAS_AGENTS.find(a => a.id === agentId);
-  if (!ag) return;
-  _currentModalAgent = agentId;
-  const icon = document.getElementById('modalAgentIcon');
-  const title = document.getElementById('modalAgentTitle');
-  if (icon) icon.innerHTML = '<i class="fa-solid ' + ag.faicon + '"></i>';
-  if (title) title.textContent = ag.name;
-  const haiku = ['trend','seo','content','distribution'];
-  const modelEl = document.getElementById('modalModel');
-  if (modelEl) modelEl.value = haiku.includes(agentId)
-    ? 'claude-haiku-4-5-20251001' : 'claude-sonnet-4-6';
-  const tokEl = document.getElementById('modalMaxTokens');
-  if (tokEl) tokEl.value = _agentTokenMap[agentId] || _agentDefaultTokens[agentId] || 2048;
-  const overlay = document.getElementById('agentModalOverlay');
-  if (overlay) overlay.classList.add('show');
-}
-
-function closeAgentModal(e) {
-  if (e && e.target !== document.getElementById('agentModalOverlay')) return;
-  const overlay = document.getElementById('agentModalOverlay');
-  if (overlay) overlay.classList.remove('show');
-  _currentModalAgent = null;
-}
-
-async function saveAgentModalConfig() {
-  if (!_currentModalAgent) return;
-  const modelEl = document.getElementById('modalModel');
-  const tokEl   = document.getElementById('modalMaxTokens');
-  const btn     = document.getElementById('modalSaveBtn');
-  const model = modelEl.value;
-  const maxTokens = parseInt(tokEl.value);
-  if (isNaN(maxTokens) || maxTokens < 256 || maxTokens > 8192) {
-    alert('Max tokens harus antara 256 – 8192'); return;
-  }
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...';
-  try {
-    const res = await fetch('/api/db/agent-config', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ agent: _currentModalAgent, model, maxTokens }),
-    });
-    const data = await res.json();
-    if (!res.ok) throw new Error(data.message);
-    _agentTokenMap[_currentModalAgent] = maxTokens;
-    btn.innerHTML = '<i class="fa-solid fa-check"></i> Tersimpan!';
-    btn.style.background = 'var(--green)';
-    setTimeout(() => {
-      document.getElementById('agentModalOverlay').classList.remove('show');
-      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
-      btn.style.background = ''; btn.disabled = false;
-      _currentModalAgent = null;
-      renderDashboard();
-    }, 1200);
-  } catch(ex) {
-    btn.innerHTML = '<i class="fa-solid fa-xmark"></i> Gagal';
-    btn.style.background = 'var(--red)';
-    setTimeout(() => {
-      btn.innerHTML = '<i class="fa-solid fa-floppy-disk"></i> Simpan';
-      btn.style.background = ''; btn.disabled = false;
-    }, 2000);
-  }
-}
 
 </script>
 <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
