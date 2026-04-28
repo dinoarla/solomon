@@ -13,7 +13,7 @@ async function runContentCreator(topic, options = {}) {
     desiredCta = 'Kunjungi link di bawah untuk info lebih lanjut',
   } = options;
 
-  const { output: rawOutput } = await callAgent('contentCreator', {
+  const _agentResult = await callAgent('contentCreator', {
     CONTENT_TYPE: contentType,
     TOPIC: topic,
     TARGET_AUDIENCE: targetAudience,
@@ -25,6 +25,7 @@ async function runContentCreator(topic, options = {}) {
     LENGTH: length,
     DESIRED_CTA: desiredCta,
   });
+  const rawOutput = _agentResult.output;
 
   // Ekstrak konten dari output
   const contentMatch = rawOutput.match(
@@ -45,6 +46,9 @@ async function runContentCreator(topic, options = {}) {
     platform,
     wordCount,
     timestamp: new Date().toISOString(),
+    model: _agentResult.model,
+    usage: _agentResult.usage,
+    costIdr: _agentResult.costIdr,
   };
 }
 

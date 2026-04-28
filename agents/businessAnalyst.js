@@ -10,7 +10,7 @@ async function runBusinessAnalyst(topic, options = {}) {
     trendContext = '',
   } = options;
 
-  const { output: rawOutput } = await callAgent('businessAnalyst', {
+  const _agentResult = await callAgent('businessAnalyst', {
     ANALYSIS_MODE: analysisMode,
     TOPIC: topic,
     BUSINESS_LINE: businessLine,
@@ -19,6 +19,7 @@ async function runBusinessAnalyst(topic, options = {}) {
     SPECIFIC_QUESTIONS: specificQuestions || 'Tidak ada.',
     TREND_CONTEXT: trendContext || 'Tidak ada.',
   });
+  const rawOutput = _agentResult.output;
 
   // Ekstrak bagian report
   const reportMatch = rawOutput.match(
@@ -40,6 +41,9 @@ async function runBusinessAnalyst(topic, options = {}) {
     summary,
     verdict,
     timestamp: new Date().toISOString(),
+    model: _agentResult.model,
+    usage: _agentResult.usage,
+    costIdr: _agentResult.costIdr,
   };
 }
 

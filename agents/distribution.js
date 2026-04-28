@@ -9,7 +9,7 @@ async function runDistribution(content, options = {}) {
     additionalContext = '',
   } = options;
 
-  const { output: rawOutput } = await callAgent('distribution', {
+  const _agentResult = await callAgent('distribution', {
     MODE: mode,
     CONTENT: content,
     PLATFORMS: platforms,
@@ -17,6 +17,7 @@ async function runDistribution(content, options = {}) {
     EXISTING_AUDIENCE: existingAudience || 'Belum ada data audiens.',
     ADDITIONAL_CONTEXT: additionalContext || 'Tidak ada.',
   });
+  const rawOutput = _agentResult.output;
 
   // Ekstrak report
   const reportMatch = rawOutput.match(
@@ -38,6 +39,9 @@ async function runDistribution(content, options = {}) {
     checklist,
     platformCount,
     timestamp: new Date().toISOString(),
+    model: _agentResult.model,
+    usage: _agentResult.usage,
+    costIdr: _agentResult.costIdr,
   };
 }
 

@@ -8,13 +8,14 @@ async function runSeoAgent(topic, options = {}) {
     trendContext = '',
   } = options;
 
-  const { output: rawOutput } = await callAgent('seoAgent', {
+  const _agentResult = await callAgent('seoAgent', {
     TOPIC: topic,
     PLATFORMS: platforms,
     CONTENT_TYPE: contentType,
     TARGET_AUDIENCE: targetAudience,
     TREND_CONTEXT: trendContext || 'Tidak ada data tren.',
   });
+  const rawOutput = _agentResult.output;
 
   // Ekstrak bagian blueprint
   const blueprintMatch = rawOutput.match(
@@ -32,6 +33,9 @@ async function runSeoAgent(topic, options = {}) {
     blueprint: blueprintContent,
     keywordTable,
     timestamp: new Date().toISOString(),
+    model: _agentResult.model,
+    usage: _agentResult.usage,
+    costIdr: _agentResult.costIdr,
   };
 }
 

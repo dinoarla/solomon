@@ -7,12 +7,13 @@ async function runOrchestrator(ownerGoal, options = {}) {
     timeBudget = 'normal (1 minggu)',
   } = options;
 
-  const { output: rawOutput } = await callAgent('orchestrator', {
+  const _agentResult = await callAgent('orchestrator', {
     OWNER_GOAL: ownerGoal,
     BUSINESS_LINE: businessLine,
     ADDITIONAL_CONTEXT: additionalContext || 'Tidak ada.',
     TIME_BUDGET: timeBudget,
   });
+  const rawOutput = _agentResult.output;
 
   // Pisahkan JSON dan penjelasan
   const jsonMatch = rawOutput.match(/=== TASK PLAN \(JSON\) ===\s*([\s\S]*?)\s*=== PENJELASAN/);
@@ -25,6 +26,9 @@ async function runOrchestrator(ownerGoal, options = {}) {
     taskPlan,
     explanation: explainMatch ? explainMatch[1].trim() : rawOutput,
     timestamp: new Date().toISOString(),
+    model: _agentResult.model,
+    usage: _agentResult.usage,
+    costIdr: _agentResult.costIdr,
   };
 }
 

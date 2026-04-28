@@ -10,7 +10,7 @@ async function runMonetization(product, options = {}) {
     specificQuestions = '',
   } = options;
 
-  const { output: rawOutput } = await callAgent('monetization', {
+  const _agentResult = await callAgent('monetization', {
     MODE: mode,
     PRODUCT: product,
     BUSINESS_LINE: businessLine,
@@ -19,6 +19,7 @@ async function runMonetization(product, options = {}) {
     COMPETITOR_PRICING: competitorPricing || 'Tidak ada data.',
     SPECIFIC_QUESTIONS: specificQuestions || 'Tidak ada.',
   });
+  const rawOutput = _agentResult.output;
 
   // Ekstrak report
   const reportMatch = rawOutput.match(
@@ -35,6 +36,9 @@ async function runMonetization(product, options = {}) {
     report,
     projectionTable,
     timestamp: new Date().toISOString(),
+    model: _agentResult.model,
+    usage: _agentResult.usage,
+    costIdr: _agentResult.costIdr,
   };
 }
 
